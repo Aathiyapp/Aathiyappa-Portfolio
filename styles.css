@@ -1,15 +1,22 @@
 body {
     font-family: Arial, sans-serif;
 }
-
 .hero {
     background: #343a40;
     color: white;
     padding: 50px 0;
 }
-
+.profile-pic {
+    width: 150px;
+    border-radius: 50%;
+    margin: 20px auto;
+}
 .container h2 {
     border-bottom: 2px solid #343a40;
     padding-bottom: 5px;
     margin-bottom: 20px;
+}
+.dark-mode {
+    background-color: black;
+    color: white;
 }
