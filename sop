@@ -1,0 +1,772 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOP - Cost Review/MNR/IBR</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            border-left: 4px solid #3498db;
+            padding-left: 10px;
+            margin-top: 30px;
+        }
+        h3 {
+            margin-top: 20px;
+            color: #3498db;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        .toc {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .toc ul {
+            list-style: none;
+            padding: 0;
+        }
+        .toc ul li {
+            margin: 5px 0;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #3498db;
+        }
+        .step {
+            background: #fff;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #2ecc71;
+            border-radius: 4px;
+        }
+        .note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .warning {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .top-link {
+            float: right;
+            font-size: 0.9em;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SOP – Cost Review/MNR/IBR</h1>
+        <p><strong>Last updated on:</strong> 5th June'25</p>
+        <p><strong>Version:</strong> V1.0.0</p>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#abbreviations">Abbreviations</a></li>
+                <li><a href="#step1">Step 1. Work basket in Octopus</a></li>
+                <li><a href="#step2">Step 2. Member details</a></li>
+                <li><a href="#step3">Step 3. Provider Information</a></li>
+                <li><a href="#step4">Step 4. Out of scope validity</a></li>
+                <li><a href="#step5">Step 5. Validate the total amount in blue line</a></li>
+                <li><a href="#step6">Step 6. Check for PIMS id in Octopus blue line</a></li>
+                <li><a href="#step7">Step 7. Duplicate</a></li>
+                <li><a href="#step8">Step 8. Eligibility</a></li>
+                <li><a href="#step9">Step 9. Interim bill vs Final invoice</a></li>
+                <li><a href="#step10">Step 10. Outpatient (OP) vs Daycase (DC)</a></li>
+                <li><a href="#step11">Step 11. Medical Information</a></li>
+                <li><a href="#step12">Step 12. Translation</a></li>
+                <li><a href="#step13">Step 13. Cost review process</a></li>
+                <li><a href="#step14">Step 14. MNR</a></li>
+                <li><a href="#step15">Step 15. MNR triggers</a></li>
+                <li><a href="#step16">Step 16. IBR triggers</a></li>
+                <li><a href="#step17">Step 17. Coding in MF</a></li>
+                <li><a href="#step18">Step 18. Discount rate</a></li>
+                <li><a href="#step19">Step 19. Review Complete</a></li>
+            </ul>
+        </div>
+
+        <h2 id="abbreviations">Abbreviations <a href="#" class="top-link">Top</a></h2>
+        <table>
+            <tr><th>Acronym</th><th>Description</th></tr>
+            <tr><td>MNR</td><td>Medical necessity review</td></tr>
+            <tr><td>Dr. MNR</td><td>Doctor Medical Necessity Review</td></tr>
+            <tr><td>HC</td><td>Health Cloud</td></tr>
+            <tr><td>LOS</td><td>Length of stay</td></tr>
+            <tr><td>GOP</td><td>Guarantee of payment</td></tr>
+            <tr><td>NCCN</td><td>National Comprehensive Cancer Network</td></tr>
+            <tr><td>CRI</td><td>Care Request Item</td></tr>
+            <tr><td>SN</td><td>Settlement note</td></tr>
+            <tr><td>MCG</td><td>Milliman care guideline</td></tr>
+            <tr><td>KE</td><td>Knowledge exchange</td></tr>
+            <tr><td>DC</td><td>Daycase</td></tr>
+            <tr><td>R & C</td><td>Reasonable & Customary</td></tr>
+            <tr><td>IP/OP</td><td>Inpatient/Outpatient</td></tr>
+            <tr><td>PRM</td><td>Provider Relationship Management</td></tr>
+            <tr><td>DOA</td><td>Date of Admission</td></tr>
+            <tr><td>DOD</td><td>Date of Discharge</td></tr>
+            <tr><td>PPD</td><td>Prompt payment Discount</td></tr>
+            <tr><td>PR</td><td>Preferential Rate</td></tr>
+            <tr><td>LPP</td><td>Late Penalty Payment</td></tr>
+            <tr><td>MF</td><td>Mainframe</td></tr>
+            <tr><td>BOB</td><td>Book of business</td></tr>
+            <tr><td>ABOB</td><td>Africa Book of business</td></tr>
+        </table>
+
+        <div class="step" id="step1">
+            <h2>Step 1. Work basket in Octopus <a href="#" class="top-link">Top</a></h2>
+            <p><strong>Start</strong></p>
+            <p>Pick a claim from claim review basket</p>
+            
+            <div class="warning">
+                <p><strong>Restricted PIMS id</strong> – 13227(Centre Hospitalier Universitaire Vaudois- Switzerland) | (Don't handle this PIMS id)</p>
+                <p><strong>Restricted client ids</strong>- 101, 191, 014, 020, 390 | (Don't handle these client id's)</p>
+            </div>
+        </div>
+
+        <div class="step" id="step2">
+            <h2>Step 2. Member details <a href="#" class="top-link">Top</a></h2>
+            <p>Identify whether the member is correct under Mainframe TDMXELB01 by input Cigna contract no. (client id) (example 005). Press F5 input family id, member id then press F4.- Yes/No (Example: Member name in Mainframe & Octopus application) If you want to view all family members, input contract no, press f5, input family id then press f2</p>
+            
+            <p><strong>If yes</strong> → Go to step 3</p>
+            <p><strong>If no</strong> → Reindex with correct member details in Octopus (example member id "06")</p>
+        </div>
+
+        <div class="step" id="step3">
+            <h2>Step 3. Provider Information <a href="#" class="top-link">Top</a></h2>
+            <p>Identify whether the provider is correct under PRM/PIMS- Yes/No (PIMS is 2718)</p>
+            <p>(Confirm whether the entries available in PIMS ID field is the same as per the Invoice in Octopus)</p>
+            
+            <p><strong>If yes</strong> → Go to step 4</p>
+            <p><strong>If no</strong> → Reindex as per correct PIMS in octopus</p>
+        </div>
+
+        <div class="step" id="step4">
+            <h2>Step 4. Out of scope validity <a href="#" class="top-link">Top</a></h2>
+            <h3>4.1 Is claim from member/provider</h3>
+            
+            <p><strong>If member</strong> → Reindex claim into member queue by selecting 'M' instead of 'P' and leave a yellow note in Octopus. (Yellow note comments: 'This is member claim'.)</p>
+            
+            <div class="note">
+                <p>Note-claims submitted by a member with instructions to make payment to the provider must be handled as a provider claim. Update dummy PIMS id in the blue line.</p>
+                <p>PIMS id- 273456</p>
+                <p>ANT code- 015 016 00M</p>
+                <p>Name/city/country* Cigna IOH Dummy Provider, ANTWERPEN, BELGIUM</p>
+            </div>
+            
+            <p><strong>If provider</strong> → Go to step 4.2</p>
+            
+            <h3>4.2 Is claim- OP/IP</h3>
+            
+            <p><strong>If OP</strong> → Reindex claim into outpatient queue by selecting 'Outpatient' instead of 'Inpatient' and leave a yellow note in Octopus (Yellow notes: 'This is outpatient')</p>
+            
+            <p><strong>If IP</strong> → Go to step 5</p>
+        </div>
+
+        <div class="step" id="step5">
+            <h2>Step 5. Validate the total amount in blue line <a href="#" class="top-link">Top</a></h2>
+            <p>Is claim amount matching with invoice in Octopus- Yes/No</p>
+            
+            <p><strong>If yes</strong> → Go to step 6</p>
+            <p><strong>If no</strong> → Reindex as per correct amount in Octopus-NB-Amount =GROSS AMOUNT</p>
+        </div>
+
+        <div class="step" id="step6">
+            <h2>Step 6. Check for PIMS id in Octopus blue line <a href="#" class="top-link">Top</a></h2>
+            <ul>
+                <li>If we receive a doctor bill related to an admission, for a doctor that is (NOT on PIMS) and (NOT on PRM), the expectation in the blue line is BLANK.</li>
+                <li>If we receive a doctor bill related to an admission, for a doctor that (IS in PRM), the expectation in the blue line is DOCTOR PIMS ID.</li>
+                <li>If we receive a doctor bill NOT related to an admission, for a doctor that is (NOT on PIMS) and (NOT on PRM), the expectation in the blue line is Blank. In e80a we used dokterkabinet as hospital code when coding</li>
+                <li>If we receive a hospital bill that is (NOT on PIMS) and (NOT on PRM), the next step will be creating provider vetting form.</li>
+            </ul>
+            
+            <div class="note">
+                <p>How to create vetting form- Refer KE article 000110931.https://cignaknowledge.lightning.force.com/lightning/r/Knowledge__</p>
+            </div>
+            
+            <div class="warning">
+                <p>Note- If the claim will not go out of the queue after reindexing, in such case leave a yellow note with reason and keep posted with the supervisor.</p>
+            </div>
+        </div>
+
+        <div class="step" id="step7">
+            <h2>Step 7. Duplicate <a href="#" class="top-link">Top</a></h2>
+            <p>Check for duplicate in MF (E80a), TDMXELB01 and retrieval in Octopus</p>
+            
+            <p><strong>If yes</strong> → Verify for true duplicate or false duplicate</p>
+            
+            <h3>True duplicate</h3>
+            <p>Check in mainframe for SN and make sure payment has done. Review complete and leave a yellow note with SN date</p>
+            
+            <div class="note">
+                <p>Use custom queries to check SN date for old claims (especially claims sent from reconciliation) with no data on mainframe</p>
+            </div>
+            
+            <h3>False duplicate</h3>
+            <p>Confirm the previous claim has no payment. Leave a yellow note with clause code. Go to step 8</p>
+            
+            <p><strong>If No</strong> → Go to step 8</p>
+        </div>
+
+        <div class="step" id="step8">
+            <h2>Step 8. Eligibility <a href="#" class="top-link">Top</a></h2>
+            <p>Check for eligibility in MF TDMXELB01- Yes/ No</p>
+            <p>Enter Cigna contract id → Press 'f5'→input family id + member id → press 'f4'→ check policy end date</p>
+            
+            <p><strong>If yes</strong> → Go to step 9</p>
+            <p><strong>If no</strong> → Check in HC is the member is having new file(This is done by using the members full names while searching on hc)- Yes/No</p>
+            
+            <p><strong>If yes</strong> → Check for BOB</p>
+            <ul>
+                <li>If the BOB is not IO reindex to admin team. Leave a yellow note in octopus 'Out of scope BOB (e.g. ABOB)'</li>
+                <li>If the BOB is IO- Go to step 9.</li>
+            </ul>
+            
+            <p><strong>If no</strong> → Send to eligibility team under sub status "Request advice" in Octopus.</p>
+            
+            <div class="note">
+                <p>Note- For newborn baby- Send for eligibility team if there is no record found in MF</p>
+            </div>
+        </div>
+
+        <div class="step" id="step9">
+            <h2>Step 9. Interim bill vs Final invoice <a href="#" class="top-link">Top</a></h2>
+            <p>Identify claim for interim/final invoice</p>
+            
+            <p><strong>If interim bill</strong> → Review complete and leave a yellow note "This is interim bill". other names Final update, Claim update, Pre factura, Proforma Invoice, Swischerung, cost estimate, provisional, running bill,</p>
+            
+            <div class="note">
+                <p>Note- Interim bills are accepted in some UK providers. Make sure to check PIMS remarks on claim processing in prm/pims . Example- PIMS id 18580.</p>
+            </div>
+            
+            <p><strong>If final invoice</strong> → Go to step 10.</p>
+        </div>
+
+        <div class="step" id="step10">
+            <h2>Step 10. Outpatient (OP) vs Daycase (DC) in claim review basket <a href="#" class="top-link">Top</a></h2>
+            <p>Identify whether received case is for DC or OP</p>
+            
+            <p>If we found OP case, then we need to just update yellow notes and reindex as this is out of scope (Step 4.2)</p>
+            
+            <p>Post identifying as DC, please check for necessity of Operating Room (OR) under PIMs</p>
+            
+            <ul>
+                <li>In case OR is required we need to code day case in mainframe</li>
+                <li>Incase OR not required check if gop is present. If yes, check if it's a day case or outpatient Gop. If outpatient reindex, if day case we need to perform only cost review and mention yellow note "Daycase coding not required"</li>
+                <li>If no gop ,check if room was charged on the invoice. if yes treat as daycase, if no treat as outpatient. (refer to flowchart below)</li>
+            </ul>
+        </div>
+
+        <div class="step" id="step11">
+            <h2>Step 11. Medical Information <a href="#" class="top-link">Top</a></h2>
+            <p>Medical review-</p>
+            <p>Check complete medical information + pre-auth case in HealthCloud Available- Yes/No</p>
+            
+            <p><strong>If Yes</strong> → Go for step 12</p>
+            <p><strong>If No</strong> → Create standard case for requesting additional information in HC:</p>
+            
+            <ul>
+                <li>Send the claim to HealthCloud by using a template in Outlook.</li>
+                <li>Send the template together with the invoice to HealthCloud.</li>
+                <li>Pick up the unstructured HealthCloud case</li>
+                <li>Take Ownership</li>
+                <li>Turn the unstructured case into a Standard case record type</li>
+                <li>Leave a yellow note with HC case number and pend under communication instructions in Octopus</li>
+                <li>Follow up on the 5th business day after the first outreach and CSR will send reminder on the 5th business day</li>
+                <li>Put the case as standard back in my personal queue on the 2nd business day after the reminder. If we did not receive information after 7days perform review complete in octopus and add comments- "Info requested under HC case no. XXXXXXX but provider didnot respond, please deny claim". update new date in on a yellow note -date of the last reminder to the hcp if no information was received.</li>
+                <li>After completing 60days, register cost savings in HC.</li>
+                <li>Refer KE article 000104172 (click the link: How to obtain additional information from a provider for Claim Review | Knowledge | Salesforce)</li>
+            </ul>
+            
+            <h3>How to send an invoice to HealthCloud?</h3>
+            <ol>
+                <li>Right-click on the invoice</li>
+                <li>Click on 'Send to'</li>
+                <li>Click on 'Mail Recipient (as Attachment)'</li>
+                <li>Pop-up screen 'Send to Mail'</li>
+                <li>Choose as File Format 'Unencrypted PDF'</li>
+                <li>Click on Send</li>
+                <li>New email message will pop-up including the invoice in pdf-format</li>
+                <li>Insert a CARE CA template
+                    <ul>
+                        <li>Home tab in Outlook/From template</li>
+                        <li>Cigna Notifications & Iris/Email templates</li>
+                        <li>W:\Templates\Outlook_new\MCC General\CARE CA</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <h3>Outlook Template:</h3>
+            <p>To: urgentrequestsclaimsreviewteam@cigna.com</p>
+            <p>Subject: Initials/Upload/Client ID xxx/ PIMS ID xxxx/ Claim ID xxxx/ Further information Required</p>
+            <p>Body of the email: use the template >IMPORTANT: provide clear instructions on the information Required so Customer Service can reach out to the provider Signature</p>
+            
+            <h3>Unstructured case in HealthCloud</h3>
+            <p>Email sent to: urgentrequestsclaimsreviewteam@cigna.com will land in HealthCloud as an Unstructured Case. This case will be temporarily in the TH&N (Total Health & Network ) Pending to Route Queue for queue allocation. After some time the case will be assigned to the Claim Review Escalations queue.</p>
+            <p>You should pick the case and take ownership of it.</p>
+            <p>Retrieve unstructured case either by searching from the Claim Review Escalations Queue or looking up for member related cases</p>
+            
+            <h3>Creating a Standard case</h3>
+            <ol>
+                <li>New Case</li>
+                <li>Select 'cases' from the Navigation Menu</li>
+                <li>Click on 'NEW'</li>
+                <li>Follow next steps</li>
+                <li>Select Standard Case</li>
+                <li>Parent Case: Add main Claim Review Case number (if needed)</li>
+                <li>Case Type: Processing Info</li>
+                <li>Subtype: Additional Information</li>
+                <li>Case Language: language to match provider invoice</li>
+                <li>Case Origin: Email</li>
+                <li>Sender Type: Provider</li>
+                <li>Customer: add and search member id</li>
+                <li>Provider: add and search provider id</li>
+                <li>Subject: subject Will remain from the email sent.</li>
+                <li>> If you are creating a Brand new case add subject as per standard format</li>
+                <li>Case Description: add information required here when creating a brand new case for Customer Service awareness</li>
+                <li>Claim Id: add information as per claim Id in Octopus</li>
+                <li>Assign using active assignement rule: tick the check box for automatic routing</li>
+                <li>Save</li>
+            </ol>
+        </div>
+
+        <div class="step" id="step12">
+            <h2>Step 12. Translation <a href="#" class="top-link">Top</a></h2>
+            <p>Does claim requires translation-Yes/No</p>
+            
+            <p><strong>If yes</strong> (click the link) → How to refer cases for Translation support.pdf</p>
+            <p><strong>If no</strong> → Go to step 13</p>
+        </div>
+
+        <div class="step" id="step13">
+            <h2>Step 13. Cost review process <a href="#" class="top-link">Top</a></h2>
+            <ol>
+                <li>Check PRM-
+                    <ul>
+                        <li>Tariff agreement (Direct Payment Agreement), discount (List price agreement)</li>
+                    </ul>
+                </li>
+                <li>If tariff is not okay send for rectified invoice by creating standard case record type in HC based on country specific (Step 11)</li>
+                <li>Be categorical and mention/point out the amount as per tariff or tariff package ON YOUR COMMUNICATION INFORMATION.</li>
+                <li>If you get a claim and you need to request the provider for a rectified bill, please be very clear on what for is the bill to be rectified. You must have a comparison, or you must have a point where you clearly asked why you needed a rectified bill.</li>
+            </ol>
+            
+            <div class="note">
+                <p>EXAMPLE FORMAT:-</p>
+                <p>"Please ask the health care provider for a rectified bill of $______(amount to be deducted). This is because they charged us $______(amount on invoice) for this procedure WHERE on the tariff list, the charge is $____(amount on tariff).</p>
+            </div>
+            
+            <ol start="2">
+                <li>Check Healthcloud
+                    <ul>
+                        <li>GOP</li>
+                        <li>LOS Approved</li>
+                        <li>Medical reports</li>
+                        <li>Doctors notes in the case</li>
+                    </ul>
+                </li>
+                <li>Check for country specifics
+                    <ul>
+                        <li>DRG, Vadicco, Kenya fee schedule, Uk fee schedule RISIV, OP Gruppe, GHS, DBC</li>
+                        <li>Invoices from In-network providers with tariff lists in PIMS will be cut to the agreed tariffs.</li>
+                    </ul>
+                </li>
+                <li>If all is OK (Step 17) → Code and release</li>
+                <li>If it meets CC trigger → Send to CC</li>
+            </ol>
+            
+            <h3>Care Coordination (CC) triggers for Claim Reviewer (CR):</h3>
+            <ul>
+                <li>If no Financial Verification (FV) was done before, all claims from out of network providers above 15,000 USD to CC for cost negotiation check.</li>
+                <li>All claims (from in -or out of network providers) exceeding the R&C cost by 20% with a minimum of 2,000 USD above the Reasonable & Customary (R&C) limit to CC.</li>
+                <li>All claims above 50,000 USD in Europe excluding:
+                    <ul>
+                        <li>DRG (Switzerland, Germany, Austria);</li>
+                        <li>DBC (Netherlands);</li>
+                        <li>GHS (France);</li>
+                        <li>APHP (France);</li>
+                        <li>Sensitive provider</li>
+                    </ul>
+                </li>
+                <li>All claims above 30,000 USD in Africa excluding:
+                    <ul>
+                        <li>Kenya for in-network providers with Tariff Agreement (TA);</li>
+                        <li>South Africa for in-network providers with Tariff Agreement (TA).</li>
+                    </ul>
+                </li>
+                <li>All claims for doctor's fees in South Africa (SA) above 5,000 USD.</li>
+                <li>All claims above 50,000 USD in the rest of world.</li>
+                <li>General exclusions:
+                    <ul>
+                        <li>All claims from providers without any discount possibilities as mentioned in PIMS/PRM. Do not forward to CC.</li>
+                        <li>No FV required: if no FV was done before for an in-network provider.</li>
+                        <li>Reasoning: FV will be done by Claims Analyst and their superiors/ following their FV levels.</li>
+                        <li>If the Tariff Agreement (TA) is not respected by an in-network provider > continue current instructions (i.e. instruction for CSR to request new invoice according to Tariff Agreement (TA).</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <ol start="6">
+                <li>If it requires MNR → Go to Step 14</li>
+            </ol>
+        </div>
+
+        <div class="step" id="step14">
+            <h2>Step 14. MNR <a href="#" class="top-link">Top</a></h2>
+            <p>Does claim requires MNR- Yes/No</p>
+            
+            <p><strong>If yes</strong> → Go to step 15</p>
+            <p><strong>If no</strong> → Go to step 16</p>
+        </div>
+
+        <div class="step" id="step15">
+            <h2>Step 15. MNR triggers <a href="#" class="top-link">Top</a></h2>
+            <p>Check triggers for MNR</p>
+            
+            <p>Is a dental /pharmacy claim- Yes/No</p>
+            
+            <p><strong>If yes</strong> → Is claim cost over 5k USD? Yes/No</p>
+            
+            <p><strong>If yes</strong> → Sent to HC, Cigna clinical team to MNR by creating claim review</p>
+            <p><strong>If No</strong> → Follow Claim review process</p>
+            
+            <p><strong>If No</strong> → Is claim cost over 35k USD? Yes/No</p>
+            
+            <p><strong>If yes</strong> → Has GOP matching claim- Yes/No</p>
+            
+            <p><strong>If yes</strong> → Is cost difference 10K USD- Yes/No</p>
+            
+            <p><strong>If yes</strong> → Sent to HC for Dr MNR by creating claim review case record type</p>
+            <p><strong>If No</strong> → Is total cost >/= 50K USD- Yes/No</p>
+            
+            <p><strong>If yes</strong> → Sent to HC for Dr MNR by creating claim review case record type</p>
+            <p><strong>If No</strong> → Follow claim review</p>
+            
+            <p><strong>If No</strong> → Sent to HC for Dr MNR by creating claim review case record type</p>
+            
+            <p><strong>If No</strong> → Has GOP matching claim- Yes/No</p>
+            
+            <p><strong>If yes</strong> → Follow claim review</p>
+            <p><strong>If No</strong> → Sent to HC to perform MNR by IOH claim reviewer creating claim review case record type- Has MNR approved- Yes/ No</p>
+            
+            <p><strong>If yes</strong> → Follow claim review process</p>
+            <p><strong>If no</strong> → Sent to HC for Dr MNR by creating claim review case record type</p>
+            
+            <h3>MNR triggers</h3>
+            <table>
+                <tr>
+                    <th>Cigna MNR</th>
+                    <th>Sagility MNR</th>
+                </tr>
+                <tr>
+                    <td>Pharmacy/Dental claims of >/= 5k USD</td>
+                    <td>Claims and GOP cost difference >/= 10K USD</td>
+                </tr>
+                <tr>
+                    <td>Claims amount >/= 50K USD</td>
+                    <td>MNR performed by Sagility IOH team but criteria not met</td>
+                </tr>
+                <tr>
+                    <td>Dental and Pharma claims <5K</td>
+                    <td>All claims with cost between 5 - 35K USD AND NO GOP</td>
+                </tr>
+                <tr>
+                    <td colspan="2">No need to review  claims with cost difference <10k USD if they have a matching GOP</td>
+                </tr>
+            </table>
+            
+            <h3>Decision making process</h3>
+            <p>Clinical team will follow the below order while reviewing a case for MNR.</p>
+            <ul>
+                <li>Contract Summary
+                    <ul>
+                        <li>European clients: local guidelines</li>
+                        <li>EPO: Guide To Cover</li>
+                    </ul>
+                </li>
+                <li>Cigna Policy</li>
+                <li>Guidelines: MCG, NCCN</li>
+                <li>Personal knowledge</li>
+            </ul>
+            
+            <h3>Cigna Coverage Guidelines</h3>
+            <p>Cigna coverage policies are tools to assist in interpreting standard health coverage plan provisions.</p>
+            <p>Through this link CHCP - Resources - Coverage Policies (cigna.com) the Cigna's medical administrative or drug coverage policies can be accessed.</p>
+            <p>Here you can search for a Cigna commercial coverage position which includes Medicare determinations.</p>
+            <p>Within each policy -there are specifics about what can be considered Experimental, Investigational, Unproven or Not Medically Necessary.</p>
+            <p>Due to the nature of each treatment/procedure it is required to have one of the clinicians, medical advisors or nurse clinical advisors, reviewing the request.</p>
+            <p>Clinical team reviews the medical necessity (MNR) of the requested treatment ensuring our customers get the most accurate treatment.</p>
+            
+            <h3>To perform MNR or to capture Savings:</h3>
+            <ul>
+                <li>Send case from Octopus to HC</li>
+                <li>Update the case as a Claim Review Record Type in HC</li>
+                <li>Claim in Octopus→Advice needed from medical board→ Forward invoice to HealthCloud using template→ Pick up the Unstructured→ Create a Claim Review case</li>
+            </ul>
+            
+            <h3>Steps to check guideline in HC</h3>
+            <ol>
+                <li>Click on New guideline in the Guidelines category</li>
+                <li>Select from the care type available</li>
+                <li>Type the procedure under 'Search Value' and click on 'Search'</li>
+                <li>Review Guidelines</li>
+                <li>Select the appropriate guideline by clicking on it and then select launch</li>
+                <li>A pop-up window is displayed with a list of all the health conditions that indicate the medical necessity of the procedure / diagnosis.</li>
+                <li>Additional information about member's conditions can be added to the guideline</li>
+                <li>Information about the most appropriate length LOS</li>
+                <li>Clinical Indications for procedure- Met</li>
+                <li>Select all that apply to the customer and click submit</li>
+                <li>Guidelines added to the case</li>
+                <li>The completed guideline is visible under Guidelines.</li>
+            </ol>
+            
+            <div class="note">
+                <p>If the status shows 'Indications Not Met', the MNR can be denied</p>
+                <p>MNR denials will go automatically to the MNR savings basket</p>
+            </div>
+            
+            <h3>MNR assessment in HealthCloud</h3>
+            <p>Care request information (CRI) line</p>
+            <p>Case Status must always be updated to MNR Approved/Denied or Approved/Denied based on the original Status (New-MNR Required or New-No MNR Required).</p>
+            <p>Diagnosis and Procedure should always be correctly updated in the CRI Line Status before performing the MNR</p>
+            <p>Case must show the same number of procedure lines and costs as per details received in the invoice.</p>
+            
+            <div class="warning">
+                <p>NOTE: IOH Claim Reviewers Will not update cases to status MNR Denied as this is out of scope. Refer case in HC to the IOH Medical Advisors Q for internal review.</p>
+            </div>
+            
+            <h3>Sent to HC for Dr. MNR</h3>
+            <p>This is Out of Scope for the IOH Clinical Claim Review Team</p>
+            <p>Add a Yellow Note in Octopus mentioning that case assigned to the Cigna doctors.</p>
+            <p>Add a note to your Claim Review case in HC</p>
+            
+            <div class="note">
+                <p>Dear Dr,</p>
+                <ul>
+                    <li>Brief member description which could add value (e.g. 86-year-old female)</li>
+                    <li>Diagnoses</li>
+                    <li>Procedure</li>
+                    <li>Length of Stay</li>
+                    <li>GOP in place? If yes, confirm LOS approved + Cost approved (FV done? as per notes in HC Pre-Authorisation Case)</li>
+                    <li>Provider remarks (e.g. Hospital costs matching tariff agreement, Dr Fees as per Vadicco rates...)</li>
+                    <li>Additional remarks: (e.g. final invoice more than 50K, cost approved in the GOP difference on >10K the final invoice....)</li>
+                    <li>Expected action from the clinical team: Can we accept full invoice? Thanks</li>
+                </ul>
+            </div>
+            
+            <p>Assign case to the IO Medical Advisor Q</p>
+            
+            <h3>How to Add a note in Health Cloud</h3>
+            <ol>
+                <li>From Related List Quick Links</li>
+                <li>Select Notes</li>
+                <li>Select New</li>
+                <li>Add your comments</li>
+                <li>Select Done</li>
+            </ol>
+            
+            <h3>Confirming LOS in Health Cloud</h3>
+            <p>Managing a pre-auth < MEDICAL INFORMATION</p>
+            <p>Medical Information fields: Make sure to (manually) update throughout the case and verify if the fields are correct before closing the case. This provides an overview of the length of stay that was initially approved of, additional days that have been requested and the total stay that was eventually approved</p>
+            
+            <h3>MNR Saving - LOS</h3>
+            <p>Information about Length of Stay</p>
+            <p>Upon structuring the case for Inpatient admissions information about Length of stay (1) is added and visible through "Medical Information" details.</p>
+            <p>Clinical Team should update the Initially Approved details during MNR Review Process</p>
+            <p>Other Expenses details show Room and Board Cost with the total amount related to the Original requested Length of Stay</p>
+            <p>As part of the MNR Process, Clinical Team should confirm the Length of Stay approved in that claim review case by updating the Initially Approved (2) details</p>
+            <p>Should by any reason the Total claimed LOS cannot be approved</p>
+            <p>Confirm the number of nights approved (e.g.: 6 out of 7 nights)</p>
+            
+            <div class="note">
+                <p>NOTE: for capturing LOS saving Room and Board cost must be input upon structuring the case or using the 'other expenses' blue feature.</p>
+            </div>
+            
+            <h3>Communication in HC</h3>
+            <p>Case determination: Add a note/post</p>
+            <p>Create a note after resolving the status of the CRI using the MNR Notes Template.</p>
+            <p>If more information would be required, then create a Standard case for Customer Service to Reach out to Provider as per internal process. Add the Claim Review Case reference as Parent case of the Standard case.</p>
+            
+            <h3>Adding a Note for MNR/ Itemized Review</h3>
+            <div class="note">
+                <p>Dear Dr,</p>
+                <ul>
+                    <li>Brief member description which could add value (e.g 86-year old female)</li>
+                    <li>Diagnoses</li>
+                    <li>Procedure</li>
+                    <li>Length of Stay</li>
+                    <li>GOP in place? If yes, confirm LOS approved + Cost approved (FV done? as per notes in HC Pre-Authorisation Case)</li>
+                    <li>Provider remarks (e.g. Hospital costs matching tariff agreement, Dr Fees as per Vadicco rates...)</li>
+                    <li>Additional remarks: (e.g. final invoice more than 50K, cost approved in the GOP difference on >10K the final invoice....)</li>
+                    <li>Expected action from the clinical team: Can we accept full invoice? Thanks</li>
+                </ul>
+            </div>
+            
+            <h3>Closing Case</h3>
+            <p>Update Case Status</p>
+            <p>Upon having performed MNR</p>
+            <ul>
+                <li>Add case notes</li>
+                <li>Change Case Status</li>
+                <li>Closed: Approved / Denied (in those scenarios Cigna Medical Board advised accordingly)</li>
+            </ul>
+            <p>Case in HC is finalise > move to Octopus and complete case review</p>
+            
+            <h3>MNR Tools</h3>
+            <ul>
+                <li>Cigna Medical Guideline → CHCP - Resources - Coverage Policies</li>
+                <li>MCG → https://login.mcg.com/https ://www.evicore.com/cigna</li>
+                <li>NCCN → https://www.nccn.org/</li>
+                <li>Evicore → https://www.evicore.com/</li>
+                <li>Local Governamental Guidance</li>
+            </ul>
+        </div>
+
+        <div class="step" id="step16">
+            <h2>Step 16. IBR triggers <a href="#" class="top-link">Top</a></h2>
+            <p>Which cases triggers for Itemized claims process?</p>
+            
+            <ul>
+                <li>Equal or More than 10K USD in Countries not equal to:
+                    <ul>
+                        <li>France</li>
+                        <li>Switzerland</li>
+                        <li>Germany</li>
+                        <li>Belgium</li>
+                        <li>The Netherlands</li>
+                        <li>Austria</li>
+                        <li>Czech Republic</li>
+                        <li>Luxembourg</li>
+                        <li>Ireland</li>
+                        <li>UK</li>
+                        <li>Denmark</li>
+                        <li>Sweden</li>
+                        <li>Norway</li>
+                        <li>Finland</li>
+                        <li>Iceland</li>
+                        <li>Japan</li>
+                        <li>South Korea</li>
+                        <li>United State</li>
+                    </ul>
+                </li>
+                <li>Equal or More than 5K USD Claims in African countries</li>
+                <li>Equal or More than 3K USD Claims in Lebanon</li>
+                <li>Equal or More than 10K USD Claims in other countries</li>
+            </ul>
+            
+            <div class="note">
+                <p>Note- When no itemized bill shared by the provider, although case triggers for Itemized Claim Review, you will not request the itemized invoice to the provider and will skip this process.</p>
+            </div>
+            
+            <h3>What should be Reviewed?</h3>
+            <p>Agents review the following information on the itemized bill and/or medical record for claims that meet the triggers:</p>
+            <ul>
+                <li>Dosage, units, and amounts are appropriate for the patient age/size/gender and diagnosis</li>
+                <li>Services that may be integral to another greater service or procedure being reimbursed such as room & board, operating room charges, procedure charges</li>
+                <li>LOS, level of care</li>
+                <li>Consumables, prosthesis.</li>
+                <li>Duplicative or erroneous charges</li>
+                <li>Unidentifiable charges</li>
+                <li>Non-covered experimental, investigational or unproven services</li>
+                <li>Correct coding for services rendered (if codes are used)</li>
+                <li>Appropriate DRG coding (if DRG used)</li>
+                <li>Identification of services not covered under the plan.</li>
+            </ul>
+            
+            <h3>What's in an invoice? See below</h3>
+        </div>
+
+        <div class="step" id="step17">
+            <h2>Step 17. Coding in MF <a href="#" class="top-link">Top</a></h2>
+            <ul>
+                <li>Check correct diagnosis and procedure codes in PIMS</li>
+                <li>Convert ICD 10 into ICD 9 by using below links (Ctrl + click)</li>
+                <li>Find-A-Code - ICD 10 Codes, CPT Codes, HCPCS Codes, ICD 9 Codes - Online Encoder - Medical Billing and Coding</li>
+                <li>https://www.icd10data.com/</li>
+                <li>Coding in MF E80A</li>
+            </ul>
+        </div>
+
+        <div class="step" id="step18">
+            <h2>Step 18. Discount rate <a href="#" class="top-link">Top</a></h2>
+            <p>Check discount details under PIMS/PRM</p>
+            <p>Examples- PPD, LPP, PR- Mention in discount section before reviewing complete.(No need to mention preferential rate)</p>
+            
+            <div class="note">
+                <p>Note- Discount rate is applicable only in hospital claims</p>
+            </div>
+        </div>
+
+        <div class="step" id="step19">
+            <h2>Step 19. Review Complete- Claim review basket <a href="#" class="top-link">Top</a></h2>
+            <p>Confirming LOS</p>
+            <p>Upon "review complete" complete the details</p>
+            <p>Mention the MNR outcome in a yellow note including the guideline you based your decision on</p>
+            
+            <p>If LOS is ok. Length of stay check box must be ticket</p>
+            
+            <div class="note">
+                <p>Example:</p>
+                <p>MNR Approved as per Guideline P-314</p>
+                <p>LOS approved- 3nights</p>
+                <p>Total approved cost = 2500 USD</p>
+                <p>Denies cost (item and costs)</p>
+                <p>Savings applied</p>
+            </div>
+            
+            <p>Input ICD 9 Diagnosis code, Procedure code, DOA, Discount applicable (if yes), Comment(if applicable)</p>
+            <p>Click 'Submit'</p>
+        </div>
+    </div>
+</body>
+</html>
+```
