@@ -1,0 +1,1618 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unified Dashboard</title>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --primary: #003366;
+      --text: #222;
+      --bg: #f9f9f9;
+      --card-bg: #ffffff;
+      --sidebar-bg: #003366;
+      --sidebar-text: #fff;
+      --border: #ddd;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
+      --success: #2e7d32;
+      --card-padding: 25px;
+    }
+
+    .dark-mode {
+      --text: #e0e0e0;
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --border: #444;
+      --sidebar-bg: #002244;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+      position: fixed;
+      height: 100%;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 10px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 0.95rem;
+      gap: 12px;
+      transition: background 0.3s;
+    }
+
+    .sidebar-menu a:hover,
+    .sidebar-menu a.active {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border-left: 4px solid #ff9800;
+    }
+
+    .sidebar-menu a i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 20px;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .dark-mode-toggle button {
+      background: #ff9800;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dark-mode-toggle button:hover {
+      background: #e67c00;
+    }
+
+    /* Card */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: var(--card-padding);
+      margin-bottom: 25px;
+      display: none;
+    }
+
+    .card.active {
+      display: block;
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    /* Iframe */
+    .lazy-iframe {
+      width: 100%;
+      height: 500px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    /* Link List */
+    .link-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .link-list li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .link-list li:last-child {
+      border-bottom: none;
+    }
+
+    .link-list a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .link-list a:hover {
+      color: var(--primary);
+    }
+
+    .link-list i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Search Box */
+    .search-box {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #f8f9fa;
+      color: var(--text);
+    }
+
+    .search-box-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    /* Welcome Section */
+    .welcome {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text);
+    }
+
+    .welcome h1 {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      color: var(--primary);
+    }
+
+    .welcome p {
+      font-size: 1.1rem;
+      max-width: 700px;
+      margin: 0 auto 20px;
+      line-height: 1.6;
+    }
+
+    .updates {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      line-height: 1.7;
+      border-left: 5px solid #ff9800;
+    }
+
+    .updates h3 {
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    section {
+      scroll-margin-top: 80px;
+    }
+
+    /* Responsive Iframes */
+    .responsive-iframe-container {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 75%; /* 4:3 Aspect Ratio */
+      overflow: hidden;
+    }
+
+    .responsive-iframe-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Calculator Styles */
+    .calculator {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+
+    .dark-mode .calculator {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .calculator label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .calculator input, .calculator select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+    }
+
+    .result {
+      margin-top: 10px;
+      color: var(--success);
+      font-weight: 600;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: rgba(46, 125, 50, 0.1);
+    }
+
+    /* Dashboard Tabs */
+    .sub-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      background: #e0e0e0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .dark-mode .tab-btn {
+      background: #444;
+      color: white;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: #d0d0d0;
+    }
+
+    .dark-mode .tab-btn:hover:not(.active) {
+      background: #555;
+    }
+
+    /* Currency Converter */
+    .currency-converter {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .currency-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .currency-row input, .currency-row select {
+      flex: 1;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+    }
+
+    .swap-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .convert-btn {
+      align-self: flex-start;
+      padding: 10px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .convert-btn:hover {
+      background: #002244;
+    }
+
+    /* Translator */
+    .translator {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .translator textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .language-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .language-row select {
+      flex: 1;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+    }
+
+    .translate-btn {
+      align-self: flex-start;
+      padding: 10px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .translate-btn:hover {
+      background: #002244;
+    }
+
+    /* Error Message */
+    .error-message {
+      color: #d32f2f;
+      background-color: rgba(211, 47, 47, 0.1);
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+
+    /* Timestamp */
+    .timestamp {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    .dark-mode .timestamp {
+      color: #aaa;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .currency-row, .language-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <i class="fas fa-th-large"></i> <span>Dashboard</span>
+    </div>
+    <nav class="sidebar-menu">
+      <a href="#home" class="active" data-tab="home">
+        <i class="fas fa-home"></i> <span>Home</span>
+      </a>
+      <a href="#trackers" data-tab="trackers">
+        <i class="fas fa-tasks"></i> <span>Production Tracker</span>
+      </a>
+	  <a href="#sop" data-tab="sop">
+		<i class="fas fa-book"></i> <span>SOP</span>
+	  </a>
+      <a href="#calculators" data-tab="calculators">
+        <i class="fas fa-calculator"></i> <span>Multi-Calculator</span>
+      </a>
+      <a href="#translation" data-tab="translation">
+        <i class="fas fa-language"></i> <span>Translation</span>
+      </a>
+      <a href="#currency" data-tab="currency">
+        <i class="fas fa-dollar-sign"></i> <span>Currency Converter</span>
+      </a>
+      <a href="#dashboards" data-tab="dashboards">
+        <i class="fas fa-chart-line"></i> <span>Live Dashboards</span>
+      </a>
+      <a href="#useful-links" data-tab="useful-links">
+        <i class="fas fa-link"></i> <span>Useful Links</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="top-bar">
+      <h1 class="page-title">Clinical Tools Hub</h1>
+      <div class="dark-mode-toggle">
+        <button id="darkModeToggle">
+          <i class="fas fa-moon"></i> <span>Dark Mode</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Home Section -->
+    <section id="home" class="tab-content active">
+      <div class="welcome">
+        <h1>Welcome to the Clinical Tools Dashboard</h1>
+        <p>Select a tool from the sidebar to get started.</p>
+
+        <div class="updates">
+          <h3>馃摙 Team Updates & Announcements</h3>
+          <ul>
+            <li><strong>May 15:</strong> New <em>Translation Tool</em> added for multilingual clinical notes.</li>
+            <li><strong>May 10:</strong> MNR Tracker updated with Q2 targets.</li>
+            <li><strong>May 5:</strong> Swiss DRG calculator now supports extended LOS logic.</li>
+            <li><strong>Apr 30:</strong> All forms now support offline access via SharePoint.</li>
+          </ul>
+          <p style="margin-top: 15px;">
+            <small>Last updated: Aug 29, 2025 | Contact: <a href="mailto:Aathiyappa.sundar@sagilityheath.com" style="color:#0077cc;">Aathiyappa.sundar@sagilityheath.com</a></small>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trackers Section -->
+    <section id="trackers" class="tab-content">
+      <div class="card active">
+        <h2><i class="fas fa-tasks"></i> Production Tracker</h2>
+        <ul class="link-list">
+          <li>
+            <a href="https://forms.office.com/r/Hf5HPWD9aS" target="_blank">
+              <i class="fas fa-file-code" style="color: #003366;"></i>
+              <span>Coding Tracker</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=yyYbed8_w0e4Xb2fA34-f5ybz_LGG95Hmd_-xqC_o3VURTlETlZYUVhORUxTNzhRSktRVTRYWlVLRS4u" target="_blank">
+              <i class="fas fa-clipboard-check" style="color: #2e7d32;"></i>
+              <span>Claim Review Tracker</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://cignatlp-my.sharepoint.com/:x:/r/personal/c7s2bc_glbcore_com/Documents/Clinical/Ops-%20Clinical/MNR%20Case%20tracker.xlsx?d=wd6f36c2746aa466d96850d2ba1fdc0f9&csf=1&web=1&e=QWMOCV" target="_blank">
+              <i class="fas fa-cloud" style="color: #1565c0;"></i>
+              <span>Healthcloud Tracker</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Calculators Section -->
+    <section id="calculators" class="tab-content">
+      <div class="card active">
+        <h2><i class="fas fa-calculator"></i> Multi Calculator Tools</h2>
+        <label for="calcSelect" class="search-box-label">Choose a Calculator:</label>
+        <select id="calcSelect" class="search-box">
+          <option value="">-- Select Calculator --</option>
+          <option value="dateDiff">馃搮 Date Difference</option>
+          <option value="percentage">馃搳 Percentage</option>
+          <option value="bundeslandExtended">馃嚛馃嚜 German DRG (Extended LOS)</option>
+          <option value="drgExtended">馃嚚馃嚟 Swiss DRG (Extended LOS)</option>
+        </select>
+
+        <div class="calculator" id="dateDiff" style="display: none;">
+          <label>Start Date: <input type="date" id="startDate"/></label>
+          <label>End Date: <input type="date" id="endDate"/></label>
+          <div class="result" id="dateDiffResult"></div>
+        </div>
+
+        <div class="calculator" id="percentage" style="display: none;">
+          <label>Base Value: <input type="number" id="baseValue" placeholder="100"/></label>
+          <label>Percentage (%): <input type="number" id="percentageValue" placeholder="33"/></label>
+          <div class="result" id="percentageResult"></div>
+        </div>
+
+        <div class="calculator" id="bundeslandExtended" style="display: none;">
+          <label>Max LOS: <input type="number" id="maxLos2" value="6"/></label>
+          <label>Bundesland Rate: <input type="number" id="bundesland" step="0.01" value="4206.51"/></label>
+          <label>Column 10: <input type="number" id="col10" step="0.001" value="0.051"/></label>
+          <label>Actual LOS: <input type="number" id="actualLos2" value="9"/></label>
+          <div class="result" id="bundeslandResult"></div>
+        </div>
+
+        <div class="calculator" id="drgExtended" style="display: none;">
+          <label>DRG CW (Col 4): <input type="number" id="cw" step="0.001" value="0.977"/></label>
+          <label>Max LOS: <input type="number" id="maxLos" value="6"/></label>
+          <label>DRG Base Rate: <input type="number" id="drgRate" value="13500"/></label>
+          <label>Column 9: <input type="number" id="col9" step="0.001" value="0.153"/></label>
+          <label>Actual LOS: <input type="number" id="actualLos" value="9"/></label>
+          <div class="result" id="drgResult"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Translation Section -->
+    <section id="translation" class="tab-content">
+      <div class="card active">
+        <h2><i class="fas fa-language"></i> Document Translator</h2>
+        <p>Translate text between different languages using Microsoft Translator API (auto-detect language).</p>
+        
+        <div class="translator">
+          <textarea id="inputText" placeholder="Enter text to translate..."></textarea>
+          
+          <div class="language-row">
+            <select id="toLanguage">
+              <option value="es">Spanish</option>
+              <option value="en">English</option>
+              <option value="fr">French</option>
+              <option value="de">German</option>
+              <option value="zh-Hans">Chinese (Simplified)</option>
+              <option value="ja">Japanese</option>
+              <option value="ar">Arabic</option>
+              <option value="ru">Russian</option>
+              <option value="pt">Portuguese</option>
+              <option value="it">Italian</option>
+            </select>
+          </div>
+          
+          <button class="translate-btn" id="translateBtn">Translate</button>
+          
+          <textarea id="outputText" placeholder="Translated text will appear here..." readonly></textarea>
+          <div id="translationResult"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Currency Converter Section -->
+    <section id="currency" class="tab-content">
+      <div class="card active">
+        <h2><i class="fas fa-dollar-sign"></i> Currency Converter</h2>
+        <p>Convert between different currencies for international billing and claims using Exchangerate-API.</p>
+        
+        <div class="currency-converter">
+          <div class="currency-row">
+            <input type="number" id="amount" value="1" step="any" placeholder="Amount">
+            <select id="fromCurrency">
+              <option value="USD">USD - US Dollar</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="GBP">GBP - British Pound</option>
+              <option value="CHF">CHF - Swiss Franc</option>
+              <option value="AUD">AUD - Australian Dollar</option>
+              <option value="CAD">CAD - Canadian Dollar</option>
+              <option value="JPY">JPY - Japanese Yen</option>
+              <option value="CNY">CNY - Chinese Yuan</option>
+              <option value="AFN">AFN - Afghan Afghani</option>
+              <option value="ALL">ALL - Albanian Lek</option>
+              <option value="DZD">DZD - Algerian Dinar</option>
+              <option value="AOA">AOA - Angolan Kwanza</option>
+              <option value="XCD">XCD - East Caribbean Dollar</option>
+              <option value="ARS">ARS - Argentine Peso</option>
+              <option value="AMD">AMD - Armenian Dram</option>
+              <option value="AWG">AWG - Aruban Florin</option>
+              <option value="AZN">AZN - Azerbaijani Manat</option>
+              <option value="BSD">BSD - Bahamian Dollar</option>
+              <option value="BHD">BHD - Bahraini Dinar</option>
+              <option value="BDT">BDT - Bangladeshi Taka</option>
+              <option value="BBD">BBD - Barbadian Dollar</option>
+              <option value="BYN">BYN - Belarusian Ruble</option>
+              <option value="BZD">BZD - Belize Dollar</option>
+              <option value="XOF">XOF - West African CFA Franc</option>
+              <option value="BTN">BTN - Bhutanese Ngultrum</option>
+              <option value="BOB">BOB - Bolivian Boliviano</option>
+              <option value="BAM">BAM - Bosnia-Herzegovina Convertible Mark</option>
+              <option value="BWP">BWP - Botswanan Pula</option>
+              <option value="BRL">BRL - Brazilian Real</option>
+              <option value="BND">BND - Brunei Dollar</option>
+              <option value="BGN">BGN - Bulgarian Lev</option>
+              <option value="BIF">BIF - Burundian Franc</option>
+              <option value="CVE">CVE - Cape Verdean Escudo</option>
+              <option value="KHR">KHR - Cambodian Riel</option>
+              <option value="XAF">XAF - Central African CFA Franc</option>
+              <option value="CLP">CLP - Chilean Peso</option>
+              <option value="COP">COP - Colombian Peso</option>
+              <option value="KMF">KMF - Comorian Franc</option>
+              <option value="CDF">CDF - Congolese Franc</option>
+              <option value="CRC">CRC - Costa Rican Col贸n</option>
+              <option value="CUP">CUP - Cuban Peso</option>
+              <option value="ANG">ANG - Netherlands Antillean Guilder</option>
+              <option value="CZK">CZK - Czech Republic Koruna</option>
+              <option value="DKK">DKK - Danish Krone</option>
+              <option value="DJF">DJF - Djiboutian Franc</option>
+              <option value="DOP">DOP - Dominican Peso</option>
+              <option value="EGP">EGP - Egyptian Pound</option>
+              <option value="ERN">ERN - Eritrean Nakfa</option>
+              <option value="SZL">SZL - Swazi Lilangeni</option>
+              <option value="ETB">ETB - Ethiopian Birr</option>
+              <option value="FKP">FKP - Falkland Islands Pound</option>
+              <option value="FJD">FJD - Fijian Dollar</option>
+              <option value="XPF">XPF - CFP Franc</option>
+              <option value="GMD">GMD - Gambian Dalasi</option>
+              <option value="GEL">GEL - Georgian Lari</option>
+              <option value="GHS">GHS - Ghanaian Cedi</option>
+              <option value="GIP">GIP - Gibraltar Pound</option>
+              <option value="GTQ">GTQ - Guatemalan Quetzal</option>
+              <option value="GNF">GNF - Guinean Franc</option>
+              <option value="GYD">GYD - Guyanaese Dollar</option>
+              <option value="HTG">HTG - Haitian Gourde</option>
+              <option value="HNL">HNL - Honduran Lempira</option>
+              <option value="HKD">HKD - Hong Kong Dollar</option>
+              <option value="HUF">HUF - Hungarian Forint</option>
+              <option value="ISK">ISK - Icelandic Kr贸na</option>
+              <option value="INR">INR - Indian Rupee</option>
+              <option value="IDR">IDR - Indonesian Rupiah</option>
+              <option value="IRR">IRR - Iranian Rial</option>
+              <option value="IQD">IQD - Iraqi Dinar</option>
+              <option value="ILS">ILS - Israeli New Sheqel</option>
+              <option value="JMD">JMD - Jamaican Dollar</option>
+              <option value="JEP">JEP - Jersey Pound</option>
+              <option value="JOD">JOD - Jordanian Dinar</option>
+              <option value="KZT">KZT - Kazakhstani Tenge</option>
+              <option value="KES">KES - Kenyan Shilling</option>
+              <option value="KWD">KWD - Kuwaiti Dinar</option>
+              <option value="KGS">KGS - Kyrgystani Som</option>
+              <option value="LAK">LAK - Laotian Kip</option>
+              <option value="LBP">LBP - Lebanese Pound</option>
+              <option value="LSL">LSL - Lesotho Loti</option>
+              <option value="LRD">LRD - Liberian Dollar</option>
+              <option value="LYD">LYD - Libyan Dinar</option>
+              <option value="MOP">MOP - Macanese Pataca</option>
+              <option value="MGA">MGA - Malagasy Ariary</option>
+              <option value="MWK">MWK - Malawian Kwacha</option>
+              <option value="MYR">MYR - Malaysian Ringgit</option>
+              <option value="MVR">MVR - Maldivian Rufiyaa</option>
+              <option value="MRU">MRU - Mauritanian Ouguiya</option>
+              <option value="MUR">MUR - Mauritian Rupee</option>
+              <option value="MXN">MXN - Mexican Peso</option>
+              <option value="MDL">MDL - Moldovan Leu</option>
+              <option value="MNT">MNT - Mongolian Tugrik</option>
+              <option value="MAD">MAD - Moroccan Dirham</option>
+              <option value="MZN">MZN - Mozambican Metical</option>
+              <option value="MMK">MMK - Myanmar Kyat</option>
+              <option value="NAD">NAD - Namibian Dollar</option>
+              <option value="NPR">NPR - Nepalese Rupee</option>
+              <option value="NZD">NZD - New Zealand Dollar</option>
+              <option value="NIO">NIO - Nicaraguan C贸rdoba</option>
+              <option value="NGN">NGN - Nigerian Naira</option>
+              <option value="KPW">KPW - North Korean Won</option>
+              <option value="MKD">MKD - Macedonian Denar</option>
+              <option value="NOK">NOK - Norwegian Krone</option>
+              <option value="OMR">OMR - Omani Rial</option>
+              <option value="PKR">PKR - Pakistani Rupee</option>
+              <option value="PAB">PAB - Panamanian Balboa</option>
+              <option value="PGK">PGK - Papua New Guinean Kina</option>
+              <option value="PYG">PYG - Paraguayan Guarani</option>
+              <option value="PEN">PEN - Peruvian Nuevo Sol</option>
+              <option value="PHP">PHP - Philippine Peso</option>
+              <option value="PLN">PLN - Polish Zloty</option>
+              <option value="QAR">QAR - Qatari Rial</option>
+              <option value="RON">RON - Romanian Leu</option>
+              <option value="RUB">RUB - Russian Ruble</option>
+              <option value="RWF">RWF - Rwandan Franc</option>
+              <option value="SHP">SHP - Saint Helena Pound</option>
+              <option value="WST">WST - Samoan Tala</option>
+              <option value="STN">STN - S茫o Tom茅 and Pr铆ncipe Dobra</option>
+              <option value="SAR">SAR - Saudi Riyal</option>
+              <option value="RSD">RSD - Serbian Dinar</option>
+              <option value="SCR">SCR - Seychellois Rupee</option>
+              <option value="SLE">SLE - Sierra Leonean Leone</option>
+              <option value="SGD">SGD - Singapore Dollar</option>
+              <option value="SBD">SBD - Solomon Islands Dollar</option>
+              <option value="SOS">SOS - Somali Shilling</option>
+              <option value="ZAR">ZAR - South African Rand</option>
+              <option value="KRW">KRW - South Korean Won</option>
+              <option value="SSP">SSP - South Sudanese Pound</option>
+              <option value="LKR">LKR - Sri Lankan Rupee</option>
+              <option value="SDG">SDG - Sudanese Pound</option>
+              <option value="SRD">SRD - Surinamese Dollar</option>
+              <option value="SEK">SEK - Swedish Krona</option>
+              <option value="SYP">SYP - Syrian Pound</option>
+              <option value="TWD">TWD - New Taiwan Dollar</option>
+              <option value="TJS">TJS - Tajikistani Somoni</option>
+              <option value="TZS">TZS - Tanzanian Shilling</option>
+              <option value="THB">THB - Thai Baht</option>
+              <option value="TOP">TOP - Tongan Pa'anga</option>
+              <option value="TTD">TTD - Trinidad and Tobago Dollar</option>
+              <option value="TND">TND - Tunisian Dinar</option>
+              <option value="TRY">TRY - Turkish Lira</option>
+              <option value="TMT">TMT - Turkmenistani Manat</option>
+              <option value="UGX">UGX - Ugandan Shilling</option>
+              <option value="UAH">UAH - Ukrainian Hryvnia</option>
+              <option value="AED">AED - United Arab Emirates Dirham</option>
+              <option value="UYU">UYU - Uruguayan Peso</option>
+              <option value="UZS">UZS - Uzbekistan Som</option>
+              <option value="VUV">VUV - Vanuatu Vatu</option>
+              <option value="VES">VES - Venezuelan Bol铆var</option>
+              <option value="VND">VND - Vietnamese Dong</option>
+              <option value="YER">YER - Yemeni Rial</option>
+              <option value="ZMW">ZMW - Zambian Kwacha</option>
+              <option value="ZWL">ZWL - Zimbabwean Dollar</option>
+            </select>
+          </div>
+          
+          <button class="swap-btn" id="swapBtn">
+            <i class="fas fa-exchange-alt"></i>
+          </button>
+          
+          <div class="currency-row">
+            <input type="number" id="resultAmount" placeholder="Result" readonly>
+            <select id="toCurrency">
+              <option value="EUR">EUR - Euro</option>
+              <option value="USD">USD - US Dollar</option>
+              <option value="GBP">GBP - British Pound</option>
+              <option value="CHF">CHF - Swiss Franc</option>
+              <option value="AUD">AUD - Australian Dollar</option>
+              <option value="CAD">CAD - Canadian Dollar</option>
+              <option value="JPY">JPY - Japanese Yen</option>
+              <option value="CNY">CNY - Chinese Yuan</option>
+              <option value="AFN">AFN - Afghan Afghani</option>
+              <option value="ALL">ALL - Albanian Lek</option>
+              <option value="DZD">DZD - Algerian Dinar</option>
+              <option value="AOA">AOA - Angolan Kwanza</option>
+              <option value="XCD">XCD - East Caribbean Dollar</option>
+              <option value="ARS">ARS - Argentine Peso</option>
+              <option value="AMD">AMD - Armenian Dram</option>
+              <option value="AWG">AWG - Aruban Florin</option>
+              <option value="AZN">AZN - Azerbaijani Manat</option>
+              <option value="BSD">BSD - Bahamian Dollar</option>
+              <option value="BHD">BHD - Bahraini Dinar</option>
+              <option value="BDT">BDT - Bangladeshi Taka</option>
+              <option value="BBD">BBD - Barbadian Dollar</option>
+              <option value="BYN">BYN - Belarusian Ruble</option>
+              <option value="BZD">BZD - Belize Dollar</option>
+              <option value="XOF">XOF - West African CFA Franc</option>
+              <option value="BTN">BTN - Bhutanese Ngultrum</option>
+              <option value="BOB">BOB - Bolivian Boliviano</option>
+              <option value="BAM">BAM - Bosnia-Herzegovina Convertible Mark</option>
+              <option value="BWP">BWP - Botswanan Pula</option>
+              <option value="BRL">BRL - Brazilian Real</option>
+              <option value="BND">BND - Brunei Dollar</option>
+              <option value="BGN">BGN - Bulgarian Lev</option>
+              <option value="BIF">BIF - Burundian Franc</option>
+              <option value="CVE">CVE - Cape Verdean Escudo</option>
+              <option value="KHR">KHR - Cambodian Riel</option>
+              <option value="XAF">XAF - Central African CFA Franc</option>
+              <option value="CLP">CLP - Chilean Peso</option>
+              <option value="COP">COP - Colombian Peso</option>
+              <option value="KMF">KMF - Comorian Franc</option>
+              <option value="CDF">CDF - Congolese Franc</option>
+              <option value="CRC">CRC - Costa Rican Col贸n</option>
+              <option value="CUP">CUP - Cuban Peso</option>
+              <option value="ANG">ANG - Netherlands Antillean Guilder</option>
+              <option value="CZK">CZK - Czech Republic Koruna</option>
+              <option value="DKK">DKK - Danish Krone</option>
+              <option value="DJF">DJF - Djiboutian Franc</option>
+              <option value="DOP">DOP - Dominican Peso</option>
+              <option value="EGP">EGP - Egyptian Pound</option>
+              <option value="ERN">ERN - Eritrean Nakfa</option>
+              <option value="SZL">SZL - Swazi Lilangeni</option>
+              <option value="ETB">ETB - Ethiopian Birr</option>
+              <option value="FKP">FKP - Falkland Islands Pound</option>
+              <option value="FJD">FJD - Fijian Dollar</option>
+              <option value="XPF">XPF - CFP Franc</option>
+              <option value="GMD">GMD - Gambian Dalasi</option>
+              <option value="GEL">GEL - Georgian Lari</option>
+              <option value="GHS">GHS - Ghanaian Cedi</option>
+              <option value="GIP">GIP - Gibraltar Pound</option>
+              <option value="GTQ">GTQ - Guatemalan Quetzal</option>
+              <option value="GNF">GNF - Guinean Franc</option>
+              <option value="GYD">GYD - Guyanaese Dollar</option>
+              <option value="HTG">HTG - Haitian Gourde</option>
+              <option value="HNL">HNL - Honduran Lempira</option>
+              <option value="HKD">HKD - Hong Kong Dollar</option>
+              <option value="HUF">HUF - Hungarian Forint</option>
+              <option value="ISK">ISK - Icelandic Kr贸na</option>
+              <option value="INR">INR - Indian Rupee</option>
+              <option value="IDR">IDR - Indonesian Rupiah</option>
+              <option value="IRR">IRR - Iranian Rial</option>
+              <option value="IQD">IQD - Iraqi Dinar</option>
+              <option value="ILS">ILS - Israeli New Sheqel</option>
+              <option value="JMD">JMD - Jamaican Dollar</option>
+              <option value="JEP">JEP - Jersey Pound</option>
+              <option value="JOD">JOD - Jordanian Dinar</option>
+              <option value="KZT">KZT - Kazakhstani Tenge</option>
+              <option value="KES">KES - Kenyan Shilling</option>
+              <option value="KWD">KWD - Kuwaiti Dinar</option>
+              <option value="KGS">KGS - Kyrgystani Som</option>
+              <option value="LAK">LAK - Laotian Kip</option>
+              <option value="LBP">LBP - Lebanese Pound</option>
+              <option value="LSL">LSL - Lesotho Loti</option>
+              <option value="LRD">LRD - Liberian Dollar</option>
+              <option value="LYD">LYD - Libyan Dinar</option>
+              <option value="MOP">MOP - Macanese Pataca</option>
+              <option value="MGA">MGA - Malagasy Ariary</option>
+              <option value="MWK">MWK - Malawian Kwacha</option>
+              <option value="MYR">MYR - Malaysian Ringgit</option>
+              <option value="MVR">MVR - Maldivian Rufiyaa</option>
+              <option value="MRU">MRU - Mauritanian Ouguiya</option>
+              <option value="MUR">MUR - Mauritian Rupee</option>
+              <option value="MXN">MXN - Mexican Peso</option>
+              <option value="MDL">MDL - Moldovan Leu</option>
+              <option value="MNT">MNT - Mongolian Tugrik</option>
+              <option value="MAD">MAD - Moroccan Dirham</option>
+              <option value="MZN">MZN - Mozambican Metical</option>
+              <option value="MMK">MMK - Myanmar Kyat</option>
+              <option value="NAD">NAD - Namibian Dollar</option>
+              <option value="NPR">NPR - Nepalese Rupee</option>
+              <option value="NZD">NZD - New Zealand Dollar</option>
+              <option value="NIO">NIO - Nicaraguan C贸rdoba</option>
+              <option value="NGN">NGN - Nigerian Naira</option>
+              <option value="KPW">KPW - North Korean Won</option>
+              <option value="MKD">MKD - Macedonian Denar</option>
+              <option value="NOK">NOK - Norwegian Krone</option>
+              <option value="OMR">OMR - Omani Rial</option>
+              <option value="PKR">PKR - Pakistani Rupee</option>
+              <option value="PAB">PAB - Panamanian Balboa</option>
+              <option value="PGK">PGK - Papua New Guinean Kina</option>
+              <option value="PYG">PYG - Paraguayan Guarani</option>
+              <option value="PEN">PEN - Peruvian Nuevo Sol</option>
+              <option value="PHP">PHP - Philippine Peso</option>
+              <option value="PLN">PLN - Polish Zloty</option>
+              <option value="QAR">QAR - Qatari Rial</option>
+              <option value="RON">RON - Romanian Leu</option>
+              <option value="RUB">RUB - Russian Ruble</option>
+              <option value="RWF">RWF - Rwandan Franc</option>
+              <option value="SHP">SHP - Saint Helena Pound</option>
+              <option value="WST">WST - Samoan Tala</option>
+              <option value="STN">STN - S茫o Tom茅 and Pr铆ncipe Dobra</option>
+              <option value="SAR">SAR - Saudi Riyal</option>
+              <option value="RSD">RSD - Serbian Dinar</option>
+              <option value="SCR">SCR - Seychellois Rupee</option>
+              <option value="SLE">SLE - Sierra Leonean Leone</option>
+              <option value="SGD">SGD - Singapore Dollar</option>
+              <option value="SBD">SBD - Solomon Islands Dollar</option>
+              <option value="SOS">SOS - Somali Shilling</option>
+              <option value="ZAR">ZAR - South African Rand</option>
+              <option value="KRW">KRW - South Korean Won</option>
+              <option value="SSP">SSP - South Sudanese Pound</option>
+              <option value="LKR">LKR - Sri Lankan Rupee</option>
+              <option value="SDG">SDG - Sudanese Pound</option>
+              <option value="SRD">SRD - Surinamese Dollar</option>
+              <option value="SEK">SEK - Swedish Krona</option>
+              <option value="SYP">SYP - Syrian Pound</option>
+              <option value="TWD">TWD - New Taiwan Dollar</option>
+              <option value="TJS">TJS - Tajikistani Somoni</option>
+              <option value="TZS">TZS - Tanzanian Shilling</option>
+              <option value="THB">THB - Thai Baht</option>
+              <option value="TOP">TOP - Tongan Pa'anga</option>
+              <option value="TTD">TTD - Trinidad and Tobago Dollar</option>
+              <option value="TND">TND - Tunisian Dinar</option>
+              <option value="TRY">TRY - Turkish Lira</option>
+              <option value="TMT">TMT - Turkmenistani Manat</option>
+              <option value="UGX">UGX - Ugandan Shilling</option>
+              <option value="UAH">UAH - Ukrainian Hryvnia</option>
+              <option value="AED">AED - United Arab Emirates Dirham</option>
+              <option value="UYU">UYU - Uruguayan Peso</option>
+              <option value="UZS">UZS - Uzbekistan Som</option>
+              <option value="VUV">VUV - Vanuatu Vatu</option>
+              <option value="VES">VES - Venezuelan Bol铆var</option>
+              <option value="VND">VND - Vietnamese Dong</option>
+              <option value="YER">YER - Yemeni Rial</option>
+              <option value="ZMW">ZMW - Zambian Kwacha</option>
+              <option value="ZWL">ZWL - Zimbabwean Dollar</option>
+            </select>
+          </div>
+          
+          <button class="convert-btn" id="convertBtn">Convert</button>
+          <div id="currencyResult"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Dashboards -->
+    <section id="dashboards" class="tab-content">
+      <div class="card active">
+        <h2><i class="fas fa-chart-line"></i> Live Excel Dashboards</h2>
+        <div class="sub-tabs">
+          <button class="tab-btn active" data-src="https://cignatlp-my.sharepoint.com/personal/axsund_glbcore_com/_layouts/15/Doc.aspx?sourcedoc={82865598-be32-4991-abbe-71a477c6794d}&action=embedview&wdHideGridlines=True&wdHideHeaders=True">Claims Review</button>
+          <button class="tab-btn" data-src="https://cignatlp-my.sharepoint.com/personal/c7s2bc_glbcore_com/_layouts/15/Doc.aspx?sourcedoc={d6f36c27-46aa-466d-9685-0d2ba1fdc0f9}&action=embedview&AllowTyping=True&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True">MNR</button>
+          <button class="tab-btn" data-src="https://cignatlp-my.sharepoint.com/personal/axsund_glbcore_com/_layouts/15/Doc.aspx?sourcedoc={cd0d77df-101c-4eff-b91d-af2af7a4bc79}&action=embedview&AllowTyping=True&wdHideGridlines=True&wdHideHeaders=True">Coding</button>
+        </div>
+        <div class="responsive-iframe-container">
+          <iframe id="dashboardFrame"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- Useful Links -->
+    <section id="useful-links" class="tab-content">
+      <div class="card active">
+        <h2><i class="fas fa-link"></i> Useful Links</h2>
+        <input type="text" id="searchLinks" class="search-box" placeholder="Search links..." />
+        <ul class="link-list" id="linksContainer">
+          <!-- Tools Section -->
+          <li>
+            <a href="https://cigna-im.lightning.force.com/lightning/page/home" target="_blank">
+              <i class="fas fa-cloud" style="color: #1565c0;"></i>
+              <span>Health Cloud/PRM</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://start.cignahealthbenefits.com/" target="_blank">
+              <i class="fas fa-home" style="color: #003366;"></i>
+              <span>Cigna Start Page</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://cigna--cignaprod1.lightning.force.com/lightning/page/knowledge" target="_blank">
+              <i class="fas fa-book" style="color: #ef6c00;"></i>
+              <span>KnowledgeXchange</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://provider.cignahealthbenefits.com/pims" target="_blank">
+              <i class="fas fa-database" style="color: #5d4037;"></i>
+              <span>PIMS (e80a coding)</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://cigna.vbrick.com/" target="_blank">
+              <i class="fas fa-video" style="color: #ff8f00;"></i>
+              <span>Vbrick (recordings)</span>
+            </a>
+          </li>
+
+          <!-- Provider Rate Related -->
+          <li>
+            <a href="https://cignaglobal-my.sharepoint.com/:f:/r/personal/axsund_glbcore_com/Documents/GDS%20Contracts/Hospital%20Tariffs?csf=1&e=XYZ123" target="_blank">
+              <i class="fas fa-file-invoice-dollar" style="color: #2e7d32;"></i>
+              <span>Hospital Tariffs</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://cignaglobal.sharepoint.com/sites/GlobalContracts/CountryInformation" target="_blank">
+              <i class="fas fa-globe" style="color: #1565c0;"></i>
+              <span>Country Information</span>
+            </a>
+          </li>
+
+          <!-- Switzerland DRG -->
+          <li>
+            <a href="https://www.swissdrg.org/de/akutsomatik/swissdrg-system-1202023/fallpauschalenkatalo" target="_blank">
+              <i class="fas fa-calculator" style="color: #003366;"></i>
+              <span>SwissDRG</span>
+            </a>
+          </li>
+
+          <!-- German DRG -->
+          <li>
+            <a href="https://www.g-ba.de/downloads/62-235-302/LBFW_2024.pdf" target="_blank">
+              <i class="fas fa-calculator" style="color: #003366;"></i>
+              <span>German DRG</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.vdek.com/vertragspartner/krankenversicherung/operationsgruppenschema.html" target="_blank">
+              <i class="fas fa-calculator" style="color: #003366;"></i>
+              <span>Austrian DRG</span>
+            </a>
+          </li>
+
+          <!-- UK -->
+          <li>
+            <a href="https://www.cigna.co.uk/healthcare-professionals/fee-schedule/" target="_blank">
+              <i class="fas fa-pound-sign" style="color: #1565c0;"></i>
+              <span>UK Cigna Fees</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.ccsd.org.uk/ccsdschedule" target="_blank">
+              <i class="fas fa-pound-sign" style="color: #1565c0;"></i>
+              <span>UK CCS</span>
+            </a>
+          </li>
+
+          <!-- France -->
+          <li>
+            <a href="https://www.ameli.fr/etablissement-de-sante/activites-medicales-et-techniques/activites-dhospitalisation/tarification-a-lactivite/ghs" target="_blank">
+              <i class="fas fa-euro-sign" style="color: #2e7d32;"></i>
+              <span>France GHS</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.ameli.fr/etablissement-de-sante/activites-medicales-et-techniques/activites-dhospitalisation/tarification-a-lactivite/ccam" target="_blank">
+              <i class="fas fa-euro-sign" style="color: #2e7d32;"></i>
+              <span>France CCAM</span>
+            </a>
+          </li>
+
+          <!-- Belgium -->
+          <li>
+            <a href="https://webappsa.riziv-inami.fgov.be/nomen/nl/search" target="_blank">
+              <i class="fas fa-search" style="color: #ef6c00;"></i>
+              <span>Belgium RIZIV</span>
+            </a>
+          </li>
+
+          <!-- Singapore -->
+          <li>
+            <a href="https://www.moh.gov.sg/docs/default-source/healthcare-institutions/fee-benchmarks/full-list-of-fee-benchmarks_010424.pdf" target="_blank">
+              <i class="fas fa-dollar-sign" style="color: #5d4037;"></i>
+              <span>Singapore Fees</span>
+            </a>
+          </li>
+
+          <!-- Guidelines -->
+          <li>
+            <a href="https://careweb.careguidelines.com/" target="_blank">
+              <i class="fas fa-book-medical" style="color: #7b1fa2;"></i>
+              <span>MCG</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.nccn.org/guidelines/category_1" target="_blank">
+              <i class="fas fa-book-medical" style="color: #7b1fa2;"></i>
+              <span>NCCN</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://cigna--cignaprod1.lightning.force.com/lightning/page/policies" target="_blank">
+              <i class="fas fa-file-contract" style="color: #003366;"></i>
+              <span>Cigna Policies</span>
+            </a>
+          </li>
+
+          <!-- Coding -->
+          <li>
+            <a href="https://icd.who.int/browse10/2019/en" target="_blank">
+              <i class="fas fa-code" style="color: #ff8f00;"></i>
+              <span>ICD-10</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.aapc.com/codes/cpt-codes-range.aspx" target="_blank">
+              <i class="fas fa-code" style="color: #ff8f00;"></i>
+              <span>CPT</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.findacode.com/code.php?set=ICD9CM" target="_blank">
+              <i class="fas fa-code" style="color: #ff8f00;"></i>
+              <span>ICD-9</span>
+            </a>
+          </li>
+
+          <!-- Medication Prices -->
+          <li>
+            <a href="https://ar.kairosweb.com/precio/producto-humira-ac-26495/" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Argentina</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.cbip.be/fr/chapters" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Belgium</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.moh.gov.cy/moh/phs/phs.nsf/All/6E6D8A8F0B8E4D92C22588E4003A9D1E?OpenDocument" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Cyprus</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://base-donnees-publique.medicaments.gouv.fr/index.php" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>France</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.jodrugs.com/JoDrugs.aspx" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Jordan</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://moph.gov.lb/en/Pages/3/3101/drugs-public-price-list-" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Lebanon</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://cns.public.lu/en/legislations/textes-coordonnes/liste-positive.html" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Luxembourg</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://medicalis.ma/" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Morocco</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.riziv-inami.be/nl/richtlijnen/nomensoft" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Netherlands</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.legemiddelsok.no/sider/default.aspx?searchquery=&f=Han;MtI;Vir;ATC;Var;Mar;Mid;Avr;gen;par;&pane=0" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Norway</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.moh.gov.om/en/web/dgpadc/-2" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Oman</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://ms.ro/en/ministry/structure/directia-politica-medicamentului-si-a-dispozitivelor-medicale/preturi-medicamente/catalogul-public-national-al-preturilor-maximale-ale-medicamentelor-de-uz-uman/" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Romania</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://extranet.infarmed.pt/INFOMED-fo/index.xhtml" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Portugal</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://sfda.gov.sa/en/drugs-list" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Saudi Arabia</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://medicineprices.org.za/#search:adcetris" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>South Africa</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://compendium.ch/fr" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Switzerland</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://farmacoinc.com/uae/brands/a" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>UAE</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://bnf.nice.org.uk/drugs/" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>UK Drugs</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.ilacabak.com/firmr.php" target="_blank">
+              <i class="fas fa-pills" style="color: #2e7d32;"></i>
+              <span>Turkey</span>
+            </a>
+          </li>
+
+          <!-- Cigna Internal -->
+          <li>
+            <a href="https://iris.cigna.com/" target="_blank">
+              <i class="fas fa-eye" style="color: #003366;"></i>
+              <span>Iris</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://cignaglobal.service-now.com/sp" target="_blank">
+              <i class="fas fa-cogs" style="color: #5d4037;"></i>
+              <span>Tech Central</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://cigna.csod.com/ux/ats/careerhome.aspx?site=4" target="_blank">
+              <i class="fas fa-graduation-cap" style="color: #ef6c00;"></i>
+              <span>Cigna University</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Dark Mode
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    const body = document.body;
+    const icon = darkModeToggle.querySelector("i");
+    const label = darkModeToggle.querySelector("span");
+
+    darkModeToggle.addEventListener("click", () => {
+      body.classList.toggle("dark-mode");
+      if (body.classList.contains("dark-mode")) {
+        icon.className = "fas fa-sun";
+        label.textContent = "Light Mode";
+      } else {
+        icon.className = "fas fa-moon";
+        label.textContent = "Dark Mode";
+      }
+    });
+
+    // Tab Navigation with Single Active Tab
+    const tabs = document.querySelectorAll(".sidebar-menu a");
+    const sections = document.querySelectorAll(".tab-content");
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", (e) => {
+        e.preventDefault();
+        const targetTab = tab.dataset.tab;
+
+        // Update active tab in sidebar
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        // Hide all sections and show only the target section
+        sections.forEach(section => {
+          section.style.display = "none";
+          if (section.id === targetTab) {
+            section.style.display = "block";
+          }
+        });
+
+        // Lazy Load Content
+        if (targetTab === "dashboards") {
+          const iframe = document.getElementById("dashboardFrame");
+          if (!iframe.src) {
+            iframe.src = document.querySelector(".tab-btn.active").dataset.src;
+          }
+        }
+      });
+    });
+
+    // Calculator Logic
+    const calcSelect = document.getElementById("calcSelect");
+    const calculators = document.querySelectorAll(".calculator");
+
+    calcSelect.addEventListener("change", () => {
+      calculators.forEach(c => c.style.display = "none");
+      if (calcSelect.value) {
+        document.getElementById(calcSelect.value).style.display = "block";
+      }
+    });
+
+    // Calculator Functions
+    ["startDate", "endDate"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("change", () => {
+          const start = new Date(document.getElementById("startDate").value);
+          const end = new Date(document.getElementById("endDate").value);
+          if (start && end && !isNaN(start) && !isNaN(end)) {
+            const diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+            const diffWeeks = (diffDays / 7).toFixed(2);
+            document.getElementById("dateDiffResult").innerHTML = `${diffDays} day(s) = ${diffWeeks} week(s)`;
+          }
+        });
+      }
+    });
+
+    ["baseValue", "percentageValue"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("input", () => {
+          const b = parseFloat(document.getElementById("baseValue").value) || 0;
+          const p = parseFloat(document.getElementById("percentageValue").value) || 0;
+          document.getElementById("percentageResult").innerHTML = `${p}% of ${b} = ${(b * p / 100).toFixed(2)}`;
+        });
+      }
+    });
+
+    // German DRG
+    const maxLos2 = document.getElementById("maxLos2");
+    const bundesland = document.getElementById("bundesland");
+    const col10 = document.getElementById("col10");
+    const actualLos2 = document.getElementById("actualLos2");
+    const bundeslandResult = document.getElementById("bundeslandResult");
+
+    function updateGermanDRG() {
+      const max = parseInt(maxLos2.value);
+      const rate = parseFloat(bundesland.value);  // e.g., base rate per case (鈧?
+      const factor = parseFloat(col10.value);     // e.g., cost weight (CW) of the case
+      const actual = parseInt(actualLos2.value);
+
+      // Validate inputs
+      if ([max, rate, factor, actual].some(isNaN)) {
+        bundeslandResult.innerHTML = "";
+        return;
+      }
+
+      // Base payment (always applies)
+      const basePayment = rate * factor;
+      const ext = actual - max;
+
+      if (ext <= 0) {
+        // No excess days 鈥?only base payment
+        bundeslandResult.innerHTML = `LOS within limit. Base payment: <strong>${basePayment.toFixed(2)} 鈧?/strong>`;
+      } else {
+        // Excess days: add supplementary payment (varies by state/model)
+        const extraPayment = rate * factor * ext;  // Simplified model 鈥?confirm formula
+        const totalPayment = basePayment + extraPayment;
+        bundeslandResult.innerHTML = `
+          Excess: ${ext} day(s). 
+          Base: ${basePayment.toFixed(2)} 鈧?+ 
+          Extra: ${extraPayment.toFixed(2)} 鈧?鈫?
+          <strong>Total: ${totalPayment.toFixed(2)} 鈧?/strong>
+        `;
+      }
+    }
+    [maxLos2, bundesland, col10, actualLos2].forEach(i => i.addEventListener("input", updateGermanDRG));
+
+    // Swiss DRG
+    const cw = document.getElementById("cw");
+    const maxLos = document.getElementById("maxLos");
+    const drgRate = document.getElementById("drgRate");
+    const col9 = document.getElementById("col9");
+    const actualLos = document.getElementById("actualLos");
+    const drgResult = document.getElementById("drgResult");
+
+    function updateSwissDRG() {
+      const c = parseFloat(cw.value);
+      const m = parseInt(maxLos.value);
+      const r = parseFloat(drgRate.value);
+      const f = parseFloat(col9.value);
+      const a = parseInt(actualLos.value);
+
+      // Check for any invalid input
+      if ([c, m, r, f, a].some(isNaN)) {
+        drgResult.innerHTML = "";
+        return;
+      }
+
+      // Base payment always exists: CW * DRG Rate
+      const basePayment = c * r;
+
+      const ext = a - m;
+
+      if (ext <= 0) {
+        // LOS is within limit: only base payment
+        drgResult.innerHTML = `LOS within limit. Payment: <strong>${basePayment.toFixed(2)}</strong>`;
+      } else {
+        // LOS exceeded: add cost weight for excess days
+        const comp = (ext + 1) * f;     // +1 rule? (common in some DRG models)
+        const finalCW = c + comp;
+        const payment = finalCW * r;
+        drgResult.innerHTML = `Excess days: ${ext}. Final CW: ${finalCW.toFixed(4)} 鈫?<strong>${payment.toFixed(2)}</strong>`;
+      }
+    }
+    [cw, maxLos, drgRate, col9, actualLos].forEach(i => i.addEventListener("input", updateSwissDRG));
+
+    // Dashboard Tabs
+    document.querySelectorAll(".tab-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        button.classList.add("active");
+        const iframe = document.getElementById("dashboardFrame");
+        iframe.src = button.dataset.src;
+      });
+    });
+
+    // Link Search
+    document.getElementById("searchLinks").addEventListener("input", function () {
+      const filter = this.value.toLowerCase();
+      const links = document.querySelectorAll("#linksContainer li");
+      
+      links.forEach(link => {
+        const text = link.textContent.toLowerCase();
+        link.style.display = text.includes(filter) ? "" : "none";
+      });
+    });
+
+    // Initialize: Show only home section on load
+    document.addEventListener("DOMContentLoaded", function() {
+      sections.forEach(section => {
+        section.style.display = "none";
+      });
+      document.getElementById("home").style.display = "block";
+    });
+
+    // Currency Converter using Exchangerate-API
+    document.getElementById("convertBtn").addEventListener("click", async () => {
+      const amount = document.getElementById("amount").value;
+      const from = document.getElementById("fromCurrency").value;
+      const to = document.getElementById("toCurrency").value;
+      const resultEl = document.getElementById("currencyResult");
+      const resultAmount = document.getElementById("resultAmount");
+
+      // Clear previous results
+      resultEl.innerHTML = "";
+      resultAmount.value = "";
+
+      // Validate input
+      if (!amount || isNaN(amount) || amount <= 0) {
+        resultEl.innerHTML = '<div class="error-message">Please enter a valid amount</div>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`);
+        if (!response.ok) throw new Error("Failed to fetch exchange rates");
+        
+        const data = await response.json();
+        const rate = data.rates[to];
+        if (!rate) throw new Error(`Exchange rate for ${to} not available`);
+        
+        const converted = (amount * rate).toFixed(2);
+        const timestamp = new Date(data.date).toLocaleString();
+
+        resultAmount.value = converted;
+        resultEl.innerHTML = `<div class="result">1 ${from} = ${rate.toFixed(4)} ${to}</div>
+                              <div class="timestamp">Last updated: ${timestamp}</div>`;
+      } catch (err) {
+        resultEl.innerHTML = '<div class="error-message">Error fetching exchange rate. Please try again later.</div>';
+        console.error(err);
+      }
+    });
+
+    // Swap currencies
+    document.getElementById("swapBtn").addEventListener("click", () => {
+      const fromSelect = document.getElementById("fromCurrency");
+      const toSelect = document.getElementById("toCurrency");
+      
+      const temp = fromSelect.value;
+      fromSelect.value = toSelect.value;
+      toSelect.value = temp;
+    });
+
+    // Trigger conversion on Enter key in amount field
+    document.getElementById("amount").addEventListener("keyup", (e) => {
+      if (e.key === "Enter") {
+        document.getElementById("convertBtn").click();
+      }
+    });
+
+    // Translation using Microsoft Translator API
+    document.getElementById("translateBtn").addEventListener("click", async () => {
+      const inputText = document.getElementById("inputText").value;
+      const toLang = document.getElementById("toLanguage").value;
+      const outputText = document.getElementById("outputText");
+      const resultEl = document.getElementById("translationResult");
+
+      // Clear previous results
+      outputText.value = "";
+      resultEl.innerHTML = "";
+
+      if (!inputText.trim()) {
+        resultEl.innerHTML = '<div class="error-message">Please enter text to translate.</div>';
+        return;
+      }
+
+      try {
+        // Note: In a real application, you would need to obtain an access token from Azure
+        // This is a placeholder - you'll need to implement the token retrieval logic
+        const response = await fetch('https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=' + toLang, {
+          method: 'POST',
+          headers: {
+            'Ocp-Apim-Subscription-Key': 'YOUR_MICROSOFT_TRANSLATOR_API_KEY', // Replace with your API key
+            'Ocp-Apim-Subscription-Region': 'YOUR_REGION', // Replace with your region
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify([{'Text': inputText}])
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Invalid Microsoft Translator API key or region");
+          }
+          throw new Error("Translation failed");
+        }
+
+        const data = await response.json();
+        const translatedText = data[0].translations[0].text;
+        const detectedLanguage = data[0].detectedLanguage?.language || 'Unknown';
+        
+        outputText.value = translatedText;
+        resultEl.innerHTML = `<div class="result">Translated successfully!</div>
+                              <div class="timestamp">Detected language: ${detectedLanguage} | Translation completed at: ${new Date().toLocaleString()}</div>`;
+      } catch (err) {
+        resultEl.innerHTML = '<div class="error-message">Error during translation. Please check your API key and try again later.</div>';
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
+```
