@@ -1,110 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aathiyappa Sundar | Portfolio</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unified Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+  <div class="container">
+    <aside class="sidebar">
+      <h2>Menu</h2>
+      <ul>
+        <li data-tab="sop">📄 SOP</li>
+        <li data-tab="calculators">🧮 Calculators</li>
+        <li data-tab="translation">🌍 Translation</li>
+        <li data-tab="currency">💱 Currency</li>
+        <li data-tab="dashboards">📊 Dashboards</li>
+        <li data-tab="links">🔗 Useful Links</li>
+      </ul>
+      <button id="darkToggle">🌙 Toggle Dark Mode</button>
+    </aside>
 
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">Aathiyappa Sundar</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#experience">Experience</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#awards">Awards</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#skills">Skills</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-                    <li class="nav-item"><button id="theme-toggle" class="btn btn-light">Dark Mode</button></li>
-                </ul>
-            </div>
+    <main class="content">
+      <!-- SOP -->
+      <section id="sop" class="tab-content">
+        <iframe src="sop.html" width="100%" height="600px" frameborder="0"></iframe>
+      </section>
+
+      <!-- Calculators -->
+      <section id="calculators" class="tab-content hidden">
+        <h2>Calculators</h2>
+        <div class="calculator">
+          <h3>Date Difference</h3>
+          <input type="date" id="date1"/> to <input type="date" id="date2"/>
+          <button id="calcDateBtn">Calculate</button>
+          <p id="dateResult"></p>
         </div>
-    </nav>
+        <div class="calculator">
+          <h3>Percentage</h3>
+          <input type="number" id="base" placeholder="Base"/> 
+          <input type="number" id="percent" placeholder="%"/> 
+          <button id="calcPercentBtn">Calculate</button>
+          <p id="percentResult"></p>
+        </div>
+      </section>
 
-    <!-- Hero Section -->
-    <header class="hero text-center">
-        <h1>Welcome to My Portfolio</h1>
-        <p>Healthcare Process Improvement & Automation Specialist</p>
-    </header>
+      <!-- Translation -->
+      <section id="translation" class="tab-content hidden">
+        <h2>Translation</h2>
+        <textarea id="sourceText" placeholder="Enter text..."></textarea>
+        <div class="row">
+          <select id="fromLang"></select>
+          <select id="toLang"></select>
+        </div>
+        <button id="translateBtn">Translate</button>
+        <p id="translateResult"></p>
+      </section>
 
-    <!-- About Section with Profile Picture -->
-    <section id="about" class="container my-5 text-center">
-        <h2>About Me</h2>
-        <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
-        <p>Results-driven Team Leader with 5.5 years of experience in healthcare claims processing and operations management. 
-        Proven ability to lead teams, optimize processes, and enhance efficiency through automation.</p>
-    </section>
+      <!-- Currency -->
+      <section id="currency" class="tab-content hidden">
+        <h2>Currency Converter</h2>
+        <input type="number" id="amount" placeholder="Amount"/>
+        <div class="row">
+          <select id="fromCurrency"></select>
+          <button id="swapBtn">⇄</button>
+          <select id="toCurrency"></select>
+        </div>
+        <button id="convertBtn">Convert</button>
+        <p id="currencyResult"></p>
+      </section>
 
-    <!-- Experience Section -->
-    <section id="experience" class="container my-5">
-        <h2>Work Experience</h2>
-        <h3>Team Leader - Operations</h3>
-        <p><strong>Sagility Pvt Ltd | Sep 2019 - Present</strong></p>
-        <ul>
-            <li>Started as a Claims Processor and promoted to Team Lead due to outstanding performance.</li>
-            <li>Implemented process improvements, leading to enhanced client satisfaction and profitability.</li>
-            <li>Developed automation tools to optimize claims processing and reduce errors.</li>
+      <!-- Dashboards -->
+      <section id="dashboards" class="tab-content hidden">
+        <h2>Dashboards</h2>
+        <p>Embed your live dashboards here (SharePoint, PowerBI, etc.)</p>
+        <iframe src="https://www.example.com" width="100%" height="400px"></iframe>
+      </section>
+
+      <!-- Useful Links -->
+      <section id="links" class="tab-content hidden">
+        <h2>Useful Links</h2>
+        <input type="text" id="searchLinks" placeholder="Search links..."/>
+        <ul id="linksContainer">
+          <li><a href="https://translate.google.com" target="_blank">Google Translate</a></li>
+          <li><a href="https://www.xe.com" target="_blank">XE Currency</a></li>
+          <li><a href="https://www.investing.com" target="_blank">Investing.com</a></li>
         </ul>
-    </section>
-
-    <!-- Projects Section -->
-    <section id="projects" class="container my-5">
-        <h2>Projects & Achievements</h2>
-        <ul>
-            <li>Developed a custom calculator that improved claims processing accuracy by 10%.</li>
-            <li>Designed an Excel VBA tool that automated claims allocation, reducing manual workload by 40%.</li>
-            <li>Implemented a real-time pend management system, reducing invalid pends by 25%.</li>
-        </ul>
-    </section>
-
-    <!-- Awards Section -->
-    <section id="awards" class="container my-5">
-        <h2>Awards & Recognitions</h2>
-        <ul>
-            <li><strong>Top Guns Award</strong> - Recognized for outstanding claims processing performance.</li>
-            <li><strong>Spark Award</strong> - Awarded for process efficiency improvements.</li>
-            <li><strong>Client Appreciation</strong> - Successfully optimized pend management processes.</li>
-        </ul>
-    </section>
-
-    <!-- Skills Section -->
-    <section id="skills" class="container my-5">
-        <h2>Skills & Expertise</h2>
-        <ul>
-            <li>Leadership & Team Management</li>
-            <li>Process Improvement & Automation</li>
-            <li>Claims Processing & Quality Assurance</li>
-            <li>Stakeholder & Client Management</li>
-            <li>Data Analysis & Reporting</li>
-        </ul>
-    </section>
-
-    <!-- Contact Section with Google Form -->
-    <section id="contact" class="container my-5 text-center">
-        <h2>Contact</h2>
-        <p>Email: Aathiyappa001@gmail.com</p>
-        <p>Location: Bangalore, India</p>
-        <a href="Aathiyappa_Sundar_Resume.pdf" download class="btn btn-primary">Download My Resume</a>
-        <h3>Send a Message</h3>
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdexample/viewform?embedded=true" width="100%" height="500px"></iframe>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-3">
-        &copy; 2025 Aathiyappa Sundar | Portfolio
-    </footer>
-
-    <script src="script.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+      </section>
+    </main>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
