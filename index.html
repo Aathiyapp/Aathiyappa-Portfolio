@@ -1,94 +1,2745 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Unified Dashboard</title>
-  <link rel="stylesheet" href="style.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Operations Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add PapaParse for CSV parsing BEFORE the closing body tag -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        :root {
+            --primary: #003366;
+            --secondary: #ff9800;
+            --success: #2e7d32;
+            --bg: #f5f7fa;
+            --text: #333;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --sidebar-bg: var(--primary);
+            --sidebar-text: #ffffff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --card-padding: 20px;
+        }
+
+        .dark-mode {
+            --primary: #4dabf5;
+            --bg: #1a1a2e;
+            --text: #e6e6e6;
+            --border: #444;
+            --card-bg: #16213e;
+            --sidebar-bg: #0f3460;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            position: fixed;
+            height: 100%;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 0.95rem;
+            gap: 12px;
+            transition: background 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left: 4px solid #ff9800;
+        }
+
+        .sidebar-menu a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px 20px 20px 280px;
+            transition: padding-left 0.3s ease;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .dark-mode-toggle button {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dark-mode-toggle button:hover {
+            background: #e67c00;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: var(--card-padding);
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        /* Iframe */
+        .lazy-iframe {
+            width: 100%;
+            height: 500px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        /* Link List */
+        .link-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .link-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .link-list li:last-child {
+            border-bottom: none;
+        }
+
+        .link-list a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .link-list a:hover {
+            color: var(--primary);
+        }
+
+        .link-list i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Search Box */
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #f8f9fa;
+            color: var(--text);
+        }
+
+        .search-box-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        /* Welcome Section */
+        .welcome {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text);
+        }
+
+        .welcome h1 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .welcome p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 20px;
+            line-height: 1.6;
+        }
+
+        .updates {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            line-height: 1.7;
+            border-left: 5px solid #ff9800;
+        }
+
+        .updates h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        section {
+            scroll-margin-top: 80px;
+        }
+
+        /* Responsive Iframes */
+        .responsive-iframe-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 75%; /* 4:3 Aspect Ratio */
+            overflow: hidden;
+        }
+
+        .responsive-iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Calculator Styles */
+        .calculator {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .dark-mode .calculator {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .calculator label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .calculator input, .calculator select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+        }
+
+        .result {
+            margin-top: 10px;
+            color: var(--success);
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: rgba(46, 125, 50, 0.1);
+        }
+
+        /* Dashboard Tabs */
+        .sub-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .dark-mode .tab-btn {
+            background: #444;
+            color: white;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #d0d0d0;
+        }
+
+        .dark-mode .tab-btn:hover:not(.active) {
+            background: #555;
+        }
+
+        /* Currency Converter */
+        .currency-converter {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .currency-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .currency-row input, .currency-row select {
+            flex: 1;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+        }
+
+        .convert-btn {
+            align-self: flex-start;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .convert-btn:hover {
+            background: #002244;
+        }
+
+        /* SOP Styles */
+        .sop-content {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+        }
+
+        .sop-content h1, .sop-content h2, .sop-content h3 {
+            color: var(--primary);
+        }
+
+        .sop-content h1 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .sop-content h2 {
+            border-left: 4px solid #3498db;
+            padding-left: 10px;
+            margin-top: 30px;
+        }
+
+        .sop-content h3 {
+            margin-top: 20px;
+            color: #3498db;
+        }
+
+        .sop-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--card-bg);
+        }
+
+        .sop-content table, .sop-content th, .sop-content td {
+            border: 1px solid var(--border);
+        }
+
+        .sop-content th, .sop-content td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        .sop-content .step {
+            background: var(--card-bg);
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+            box-shadow: var(--shadow);
+        }
+
+        .dark-mode .sop-content .step {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .sop-content .note {
+            background-color: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .sop-content .warning {
+            background-color: rgba(220, 53, 69, 0.1);
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .sop-content .top-link {
+            float: right;
+            font-size: 0.9em;
+        }
+
+        .sop-content .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                padding-left: 20px; /* Adjust padding for mobile */
+            }
+
+            .currency-row, .language-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        .step ol {
+            padding-left: 25px; /* Adjust value as needed */
+            margin-top: 10px; /* Space above the list */
+            margin-bottom: 10px; /* Space below the list */
+        }
+
+        /* Target list items within that list for spacing between items */
+        .step ol li {
+            margin-top: 8px; /* Space above each list item */
+            margin-bottom: 8px; /* Space below each list item */
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
+    <!-- Sidebar -->
     <aside class="sidebar">
-      <h2>Menu</h2>
-      <ul>
-        <li data-tab="sop">📄 SOP</li>
-        <li data-tab="calculators">🧮 Calculators</li>
-        <li data-tab="translation">🌍 Translation</li>
-        <li data-tab="currency">💱 Currency</li>
-        <li data-tab="dashboards">📊 Dashboards</li>
-        <li data-tab="links">🔗 Useful Links</li>
-      </ul>
-      <button id="darkToggle">🌙 Toggle Dark Mode</button>
+        <div class="sidebar-header">
+            <i class="fas fa-hospital"></i> Healthcare Ops
+        </div>
+        <nav class="sidebar-menu">
+            <a href="#home" data-tab="home" class="active">
+                <i class="fas fa-home"></i> <span>Home</span>
+            </a>
+            <a href="#trackers" data-tab="trackers">
+                <i class="fas fa-tasks"></i> <span>Production Tracker</span>
+            </a>
+            <a href="#sop" data-tab="sop">
+                <i class="fas fa-book"></i> <span>SOP</span>
+            </a>
+            <a href="#calculators" data-tab="calculators">
+                <i class="fas fa-calculator"></i> <span>Multi-Calculator</span>
+
+
+            </a>
+            <a href="#currency" data-tab="currency">
+                <i class="fas fa-dollar-sign"></i> <span>Currency Converter</span>
+            </a>
+            <a href="#dashboards" data-tab="dashboards">
+                <i class="fas fa-chart-line"></i> <span>Live Dashboards</span>
+            </a>
+            <a href="#useful-links" data-tab="useful-links">
+                <i class="fas fa-link"></i> <span>Useful Links</span>
+            </a>
+        </nav>
     </aside>
 
-    <main class="content">
-      <!-- SOP -->
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title">Operations Portal</h1>
+            <div class="dark-mode-toggle">
+                <button id="darkModeToggle">
+                    <i class="fas fa-moon"></i> Dark Mode
+                </button>
+            </div>
+        </div>
+
+        <!-- Home Section -->
+        <section id="home" class="tab-content active">
+            <div class="welcome">
+                <h1>Welcome to Healthcare Operations Portal</h1>
+                <p>Your centralized hub for clinical documentation review, production tracking, and operational tools.</p>
+                
+                <div class="updates">
+                    <h3>Team Updates & Announcements</h3>
+                    <ul>
+                        <li><strong>May 10:</strong> MNR Tracker updated with Q2 targets.</li>
+                        <li><strong>May 5:</strong> Swiss DRG calculator now supports extended LOS logic.</li>
+                        <li><strong>Apr 30:</strong> All forms now support offline access via SharePoint.</li>
+                    </ul>
+                    <p style="margin-top: 15px;">
+                        <small>Last updated: Aug 29, 2025 | Contact: <a href="mailto:Aathiyappa.sundar@sagilityheath.com" style="color:#0077cc;">Aathiyappa.sundar@sagilityheath.com</a></small>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Dashboards -->
+                <!-- Live Dashboards -->
+        <section id="dashboards" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-chart-line"></i> Analytics Dashboard</h2>
+                
+                                <!-- Dashboard Controls -->
+                <div class="dashboard-controls" style="margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                    <div>
+                        <label for="userFilter" style="display: block; margin-bottom: 5px; font-weight: 500;">Filter by User:</label>
+                        <select id="userFilter" class="search-box" style="width: 200px;">
+                            <option value="">All Users</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="dateRangeFilter" style="display: block; margin-bottom: 5px; font-weight: 500;">Date Range:</label>
+                        <select id="dateRangeFilter" class="search-box" style="width: 150px;">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30" selected>Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="viewType" style="display: block; margin-bottom: 5px; font-weight: 500;">View Type:</label>
+                        <select id="viewType" class="search-box" style="width: 150px;">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Add Toggle Button for Value/Percentage -->
+                    <div>
+                        <label for="valueTypeToggle" style="display: block; margin-bottom: 5px; font-weight: 500;">Display Mode:</label>
+                        <button id="valueTypeToggle" class="convert-btn" style="width: 120px; height: 40px; margin-bottom: 2px;">
+                            Show %
+                        </button>
+                    </div>
+                    <!---->
+
+                    <button id="refreshBtn" class="convert-btn" style="align-self: flex-end; height: 40px; margin-bottom: 2px;">
+                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    </button>
+                </div>
+
+                <!-- Dashboard Charts Container -->
+                <div id="dashboardContainer">
+                    <!-- Charts will be dynamically inserted here -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; margin-top: 20px;">
+                        <div class="chart-container">
+                            <canvas id="userChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="dateChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="workTypeChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="savingsChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trackers Section -->
+      <section id="trackers" class="tab-content">
+        <div class="card">
+          <h2><i class="fas fa-tasks"></i> Production Tracker</h2>
+          <ul class="link-list">
+            <li>
+              <a href="https://forms.office.com/r/Hf5HPWD9aS" target="_blank">
+                <i class="fas fa-file-code" style="color: #003366;"></i>
+                <span>Coding Tracker</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=yyYbed8_w0e4Xb2fA34-f5ybz_LGG95Hmd_-xqC_o3VURTlETlZYUVhORUxTNzhRSktRVTRYWlVLRS4u" target="_blank">
+                <i class="fas fa-clipboard-check" style="color: #2e7d32;"></i>
+                <span>Claim Review Tracker</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://cignatlp-my.sharepoint.com/:x:/r/personal/c7s2bc_glbcore_com/Documents/Clinical/Ops-%20Clinical/MNR%20Case%20tracker.xlsx?d=wd6f36c2746aa466d96850d2ba1fdc0f9&csf=1&web=1&e=QWMOCV" target="_blank">
+                <i class="fas fa-cloud" style="color: #1565c0;"></i>
+                <span>Healthcloud Tracker</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+
+        <!-- Useful Links -->
+        <section id="useful-links" class="tab-content">
+        <div class="card">
+          <h2><i class="fas fa-link"></i> Useful Links</h2>
+          <input type="text" id="searchLinks" class="search-box" placeholder="Search links..." />
+          <ul class="link-list" id="linksContainer">
+            <!-- Tools Section -->
+            <li>
+              <a href="https://cigna-im.lightning.force.com/lightning/page/home" target="_blank">
+                <i class="fas fa-cloud" style="color: #1565c0;"></i>
+                <span>Health Cloud/PRM</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://start.cignahealthbenefits.com/" target="_blank">
+                <i class="fas fa-home" style="color: #003366;"></i>
+                <span>Cigna Start Page</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://cigna--cignaprod1.lightning.force.com/lightning/page/knowledge" target="_blank">
+                <i class="fas fa-book" style="color: #ef6c00;"></i>
+                <span>KnowledgeXchange</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://provider.cignahealthbenefits.com/pims" target="_blank">
+                <i class="fas fa-database" style="color: #5d4037;"></i>
+                <span>PIMS (e80a coding)</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://cigna.rev.vbrick.com/#/" target="_blank">
+                <i class="fas fa-video" style="color: #ff8f00;"></i>
+                <span>Vbrick (recordings)</span>
+              </a>
+            </li>
+            <!-- Provider Rate Related -->
+            <li>
+              <a href="https://cignaglobal-my.sharepoint.com/:f:/r/personal/axsund_glbcore_com/Documents/GDS%20Contracts/Hospital%20Tariffs?csf=1&e=XYZ123" target="_blank">
+                <i class="fas fa-file-invoice-dollar" style="color: #2e7d32;"></i>
+                <span>Hospital Tariffs</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://cignaglobal.sharepoint.com/sites/GlobalContracts/CountryInformation" target="_blank">
+                <i class="fas fa-globe" style="color: #1565c0;"></i>
+                <span>Country Information</span>
+              </a>
+            </li>
+            <!-- Switzerland DRG -->
+            <li>
+              <a href="https://www.swissdrg.org/de/akutsomatik/swissdrg-system-1202023/fallpauschalenkatalo" target="_blank">
+                <i class="fas fa-calculator" style="color: #003366;"></i>
+                <span>SwissDRG</span>
+              </a>
+            </li>
+            <!-- German DRG -->
+            <li>
+              <a href="https://www.g-ba.de/downloads/62-235-302/LBFW_2024.pdf" target="_blank">
+                <i class="fas fa-calculator" style="color: #003366;"></i>
+                <span>German DRG</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.vdek.com/vertragspartner/krankenversicherung/operationsgruppenschema.html" target="_blank">
+                <i class="fas fa-calculator" style="color: #003366;"></i>
+                <span>Austrian DRG</span>
+              </a>
+            </li>
+            <!-- UK -->
+            <li>
+              <a href="https://www.cigna.co.uk/healthcare-professionals/fee-schedule/" target="_blank">
+                <i class="fas fa-pound-sign" style="color: #1565c0;"></i>
+                <span>UK Cigna Fees</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.ccsd.org.uk/ccsdschedule" target="_blank">
+                <i class="fas fa-pound-sign" style="color: #1565c0;"></i>
+                <span>UK CCS</span>
+              </a>
+            </li>
+            <!-- France -->
+            <li>
+              <a href="https://www.ameli.fr/etablissement-de-sante/activites-medicales-et-techniques/activites-dhospitalisation/tarification-a-lactivite/ghs" target="_blank">
+                <i class="fas fa-euro-sign" style="color: #2e7d32;"></i>
+                <span>France GHS</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.ameli.fr/etablissement-de-sante/activites-medicales-et-techniques/activites-dhospitalisation/tarification-a-lactivite/ccam" target="_blank">
+                <i class="fas fa-euro-sign" style="color: #2e7d32;"></i>
+                <span>France CCAM</span>
+              </a>
+            </li>
+            <!-- Belgium -->
+            <li>
+              <a href="https://webappsa.riziv-inami.fgov.be/nomen/nl/search" target="_blank">
+                <i class="fas fa-search" style="color: #ef6c00;"></i>
+                <span>Belgium RIZIV</span>
+              </a>
+            </li>
+            <!-- Singapore -->
+            <li>
+              <a href="https://www.moh.gov.sg/docs/default-source/healthcare-institutions/fee-benchmarks/full-list-of-fee-benchmarks_010424.pdf" target="_blank">
+                <i class="fas fa-dollar-sign" style="color: #5d4037;"></i>
+                <span>Singapore Fees</span>
+              </a>
+            </li>
+            <!-- Guidelines -->
+            <li>
+              <a href="https://careweb.careguidelines.com/" target="_blank">
+                <i class="fas fa-book-medical" style="color: #7b1fa2;"></i>
+                <span>MCG</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.nccn.org/guidelines/category_1" target="_blank">
+                <i class="fas fa-book-medical" style="color: #7b1fa2;"></i>
+                <span>NCCN</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://cigna--cignaprod1.lightning.force.com/lightning/page/policies" target="_blank">
+                <i class="fas fa-file-contract" style="color: #003366;"></i>
+                <span>Cigna Policies</span>
+              </a>
+            </li>
+            <!-- Coding -->
+            <li>
+              <a href="https://icd.who.int/browse10/2019/en" target="_blank">
+                <i class="fas fa-code" style="color: #ff8f00;"></i>
+                <span>ICD-10</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.aapc.com/codes/cpt-codes-range.aspx" target="_blank">
+                <i class="fas fa-code" style="color: #ff8f00;"></i>
+                <span>CPT</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.findacode.com/code.php?set=ICD9CM" target="_blank">
+                <i class="fas fa-code" style="color: #ff8f00;"></i>
+                <span>ICD-9</span>
+              </a>
+            </li>
+            <!-- Medication Prices -->
+            <li>
+              <a href="https://ar.kairosweb.com/precio/producto-humira-ac-26495/" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Argentina</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.cbip.be/fr/chapters" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Belgium</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.moh.gov.cy/moh/phs/phs.nsf/All/6E6D8A8F0B8E4D92C22588E4003A9D1E?OpenDocument" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Cyprus</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://base-donnees-publique.medicaments.gouv.fr/index.php" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>France</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.jodrugs.com/JoDrugs.aspx" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Jordan</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://moph.gov.lb/en/Pages/3/3101/drugs-public-price-list-" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Lebanon</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://cns.public.lu/en/legislations/textes-coordonnes/liste-positive.html" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Luxembourg</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://medicalis.ma/" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Morocco</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.riziv-inami.be/nl/richtlijnen/nomensoft" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Netherlands</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.legemiddelsok.no/sider/default.aspx?searchquery=&f=Han;MtI;Vir;ATC;Var;Mar;Mid;Avr;gen;par;&pane=0" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Norway</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.moh.gov.om/en/web/dgpadc/-2" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Oman</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://ms.ro/en/ministry/structure/directia-politica-medicamentului-si-a-dispozitivelor-medicale/preturi-medicamente/catalogul-public-national-al-preturilor-maximale-ale-medicamentelor-de-uz-uman/" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Romania</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://extranet.infarmed.pt/INFOMED-fo/index.xhtml" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Portugal</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://sfda.gov.sa/en/drugs-list" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Saudi Arabia</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://medicineprices.org.za/#search:adcetris" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>South Africa</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://compendium.ch/fr" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Switzerland</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://farmacoinc.com/uae/brands/a" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>UAE</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://bnf.nice.org.uk/drugs/" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>UK Drugs</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.ilacabak.com/firmr.php" target="_blank">
+                <i class="fas fa-pills" style="color: #2e7d32;"></i>
+                <span>Turkey</span>
+              </a>
+            </li>
+            <!-- Cigna Internal -->
+            <li>
+              <a href="https://iris.cigna.com/" target="_blank">
+                <i class="fas fa-eye" style="color: #003366;"></i>
+                <span>Iris</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://cignaglobal.service-now.com/sp" target="_blank">
+                <i class="fas fa-cogs" style="color: #5d4037;"></i>
+                <span>Tech Central</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://cigna.csod.com/ux/ats/careerhome.aspx?site=4" target="_blank">
+                <i class="fas fa-graduation-cap" style="color: #ef6c00;"></i>
+                <span>Cigna University</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+    
+  
+
+
+        <!-- SOP Section -->
       <section id="sop" class="tab-content">
-        <iframe src="sop.html" width="100%" height="600px" frameborder="0"></iframe>
-      </section>
-
-      <!-- Calculators -->
-      <section id="calculators" class="tab-content hidden">
-        <h2>Calculators</h2>
-        <div class="calculator">
-          <h3>Date Difference</h3>
-          <input type="date" id="date1"/> to <input type="date" id="date2"/>
-          <button id="calcDateBtn">Calculate</button>
-          <p id="dateResult"></p>
+        <div class="card">
+          <h2><i class="fas fa-book"></i> SOP - Cost Review/MNR/IBR</h2>
+          <div class="sop-content">
+            <h1>SOP Cost Review/MNR/IBR</h1>
+            <p><strong>Last updated on:</strong> 5th June'25</p>
+            <p><strong>Version:</strong> V1.0.0</p>
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#abbreviations">Abbreviations</a></li>
+                    <li><a href="#step1">Step 1. Work basket in Octopus</a></li>
+                    <li><a href="#step2">Step 2. Member details</a></li>
+                    <li><a href="#step3">Step 3. Provider Information</a></li>
+                    <li><a href="#step4">Step 4. Out of scope validity</a></li>
+                    <li><a href="#step5">Step 5. Validate the total amount in blue line</a></li>
+                    <li><a href="#step6">Step 6. Check for PIMS id in Octopus blue line</a></li>
+                    <li><a href="#step7">Step 7. Duplicate</a></li>
+                    <li><a href="#step8">Step 8. Eligibility</a></li>
+                    <li><a href="#step9">Step 9. Interim bill vs Final invoice</a></li>
+                    <li><a href="#step10">Step 10. Outpatient (OP) vs Daycase (DC)</a></li>
+                    <li><a href="#step11">Step 11. Medical Information</a></li>
+                    <li><a href="#step12">Step 12. Translation</a></li>
+                    <li><a href="#step13">Step 13. Cost review process</a></li>
+                    <li><a href="#step14">Step 14. MNR</a></li>
+                    <li><a href="#step15">Step 15. MNR triggers</a></li>
+                    <li><a href="#step16">Step 16. IBR triggers</a></li>
+                    <li><a href="#step17">Step 17. Coding in MF</a></li>
+                    <li><a href="#step18">Step 18. Discount rate</a></li>
+                    <li><a href="#step19">Step 19. Review Complete</a></li>
+                </ul>
+            </div>
+            <h2 id="abbreviations">Abbreviations <a href="#" class="top-link">Top</a></h2>
+            <table>
+                <tr><th>Acronym</th><th>Description</th></tr>
+                <tr><td>MNR</td><td>Medical necessity review</td></tr>
+                <tr><td>Dr. MNR</td><td>Doctor Medical Necessity Review</td></tr>
+                <tr><td>HC</td><td>Health Cloud</td></tr>
+                <tr><td>LOS</td><td>Length of stay</td></tr>
+                <tr><td>GOP</td><td>Guarantee of payment</td></tr>
+                <tr><td>NCCN</td><td>National Comprehensive Cancer Network</td></tr>
+                <tr><td>CRI</td><td>Care Request Item</td></tr>
+                <tr><td>SN</td><td>Settlement note</td></tr>
+                <tr><td>MCG</td><td>Milliman care guideline</td></tr>
+                <tr><td>KE</td><td>Knowledge exchange</td></tr>
+                <tr><td>DC</td><td>Daycase</td></tr>
+                <tr><td>R & C</td><td>Reasonable & Customary</td></tr>
+                <tr><td>IP/OP</td><td>Inpatient/Outpatient</td></tr>
+                <tr><td>PRM</td><td>Provider Relationship Management</td></tr>
+                <tr><td>DOA</td><td>Date of Admission</td></tr>
+                <tr><td>DOD</td><td>Date of Discharge</td></tr>
+                <tr><td>PPD</td><td>Prompt payment Discount</td></tr>
+                <tr><td>PR</td><td>Preferential Rate</td></tr>
+                <tr><td>LPP</td><td>Late Penalty Payment</td></tr>
+                <tr><td>MF</td><td>Mainframe</td></tr>
+                <tr><td>BOB</td><td>Book of business</td></tr>
+                <tr><td>ABOB</td><td>Africa Book of business</td></tr>
+            </table>
+            <div class="step" id="step1">
+                <h2>Step 1. Work basket in Octopus <a href="#" class="top-link">Top</a></h2>
+                <p><strong>Start</strong></p>
+                <p>Pick a claim from claim review basket</p>
+                <div class="warning">
+                    <p><strong>Restricted PIMS id</strong> 13227(Centre Hospitalier Universitaire Vaudois- Switzerland) | (Don't handle this PIMS id)</p>
+                    <p><strong>Restricted client ids</strong> - 101, 191, 014, 020, 390 | (Don't handle these client id's)</p>
+                </div>
+            </div>
+            <div class="step" id="step2">
+                <h2>Step 2. Member details <a href="#" class="top-link">Top</a></h2>
+                <p>Identify whether the member is correct under Mainframe TDMXELB01 by input Cigna contract no. (client id) (example 005). Press F5 input family id, member id then press F4.- Yes/No (Example: Member name in Mainframe & Octopus application) If you want to view all family members, input contract no, press f5, input family id then press f2</p>
+                <p><strong>If yes</strong> Go to step 3</p>
+                <p><strong>If no</strong> Reindex with correct member details in Octopus (example member id "06")</p>
+            </div>
+            <div class="step" id="step3">
+                <h2>Step 3. Provider Information <a href="#" class="top-link">Top</a></h2>
+                <p>Identify whether the provider is correct under PRM/PIMS- Yes/No (PIMS is 2718)</p>
+                <p>(Confirm whether the entries available in PIMS ID field is the same as per the Invoice in Octopus)</p>
+                <p><strong>If yes</strong> Go to step 4</p>
+                <p><strong>If no</strong> Reindex as per correct PIMS in octopus</p>
+            </div>
+            <div class="step" id="step4">
+                <h2>Step 4. Out of scope validity <a href="#" class="top-link">Top</a></h2>
+                <h3>4.1 Is claim from member/provider</h3>
+                <p><strong>If member</strong> Reindex claim into member queue by selecting 'M' instead of 'P' and leave a yellow note in Octopus. (Yellow note comments: 'This is member claim'.)</p>
+                <div class="note">
+                    <p>Note-claims submitted by a member with instructions to make payment to the provider must be handled as a provider claim. Update dummy PIMS id in the blue line.</p>
+                    <p>PIMS id- 273456</p>
+                    <p>ANT code- 015 016 00M</p>
+                    <p>Name/city/country* Cigna IOH Dummy Provider, ANTWERPEN, BELGIUM</p>
+                </div>
+                <p><strong>If provider</strong> Go to step 4.2</p>
+                <h3>4.2 Is claim- OP/IP</h3>
+                <p><strong>If OP</strong> Reindex claim into outpatient queue by selecting 'Outpatient' instead of 'Inpatient' and leave a yellow note in Octopus (Yellow notes: 'This is outpatient')</p>
+                <p><strong>If IP</strong> Go to step 5</p>
+            </div>
+            <div class="step" id="step5">
+                <h2>Step 5. Validate the total amount in blue line <a href="#" class="top-link">Top</a></h2>
+                <p>Is claim amount matching with invoice in Octopus- Yes/No</p>
+                <p><strong>If yes</strong> Go to step 6</p>
+                <p><strong>If no</strong> Reindex as per correct amount in Octopus-NB-Amount =GROSS AMOUNT</p>
+            </div>
+            <div class="step" id="step6">
+                <h2>Step 6. Check for PIMS id in Octopus blue line <a href="#" class="top-link">Top</a></h2>
+                <ul>
+                    <li>If we receive a doctor bill related to an admission, for a doctor that is (NOT on PIMS) and (NOT on PRM), the expectation in the blue line is BLANK.</li>
+                    <li>If we receive a doctor bill related to an admission, for a doctor that (IS in PRM), the expectation in the blue line is DOCTOR PIMS ID.</li>
+                    <li>If we receive a doctor bill NOT related to an admission, for a doctor that is (NOT on PIMS) and (NOT on PRM), the expectation in the blue line is Blank. In e80a we used dokterkabinet as hospital code when coding</li>
+                    <li>If we receive a hospital bill that is (NOT on PIMS) and (NOT on PRM), the next step will be creating provider vetting form.</li>
+                </ul>
+                <div class="note">
+                    <p>How to create vetting form- Refer KE article 000110931.https://cignaknowledge.lightning.force.com/lightning/r/Knowledge__</p>
+                </div>
+                <div class="warning">
+                    <p>Note- If the claim will not go out of the queue after reindexing, in such case leave a yellow note with reason and keep posted with the supervisor.</p>
+                </div>
+            </div>
+            <div class="step" id="step7">
+                <h2>Step 7. Duplicate <a href="#" class="top-link">Top</a></h2>
+                <p>Check for duplicate in MF (E80a), TDMXELB01 and retrieval in Octopus</p>
+                <p><strong>If yes</strong> Verify for true duplicate or false duplicate</p>
+                <h3>True duplicate</h3>
+                <p>Check in mainframe for SN and make sure payment has done. Review complete and leave a yellow note with SN date</p>
+                <div class="note">
+                    <p>Use custom queries to check SN date for old claims (especially claims sent from reconciliation) with no data on mainframe</p>
+                </div>
+                <h3>False duplicate</h3>
+                <p>Confirm the previous claim has no payment. Leave a yellow note with clause code. Go to step 8</p>
+                <p><strong>If No</strong> Go to step 8</p>
+            </div>
+            <div class="step" id="step8">
+                <h2>Step 8. Eligibility <a href="#" class="top-link">Top</a></h2>
+                <p>Check for eligibility in MF TDMXELB01- Yes/ No</p>
+                <p>Enter Cigna contract id Press 'f5'input family id + member id press 'f4'check policy end date</p>
+                <p><strong>If yes</strong> Go to step 9</p>
+                <p><strong>If no</strong> Check in HC is the member is having new file(This is done by using the members full names while searching on hc)- Yes/No</p>
+                <p><strong>If yes</strong> Check for BOB</p>
+                <ul>
+                    <li>If the BOB is not IO reindex to admin team. Leave a yellow note in octopus 'Out of scope BOB (e.g. ABOB)'</li>
+                    <li>If the BOB is IO- Go to step 9.</li>
+                </ul>
+                <p><strong>If no</strong> Send to eligibility team under sub status "Request advice" in Octopus.</p>
+                <div class="note">
+                    <p>Note- For newborn baby- Send for eligibility team if there is no record found in MF</p>
+                </div>
+            </div>
+            <div class="step" id="step9">
+                <h2>Step 9. Interim bill vs Final invoice <a href="#" class="top-link">Top</a></h2>
+                <p>Identify claim for interim/final invoice</p>
+                <p><strong>If interim bill</strong> Review complete and leave a yellow note "This is interim bill". other names Final update, Claim update, Pre factura, Proforma Invoice, Swischerung, cost estimate, provisional, running bill,</p>
+                <div class="note">
+                    <p>Note- Interim bills are accepted in some UK providers. Make sure to check PIMS remarks on claim processing in prm/pims . Example- PIMS id 18580.</p>
+                </div>
+                <p><strong>If final invoice</strong> Go to step 10.</p>
+            </div>
+            <div class="step" id="step10">
+                <h2>Step 10. Outpatient (OP) vs Daycase (DC) in claim review basket <a href="#" class="top-link">Top</a></h2>
+                <p>Identify whether received case is for DC or OP</p>
+                <p>If we found OP case, then we need to just update yellow notes and reindex as this is out of scope (Step 4.2)</p>
+                <p>Post identifying as DC, please check for necessity of Operating Room (OR) under PIMs</p>
+                <ul>
+                    <li>In case OR is required we need to code day case in mainframe</li>
+                    <li>Incase OR not required check if gop is present. If yes, check if it's a day case or outpatient Gop. If outpatient reindex, if day case we need to perform only cost review and mention yellow note "Daycase coding not required"</li>
+                    <li>If no gop ,check if room was charged on the invoice. if yes treat as daycase, if no treat as outpatient. (refer to flowchart below)</li>
+                </ul>
+            </div>
+            <div class="step" id="step11">
+                <h2>Step 11. Medical Information <a href="#" class="top-link">Top</a></h2>
+                <p>Medical review-</p>
+                <p>Check complete medical information + pre-auth case in HealthCloud Available- Yes/No</p>
+                <p><strong>If Yes</strong> Go for step 12</p>
+                <p><strong>If No</strong> Create standard case for requesting additional information in HC:</p>
+                <ul>
+                    <li>Send the claim to HealthCloud by using a template in Outlook.</li>
+                    <li>Send the template together with the invoice to HealthCloud.</li>
+                    <li>Pick up the unstructured HealthCloud case</li>
+                    <li>Take Ownership</li>
+                    <li>Turn the unstructured case into a Standard case record type</li>
+                    <li>Leave a yellow note with HC case number and pend under communication instructions in Octopus</li>
+                    <li>Follow up on the 5th business day after the first outreach and CSR will send reminder on the 5th business day</li>
+                    <li>Put the case as standard back in my personal queue on the 2nd business day after the reminder. If we did not receive information after 7days perform review complete in octopus and add comments- "Info requested under HC case no. XXXXXXX but provider didnot respond, please deny claim". update new date in on a yellow note -date of the last reminder to the hcp if no information was received.</li>
+                    <li>After completing 60days, register cost savings in HC.</li>
+                    <li>Refer KE article 000104172 (click the link: How to obtain additional information from a provider for Claim Review | Knowledge | Salesforce)</li>
+                </ul>
+                <h3>How to send an invoice to HealthCloud?</h3>
+                <ol>
+                    <li>Right-click on the invoice</li>
+                    <li>Click on 'Send to'</li>
+                    <li>Click on 'Mail Recipient (as Attachment)'</li>
+                    <li>Pop-up screen 'Send to Mail'</li>
+                    <li>Choose as File Format 'Unencrypted PDF'</li>
+                    <li>Click on Send</li>
+                    <li>New email message will pop-up including the invoice in pdf-format</li>
+                    <li>Insert a CARE CA template
+                        <ul>
+                            <li> Home tab in Outlook/From template</li>
+                            <li>Cigna Notifications & Iris/Email templates</li>
+                            <li>W:\Templates\Outlook_new\MCC General\CARE CA</li>
+                        </ul>
+                    </li>
+                </ol>
+                <h3>Outlook Template:</h3>
+                <p>To: urgentrequestsclaimsreviewteam@cigna.com</p>
+                <p>Subject: Initials/Upload/Client ID xxx/ PIMS ID xxxx/ Claim ID xxxx/ Further information Required</p>
+                <p>Body of the email: use the template >IMPORTANT: provide clear instructions on the information Required so Customer Service can reach out to the provider Signature</p>
+                <h3>Unstructured case in HealthCloud</h3>
+                <p>Email sent to: urgentrequestsclaimsreviewteam@cigna.com will land in HealthCloud as an Unstructured Case. This case will be temporarily in the TH&N (Total Health & Network ) Pending to Route Queue for queue allocation. After some time the case will be assigned to the Claim Review Escalations queue.</p>
+                <p>You should pick the case and take ownership of it.</p>
+                <p>Retrieve unstructured case either by searching from the Claim Review Escalations Queue or looking up for member related cases</p>
+                <h3>Creating a Standard case</h3>
+                <ol>
+                    <li>New Case</li>
+                    <li>Select 'cases' from the Navigation Menu</li>
+                    <li>Click on 'NEW'</li>
+                    <li>Follow next steps</li>
+                    <li>Select Standard Case</li>
+                    <li>Parent Case: Add main Claim Review Case number (if needed)</li>
+                    <li>Case Type: Processing Info</li>
+                    <li>Subtype: Additional Information</li>
+                    <li>Case Language: language to match provider invoice</li>
+                    <li>Case Origin: Email</li>
+                    <li>Sender Type: Provider</li>
+                    <li>Customer: add and search member id</li>
+                    <li>Provider: add and search provider id</li>
+                    <li>Subject: subject Will remain from the email sent.</li>
+                    <li>> If you are creating a Brand new case add subject as per standard format</li>
+                    <li>Case Description: add information required here when creating a brand new case for Customer Service awareness</li>
+                    <li>Claim Id: add information as per claim Id in Octopus</li>
+                    <li>Assign using active assignement rule: tick the check box for automatic routing</li>
+                    <li>Save</li>
+                </ol>
+            </div>
+            <div class="step" id="step12">
+                <h2>Step 12. Translation <a href="#" class="top-link">Top</a></h2>
+                <p>Does claim requires translation-Yes/No</p>
+                <p><strong>If yes</strong> (click the link) How to refer cases for Translation support.pdf</p>
+                <p><strong>If no</strong> Go to step 13</p>
+            </div>
+            <div class="step" id="step13">
+                <h2>Step 13. Cost review process <a href="#" class="top-link">Top</a></h2>
+                <ol>
+                    <li>Check PRM-
+                        <ul>
+                            <li>Tariff agreement (Direct Payment Agreement), discount (List price agreement)</li>
+                        </ul>
+                    </li>
+                    <li>If tariff is not okay send for rectified invoice by creating standard case record type in HC based on country specific (Step 11)</li>
+                    <li>Be categorical and mention/point out the amount as per tariff or tariff package ON YOUR COMMUNICATION INFORMATION.</li>
+                    <li>If you get a claim and you need to request the provider for a rectified bill, please be very clear on what for is the bill to be rectified. You must have a comparison, or you must have a point where you clearly asked why you needed a rectified bill.</li>
+                </ol>
+                <div class="note">
+                    <p>EXAMPLE FORMAT:-</p>
+                    <p>"Please ask the health care provider for a rectified bill of $______(amount to be deducted). This is because they charged us $______(amount on invoice) for this procedure WHERE on the tariff list, the charge is $____(amount on tariff).</p>
+                </div>
+                <ol start="2">
+                    <li>Check Healthcloud
+                        <ul>
+                            <li>GOP</li>
+                            <li>LOS Approved</li>
+                            <li>Medical reports</li>
+                            <li>Doctors notes in the case</li>
+                        </ul>
+                    </li>
+                    <li>Check for country specifics
+                        <ul>
+                            <li>DRG, Vadicco, Kenya fee schedule, Uk fee schedule RISIV, OP Gruppe, GHS, DBC</li>
+                            <li>Invoices from In-network providers with tariff lists in PIMS will be cut to the agreed tariffs.</li>
+                        </ul>
+                    </li>
+                    <li>If all is OK (Step 17) Code and release</li>
+                    <li>If it meets CC trigger Send to CC</li>
+                </ol>
+                <h3>Care Coordination (CC) triggers for Claim Reviewer (CR):</h3>
+              
+                <ul>
+                    <li>If no Financial Verification (FV) was done before, all claims from out of network providers above 15,000 USD to CC for cost negotiation check.</li>
+                    <li>All claims (from in -or out of network providers) exceeding the R&C cost by 20% with a minimum of 2,000 USD above the Reasonable & Customary (R&C) limit to CC.</li>
+                    <li>All claims above 50,000 USD in Europe excluding:
+                        <ul>
+                            <li>DRG (Switzerland, Germany, Austria);</li>
+                            <li>DBC (Netherlands);</li>
+                            <li>GHS (France);</li>
+                            <li>APHP (France);</li>
+                            <li>Sensitive provider</li>
+                        </ul>
+                    </li>
+                    <li>All claims above 30,000 USD in Africa excluding:
+                        <ul>
+                            <li>Kenya for in-network providers with Tariff Agreement (TA);</li>
+                            <li>South Africa for in-network providers with Tariff Agreement (TA).</li>
+                        </ul>
+                    </li>
+                    <li>All claims for doctor's fees in South Africa (SA) above 5,000 USD.</li>
+                    <li>All claims above 50,000 USD in the rest of world.</li>
+                    <li>General exclusions:
+                        <ul>
+                            <li>All claims from providers without any discount possibilities as mentioned in PIMS/PRM. Do not forward to CC.</li>
+                            <li>No FV required: if no FV was done before for an in-network provider.</li>
+                            <li>Reasoning: FV will be done by Claims Analyst and their superiors/ following their FV levels.</li>
+                            <li>If the Tariff Agreement (TA) is not respected by an in-network provider > continue current instructions (i.e. instruction for CSR to request new invoice according to Tariff Agreement (TA).</li>
+                        </ul>
+                    </li>
+                </ul>
+                <ol start="6">
+                    <li>If it requires MNR Go to Step 14</li>
+                </ol>
+            </div>
+            <div class="step" id="step14">
+                <h2>Step 14. MNR <a href="#" class="top-link">Top</a></h2>
+                <p>Does claim requires MNR- Yes/No</p>
+                <p><strong>If yes</strong> Go to step 15</p>
+                <p><strong>If no</strong> Go to step 16</p>
+            </div>
+            <div class="step" id="step15">
+                <h2>Step 15. MNR triggers <a href="#" class="top-link">Top</a></h2>
+                <p>Check triggers for MNR</p>
+                <p>Is a dental /pharmacy claim- Yes/No</p>
+                <p><strong>If yes</strong> Is claim cost over 5k USD? Yes/No</p>
+                <p><strong>If yes</strong> Sent to HC, Cigna clinical team to MNR by creating claim review</p>
+                <p><strong>If No</strong> Follow Claim review process</p>
+                <p><strong>If No</strong> Is claim cost over 35k USD? Yes/No</p>
+                <p><strong>If yes</strong> Has GOP matching claim- Yes/No</p>
+                <p><strong>If yes</strong> Is cost difference 10K USD- Yes/No</p>
+                <p><strong>If yes</strong> Sent to HC for Dr MNR by creating claim review case record type</p>
+                <p><strong>If No</strong>  Is total cost >/= 50K USD- Yes/No</p>
+                <p><strong>If yes</strong> Sent to HC for Dr MNR by creating claim review case record type</p>
+                <p><strong>If No</strong> Follow claim review</p>
+                <p><strong>If No</strong> Sent to HC for Dr MNR by creating claim review case record type</p>
+                <p><strong>If No</strong> Has GOP matching claim- Yes/No</p>
+                <p><strong>If yes</strong>Follow claim review</p>
+                <p><strong>If No</strong> Sent to HC to perform MNR by IOH claim reviewer creating claim review case record type- Has MNR approved- Yes/ No</p>
+                <p><strong>If yes</strong>Follow claim review process</p>
+                <p><strong>If no</strong> Sent to HC for Dr MNR by creating claim review case record type</p>
+                <h3>MNR triggers</h3>
+                <table>
+                    <tr>
+                        <th>Cigna MNR</th>
+                        <th>Sagility MNR</th>
+                    </tr>
+                    <tr>
+                        <td>Pharmacy/Dental claims of >/= 5k USD</td>
+                        <td>Claims and GOP cost difference >/= 10K USD</td>
+                    </tr>
+                    <tr>
+                        <td>Claims amount >/= 50K USD</td>
+                        <td>MNR performed by Sagility IOH team but criteria not met</td>
+                    </tr>
+                    <tr>
+                        <td>Dental and Pharma claims <5K</td>
+                        <td>All claims with cost between 5 - 35K USD AND NO GOP</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">No need to review  claims with cost difference <10k USD if they have a matching GOP</td>
+                    </tr>
+                </table>
+                <h3>Decision making process</h3>
+                <p>Clinical team will follow the below order while reviewing a case for MNR.</p>
+                <ul>
+                    <li>Contract Summary
+                        <ul>
+                            <li>European clients: local guidelines</li>
+                            <li>EPO: Guide To Cover</li>
+                        </ul>
+                    </li>
+                    <li>Cigna Policy</li>
+                    <li>Guidelines: MCG, NCCN</li>
+                    <li>Personal knowledge</li>
+                </ul>
+                <h3>Cigna Coverage Guidelines</h3>
+                <p>Cigna coverage policies are tools to assist in interpreting standard health coverage plan provisions.</p>
+                <p>Through this link CHCP - Resources - Coverage Policies (cigna.com) the Cigna's medical administrative or drug coverage policies can be accessed.</p>
+                <p>Here you can search for a Cigna commercial coverage position which includes Medicare determinations.</p>
+                <p>Within each policy -there are specifics about what can be considered Experimental, Investigational, Unproven or Not Medically Necessary.</p>
+                <p>Due to the nature of each treatment/procedure it is required to have one of the clinicians, medical advisors or nurse clinical advisors, reviewing the request.</p>
+                <p>Clinical team reviews the medical necessity (MNR) of the requested treatment ensuring our customers get the most accurate treatment.</p>
+                <h3>To perform MNR or to capture Savings:</h3>
+                <ul>
+                    <li>Send case from Octopus to HC</li>
+                    <li>Update the case as a Claim Review Record Type in HC</li>
+                    <li>Claim in Octopus Advice needed from medical board Forward invoice to HealthCloud using template Pick up the Unstructured Create a Claim Review case</li>
+                </ul>
+                <h3>Steps to check guideline in HC</h3>
+                <ol>
+                    <li>Click on New guideline in the Guidelines category</li>
+                    <li>Select from the care type available</li>
+                    <li>Type the procedure under 'Search Value' and click on 'Search'</li>
+                    <li>Review Guidelines</li>
+                    <li>Select the appropriate guideline by clicking on it and then select launch</li>
+                    <li>A pop-up window is displayed with a list of all the health conditions that indicate the medical necessity of the procedure / diagnosis.</li>
+                    <li>Additional information about member's conditions can be added to the guideline</li>
+                    <li>Information about the most appropriate length LOS</li>
+                    <li>Clinical Indications for procedure- Met</li>
+                    <li>Select all that apply to the customer and click submit</li>
+                    <li>Guidelines added to the case</li>
+                    <li>The completed guideline is visible under Guidelines.</li>
+                </ol>
+                <div class="note">
+                    <p>If the status shows 'Indications Not Met', the MNR can be denied</p>
+                    <p>MNR denials will go automatically to the MNR savings basket</p>
+                </div>
+                <h3>MNR assessment in HealthCloud</h3>
+                <p>Care request information (CRI) line</p>
+                <p>Case Status must always be updated to MNR Approved/Denied or Approved/Denied based on the original Status (New-MNR Required or New-No MNR Required).</p>
+                <p>Diagnosis and Procedure should always be correctly updated in the CRI Line Status before performing the MNR</p>
+                <p>Case must show the same number of procedure lines and costs as per details received in the invoice.</p>
+                <div class="warning">
+                    <p>NOTE: IOH Claim Reviewers Will not update cases to status MNR Denied as this is out of scope. Refer case in HC to the IOH Medical Advisors Q for internal review.</p>
+                </div>
+                <h3>Sent to HC for Dr. MNR</h3>
+                <p>This is Out of Scope for the IOH Clinical Claim Review Team</p>
+                <p>Add a Yellow Note in Octopus mentioning that case assigned to the Cigna doctors.</p>
+                <p>Add a note to your Claim Review case in HC</p>
+                <div class="note">
+                    <p>Dear Dr,</p>
+                    <ul>
+                        <li>Brief member description which could add value (e.g. 86-year-old female)</li>
+                        <li>Diagnoses</li>
+                        <li>Procedure</li>
+                        <li>Length of Stay</li>
+                        <li>GOP in place? If yes, confirm LOS approved + Cost approved (FV done? as per notes in HC Pre-Authorisation Case)</li>
+                        <li>Provider remarks (e.g. Hospital costs matching tariff agreement, Dr Fees as per Vadicco rates...)</li>
+                        <li>Additional remarks: (e.g. final invoice more than 50K, cost approved in the GOP difference on >10K the final invoice....)</li>
+                        <li>Expected action from the clinical team: Can we accept full invoice? Thanks</li>
+                    </ul>
+                </div>
+                <p>Assign case to the IO Medical Advisor Q</p>
+                <h3>How to Add a note in Health Cloud</h3>
+                <ol>
+                    <li>From Related List Quick Links</li>
+                    <li>Select Notes</li>
+                    <li>Select New</li>
+                    <li>Add your comments</li>
+                    <li>Select Done</li>
+                </ol>
+                <h3>Confirming LOS in Health Cloud</h3>
+                <p>Managing a pre-auth < MEDICAL INFORMATION</p>
+                <p>Medical Information fields: Make sure to (manually) update throughout the case and verify if the fields are correct before closing the case. This provides an overview of the length of stay that was initially approved of, additional days that have been requested and the total stay that was eventually approved</p>
+                <h3>MNR Saving - LOS</h3>
+                <p>Information about Length of Stay</p>
+                <p>Upon structuring the case for Inpatient admissions information about Length of stay (1) is added and visible through "Medical Information" details.</p>
+                <p>Clinical Team should update the Initially Approved details during MNR Review Process</p>
+                <p>Other Expenses details show Room and Board Cost with the total amount related to the Original requested Length of Stay</p>
+                <p>As part of the MNR Process, Clinical Team should confirm the Length of Stay approved in that claim review case by updating the Initially Approved (2) details</p>
+                <p>Should by any reason the Total claimed LOS cannot be approved</p>
+                <p>Confirm the number of nights approved (e.g.: 6 out of 7 nights)</p>
+                <div class="note">
+                    <p>NOTE: for capturing LOS saving Room and Board cost must be input upon structuring the case or using the 'other expenses' blue feature.</p>
+                </div>
+                <h3>Communication in HC</h3>
+                <p>Case determination: Add a note/post</p>
+                <p>Create a note after resolving the status of the CRI using the MNR Notes Template.</p>
+                <p>If more information would be required, then create a Standard case for Customer Service to Reach out to Provider as per internal process. Add the Claim Review Case reference as Parent case of the Standard case.</p>
+                <h3>Adding a Note for MNR/ Itemized Review</h3>
+                <div class="note">
+                    <p>Dear Dr,</p>
+                    <ul>
+                        <li>Brief member description which could add value (e.g 86-year old female)</li>
+                        <li>Diagnoses</li>
+                        <li>Procedure</li>
+                        <li>Length of Stay</li>
+                        <li>GOP in place? If yes, confirm LOS approved + Cost approved (FV done? as per notes in HC Pre-Authorisation Case)</li>
+                        <li>Provider remarks (e.g. Hospital costs matching tariff agreement, Dr Fees as per Vadicco rates...)</li>
+                        <li>Additional remarks: (e.g. final invoice more than 50K, cost approved in the GOP difference on >10K the final invoice....)</li>
+                        <li>Expected action from the clinical team: Can we accept full invoice? Thanks</li>
+                    </ul>
+                </div>
+                <h3>Closing Case</h3>
+                <p>Update Case Status</p>
+                <p>Upon having performed MNR</p>
+                <ul>
+                    <li>Add case notes</li>
+                    <li>Change Case Status</li>
+                    <li>Closed: Approved / Denied (in those scenarios Cigna Medical Board advised accordingly)</li>
+                </ul>
+                <p>Case in HC is finalise > move to Octopus and complete case review</p>
+                <h3>MNR Tools</h3>
+                <ul>
+                    <li>Cigna Medical Guideline CHCP - Resources - Coverage Policies</li>
+                    <li>MCG https://login.mcg.com/https ://www.evicore.com/cigna</li>
+                    <li>NCCN https://www.nccn.org/</li>
+                    <li>Evicore https://www.evicore.com/</li>
+                    <li>Local Governamental Guidance</li>
+                </ul>
+            </div>
+            <div class="step" id="step16">
+                <h2>Step 16. IBR triggers <a href="#" class="top-link">Top</a></h2>
+                <p>Which cases triggers for Itemized claims process?</p>
+                <ul>
+                    <li>Equal or More than 10K USD in Countries not equal to:
+                        <ul>
+                            <li>France</li>
+                            <li>Switzerland</li>
+                            <li>Germany</li>
+                            <li>Belgium</li>
+                            <li>The Netherlands</li>
+                            <li>Austria</li>
+                            <li>Czech Republic</li>
+                            <li>Luxembourg</li>
+                            <li>Ireland</li>
+                            <li>UK</li>
+                            <li>Denmark</li>
+                            <li>Sweden</li>
+                            <li>Norway</li>
+                            <li>Finland</li>
+                            <li>Iceland</li>
+                            <li>Japan</li>
+                            <li>South Korea</li>
+                            <li>United State</li>
+                        </ul>
+                    </li>
+                    <li>Equal or More than 5K USD Claims in African countries</li>
+                    <li>Equal or More than 3K USD Claims in Lebanon</li>
+                    <li>Equal or More than 10K USD Claims in other countries</li>
+                </ul>
+                <div class="note">
+                    <p>Note- When no itemized bill shared by the provider, although case triggers for Itemized Claim Review, you will not request the itemized invoice to the provider and will skip this process.</p>
+                </div>
+                <h3>What should be Reviewed?</h3>
+                <p>Agents review the following information on the itemized bill and/or medical record for claims that meet the triggers:</p>
+                <ul>
+                    <li>Dosage, units, and amounts are appropriate for the patient age/size/gender and diagnosis</li>
+                    <li>Services that may be integral to another greater service or procedure being reimbursed such as room & board, operating room charges, procedure charges</li>
+                    <li>LOS, level of care</li>
+                    <li>Consumables, prosthesis.</li>
+                    <li>Duplicative or erroneous charges</li>
+                    <li>Unidentifiable charges</li>
+                    <li>Non-covered experimental, investigational or unproven services</li>
+                    <li>Correct coding for services rendered (if codes are used)</li>
+                    <li>Appropriate DRG coding (if DRG used)</li>
+                    <li>Identification of services not covered under the plan.</li>
+                </ul>
+                <h3>What's in an invoice? See below</h3>
+            </div>
+            <div class="step" id="step17">
+                <h2>Step 17. Coding in MF <a href="#" class="top-link">Top</a></h2>
+                <ul>
+                    <li>Check correct diagnosis and procedure codes in PIMS</li>
+                    <li>Convert ICD 10 into ICD 9 by using below links (Ctrl + click)</li>
+                    <li>Find-A-Code - ICD 10 Codes, CPT Codes, HCPCS Codes, ICD 9 Codes - Online Encoder - Medical Billing and Coding</li>
+                    <li>https://www.icd10data.com/</li>
+                    <li>Coding in MF E80A</li>
+                </ul>
+            </div>
+            <div class="step" id="step18">
+                <h2>Step 18. Discount rate <a href="#" class="top-link">Top</a></h2>
+                <p>Check discount details under PIMS/PRM</p>
+                <p>Examples- PPD, LPP, PR- Mention in discount section before reviewing complete.(No need to mention preferential rate)</p>
+                <div class="note">
+                    <p>Note- Discount rate is applicable only in hospital claims</p>
+                </div>
+            </div>
+            <div class="step" id="step19">
+                <h2>Step 19. Review Complete- Claim review basket <a href="#" class="top-link">Top</a></h2>
+                <p>Confirming LOS</p>
+                <p>Upon "review complete" complete the details</p>
+                <p>Mention the MNR outcome in a yellow note including the guideline you based your decision on</p>
+                <p>If LOS is ok. Length of stay check box must be ticket</p>
+                <div class="note">
+                    <p>Example:</p>
+                    <p>MNR Approved as per Guideline P-314</p>
+                    <p>LOS approved- 3nights</p>
+                    <p>Total approved cost = 2500 USD</p>
+                    <p>Denies cost (item and costs)</p>
+                    <p>Savings applied</p>
+                </div>
+                <p>Input ICD 9 Diagnosis code, Procedure code, DOA, Discount applicable (if yes), Comment(if applicable)</p>
+                <p>Click 'Submit'</p>
+            </div>
         </div>
-        <div class="calculator">
-          <h3>Percentage</h3>
-          <input type="number" id="base" placeholder="Base"/> 
-          <input type="number" id="percent" placeholder="%"/> 
-          <button id="calcPercentBtn">Calculate</button>
-          <p id="percentResult"></p>
         </div>
       </section>
 
-      <!-- Translation -->
-      <section id="translation" class="tab-content hidden">
-        <h2>Translation</h2>
-        <textarea id="sourceText" placeholder="Enter text..."></textarea>
-        <div class="row">
-          <select id="fromLang"></select>
-          <select id="toLang"></select>
+        <!-- Multi-Calculator Section -->
+      <section id="calculators" class="tab-content">
+        <div class="card">
+          <h2><i class="fas fa-calculator"></i> Multi Calculator Tools</h2>
+          <label for="calcSelect" class="search-box-label">Choose a Calculator:</label>
+          <select id="calcSelect" class="search-box">
+            <option value="">-- Select Calculator --</option>
+            <option value="dateDiff">Date Difference</option>
+            <option value="percentage">Percentage</option>
+            <option value="bundeslandExtended">German DRG (Extended LOS)</option>
+            <option value="drgExtended">Swiss DRG (Extended LOS)</option>
+          </select>
+          <div class="calculator" id="dateDiff" style="display: none;">
+            <label>Start Date: <input type="date" id="startDate"/></label>
+            <label>End Date: <input type="date" id="endDate"/></label>
+            <div class="result" id="dateDiffResult"></div>
+          </div>
+          <div class="calculator" id="percentage" style="display: none;">
+            <label>Base Value: <input type="number" id="baseValue" placeholder="100"/></label>
+            <label>Percentage (%): <input type="number" id="percentageValue" placeholder="33"/></label>
+            <div class="result" id="percentageResult"></div>
+          </div>
+          <div class="calculator" id="bundeslandExtended" style="display: none;">
+            <label>Max LOS: <input type="number" id="maxLos2" value="6"/></label>
+            <label>Bundesland Rate: <input type="number" id="bundesland" step="0.01" value="4206.51"/></label>
+            <label>Column 10: <input type="number" id="col10" step="0.001" value="0.051"/></label>
+            <label>Actual LOS: <input type="number" id="actualLos2" value="9"/></label>
+            <div class="result" id="bundeslandResult"></div>
+          </div>
+          <div class="calculator" id="drgExtended" style="display: none;">
+            <label>DRG CW (Col 4): <input type="number" id="cw" step="0.001" value="0.977"/></label>
+            <label>Max LOS: <input type="number" id="maxLos" value="6"/></label>
+            <label>DRG Base Rate: <input type="number" id="drgRate" value="13500"/></label>
+            <label>Column 9: <input type="number" id="col9" step="0.001" value="0.153"/></label>
+            <label>Actual LOS: <input type="number" id="actualLos" value="9"/></label>
+            <div class="result" id="drgResult"></div>
+          </div>
         </div>
-        <button id="translateBtn">Translate</button>
-        <p id="translateResult"></p>
       </section>
 
-      <!-- Currency -->
-      <section id="currency" class="tab-content hidden">
-        <h2>Currency Converter</h2>
-        <input type="number" id="amount" placeholder="Amount"/>
-        <div class="row">
-          <select id="fromCurrency"></select>
-          <button id="swapBtn">⇄</button>
-          <select id="toCurrency"></select>
-        </div>
-        <button id="convertBtn">Convert</button>
-        <p id="currencyResult"></p>
-      </section>
-
-      <!-- Dashboards -->
-      <section id="dashboards" class="tab-content hidden">
-        <h2>Dashboards</h2>
-        <p>Embed your live dashboards here (SharePoint, PowerBI, etc.)</p>
-        <iframe src="https://www.example.com" width="100%" height="400px"></iframe>
-      </section>
-
-      <!-- Useful Links -->
-      <section id="links" class="tab-content hidden">
-        <h2>Useful Links</h2>
-        <input type="text" id="searchLinks" placeholder="Search links..."/>
-        <ul id="linksContainer">
-          <li><a href="https://translate.google.com" target="_blank">Google Translate</a></li>
-          <li><a href="https://www.xe.com" target="_blank">XE Currency</a></li>
-          <li><a href="https://www.investing.com" target="_blank">Investing.com</a></li>
-        </ul>
-      </section>
+        <!-- Currency Converter Section -->
+        <section id="currency" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-dollar-sign"></i> Currency Converter</h2>
+                <p>Convert between different currencies for international billing and claims using Exchangerate-API.</p>
+                <div class="currency-converter">
+                    <div class="currency-row">
+                        <input type="number" id="amount" value="1" step="any" placeholder="Amount">
+                        <select id="fromCurrency">
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="CHF">CHF - Swiss Franc</option>
+                            <option value="CAD">CAD - Canadian Dollar</option>
+                            <option value="AUD">AUD - Australian Dollar</option>
+                            <option value="JPY">JPY - Japanese Yen</option>
+                            <option value="CNY">CNY - Chinese Yuan</option>
+                            <option value="INR">INR - Indian Rupee</option>
+                            <option value="AED">AED - UAE Dirham</option>
+                            <option value="SAR">SAR - Saudi Riyal</option>
+                            <option value="KWD">KWD - Kuwaiti Dinar</option>
+                            <option value="BHD">BHD - Bahraini Dinar</option>
+                            <option value="OMR">OMR - Omani Rial</option>
+                            <option value="QAR">QAR - Qatari Riyal</option>
+                            <option value="SGD">SGD - Singapore Dollar</option>
+                            <option value="NZD">NZD - New Zealand Dollar</option>
+                            <option value="HKD">HKD - Hong Kong Dollar</option>
+                            <option value="SEK">SEK - Swedish Krona</option>
+                            <option value="NOK">NOK - Norwegian Krone</option>
+                            <option value="DKK">DKK - Danish Krone</option>
+                            <option value="PLN">PLN - Polish Zloty</option>
+                            <option value="CZK">CZK - Czech Koruna</option>
+                            <option value="HUF">HUF - Hungarian Forint</option>
+                            <option value="TRY">TRY - Turkish Lira</option>
+                            <option value="ZAR">ZAR - South African Rand</option>
+                            <option value="MXN">MXN - Mexican Peso</option>
+                            <option value="BRL">BRL - Brazilian Real</option>
+                            <option value="ARS">ARS - Argentine Peso</option>
+                            <option value="CLP">CLP - Chilean Peso</option>
+                            <option value="PEN">PEN - Peruvian Sol</option>
+                            <option value="COP">COP - Colombian Peso</option>
+                            <option value="UYU">UYU - Uruguayan Peso</option>
+                            <option value="BOB">BOB - Bolivian Boliviano</option>
+                            <option value="PYG">PYG - Paraguayan Guarani</option>
+                            <option value="GTQ">GTQ - Guatemalan Quetzal</option>
+                            <option value="HNL">HNL - Honduran Lempira</option>
+                            <option value="NIO">NIO - Nicaraguan Cordoba</option>
+                            <option value="CRC">CRC - Costa Rican Colon</option>
+                            <option value="PAB">PAB - Panamanian Balboa</option>
+                            <option value="DOP">DOP - Dominican Peso</option>
+                            <option value="JMD">JMD - Jamaican Dollar</option>
+                            <option value="TTD">TTD - Trinidad and Tobago Dollar</option>
+                            <option value="BBD">BBD - Barbadian Dollar</option>
+                            <option value="BSD">BSD - Bahamian Dollar</option>
+                            <option value="BZD">BZD - Belize Dollar</option>
+                            <option value="KYD">KYD - Cayman Islands Dollar</option>
+                            <option value="XCD">XCD - East Caribbean Dollar</option>
+                            <option value="SRD">SRD - Surinamese Dollar</option>
+                            <option value="ANG">ANG - Netherlands Antillean Guilder</option>
+                            <option value="AWG">AWG - Aruban Florin</option>
+                            <option value="BMD">BMD - Bermudian Dollar</option>
+                            <option value="FKP">FKP - Falkland Islands Pound</option>
+                            <option value="GIP">GIP - Gibraltar Pound</option>
+                            <option value="SHP">SHP - Saint Helena Pound</option>
+                            <option value="IMP">IMP - Isle of Man Pound</option>
+                            <option value="JEP">JEP - Jersey Pound</option>
+                            <option value="GGP">GGP - Guernsey Pound</option>
+                            <option value="RON">RON - Romanian Leu</option>
+                            <option value="BGN">BGN - Bulgarian Lev</option>
+                            <option value="HRK">HRK - Croatian Kuna</option>
+                            <option value="RSD">RSD - Serbian Dinar</option>
+                            <option value="MKD">MKD - Macedonian Denar</option>
+                            <option value="BAM">BAM - Bosnia and Herzegovina Convertible Mark</option>
+                            <option value="ALL">ALL - Albanian Lek</option>
+                            <option value="MDL">MDL - Moldovan Leu</option>
+                            <option value="UAH">UAH - Ukrainian Hryvnia</option>
+                            <option value="BYN">BYN - Belarusian Ruble</option>
+                            <option value="RUB">RUB - Russian Ruble</option>
+                            <option value="GEL">GEL - Georgian Lari</option>
+                            <option value="AMD">AMD - Armenian Dram</option>
+                            <option value="AZN">AZN - Azerbaijani Manat</option>
+                            <option value="KZT">KZT - Kazakhstani Tenge</option>
+                            <option value="UZS">UZS - Uzbekistani Som</option>
+                            <option value="KGS">KGS - Kyrgyzstani Som</option>
+                            <option value="TJS">TJS - Tajikistani Somoni</option>
+                            <option value="MNT">MNT - Mongolian Tugrik</option>
+                            <option value="KRW">KRW - South Korean Won</option>
+                            <option value="THB">THB - Thai Baht</option>
+                            <option value="VND">VND - Vietnamese Dong</option>
+                            <option value="IDR">IDR - Indonesian Rupiah</option>
+                            <option value="MYR">MYR - Malaysian Ringgit</option>
+                            <option value="PHP">PHP - Philippine Peso</option>
+                            <option value="BDT">BDT - Bangladeshi Taka</option>
+                            <option value="PKR">PKR - Pakistani Rupee</option>
+                            <option value="LKR">LKR - Sri Lankan Rupee</option>
+                            <option value="NPR">NPR - Nepalese Rupee</option>
+                            <option value="BTN">BTN - Bhutanese Ngultrum</option>
+                            <option value="MVR">MVR - Maldivian Rufiyaa</option>
+                            <option value="SCR">SCR - Seychellois Rupee</option>
+                            <option value="MUR">MUR - Mauritian Rupee</option>
+                            <option value="SZL">SZL - Swazi Lilangeni</option>
+                            <option value="LSL">LSL - Lesotho Loti</option>
+                            <option value="ZMW">ZMW - Zambian Kwacha</option>
+                            <option value="MWK">MWK - Malawian Kwacha</option>
+                            <option value="KES">KES - Kenyan Shilling</option>
+                            <option value="UGX">UGX - Ugandan Shilling</option>
+                            <option value="TZS">TZS - Tanzanian Shilling</option>
+                            <option value="RWF">RWF - Rwandan Franc</option>
+                            <option value="BIF">BIF - Burundian Franc</option>
+                            <option value="CDF">CDF - Congolese Franc</option>
+                            <option value="AOA">AOA - Angolan Kwanza</option>
+                            <option value="MZN">MZN - Mozambican Metical</option>
+                            <option value="ETB">ETB - Ethiopian Birr</option>
+                            <option value="ERN">ERN - Eritrean Nakfa</option>
+                            <option value="SOS">SOS - Somali Shilling</option>
+                            <option value="DJF">DJF - Djiboutian Franc</option>
+                            <option value="KMF">KMF - Comorian Franc</option>
+                            <option value="GMD">GMD - Gambian Dalasi</option>
+                            <option value="GNF">GNF - Guinean Franc</option>
+                            <option value="SLL">SLL - Sierra Leonean Leone</option>
+                            <option value="LRD">LRD - Liberian Dollar</option>
+                            <option value="GHS">GHS - Ghanaian Cedi</option>
+                            <option value="NGN">NGN - Nigerian Naira</option>
+                            <option value="XOF">XOF - West African CFA Franc</option>
+                            <option value="XAF">XAF - Central African CFA Franc</option>
+                            <option value="CVE">CVE - Cape Verdean Escudo</option>
+                            <option value="STN">STN - Sao Tome and Principe Dobra</option>
+                            <option value="KRW">KRW - South Korean Won</option>
+                            <option value="AFN">AFN - Afghan Afghani</option>
+                            <option value="IRR">IRR - Iranian Rial</option>
+                            <option value="IQD">IQD - Iraqi Dinar</option>
+                            <option value="SYP">SYP - Syrian Pound</option>
+                            <option value="JOD">JOD - Jordanian Dinar</option>
+                            <option value="LBP">LBP - Lebanese Pound</option>
+                            <option value="ILS">ILS - Israeli New Shekel</option>
+                            <option value="EGP">EGP - Egyptian Pound</option>
+                            <option value="SDG">SDG - Sudanese Pound</option>
+                            <option value="SSP">SSP - South Sudanese Pound</option>
+                            <option value="MAD">MAD - Moroccan Dirham</option>
+                            <option value="DZD">DZD - Algerian Dinar</option>
+                            <option value="TND">TND - Tunisian Dinar</option>
+                            <option value="LYD">LYD - Libyan Dinar</option>
+                            <option value="GMD">GMD - Gambian Dalasi</option>
+                            <option value="GNF">GNF - Guinean Franc</option>
+                            <option value="SLL">SLL - Sierra Leonean Leone</option>
+                            <option value="LRD">LRD - Liberian Dollar</option>
+                            <option value="GHS">GHS - Ghanaian Cedi</option>
+                            <option value="NGN">NGN - Nigerian Naira</option>
+                            <option value="XOF">XOF - West African CFA Franc</option>
+                            <option value="XAF">XAF - Central African CFA Franc</option>
+                            <option value="CVE">CVE - Cape Verdean Escudo</option>
+                            <option value="STN">STN - Sao Tome and Principe Dobra</option>
+                            <option value="MRO">MRO - Mauritanian Ouguiya</option>
+                            <option value="MRU">MRU - Mauritanian Ouguiya</option>
+                            <option value="TOP">TOP - Tongan Pa'anga</option>
+                            <option value="WST">WST - Samoan Tala</option>
+                            <option value="VUV">VUV - Vanuatu Vatu</option>
+                            <option value="XPF">XPF - CFP Franc</option>
+                            <option value="FJD">FJD - Fijian Dollar</option>
+                            <option value="PGK">PGK - Papua New Guinean Kina</option>
+                            <option value="SBD">SBD - Solomon Islands Dollar</option>
+                            <option value="WST">WST - Samoan Tala</option>
+                            <option value="TWD">TWD - New Taiwan Dollar</option>
+                            <option value="VES">VES - Venezuelan Bolívar</option>
+                            <option value="YER">YER - Yemeni Rial</option>
+                            <option value="ZWL">ZWL - Zimbabwean Dollar</option>
+                        </select>
+                    </div>
+                    <div class="currency-row">
+                        <select id="toCurrency">
+                            <option value="USD" selected>USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="CHF">CHF - Swiss Franc</option>
+                            <option value="CAD">CAD - Canadian Dollar</option>
+                            <option value="AUD">AUD - Australian Dollar</option>
+                            <option value="JPY">JPY - Japanese Yen</option>
+                            <option value="CNY">CNY - Chinese Yuan</option>
+                            <option value="INR">INR - Indian Rupee</option>
+                            <option value="AED">AED - UAE Dirham</option>
+                            <option value="SAR">SAR - Saudi Riyal</option>
+                            <option value="KWD">KWD - Kuwaiti Dinar</option>
+                            <option value="BHD">BHD - Bahraini Dinar</option>
+                            <option value="OMR">OMR - Omani Rial</option>
+                            <option value="QAR">QAR - Qatari Riyal</option>
+                            <option value="SGD">SGD - Singapore Dollar</option>
+                            <option value="NZD">NZD - New Zealand Dollar</option>
+                            <option value="HKD">HKD - Hong Kong Dollar</option>
+                            <option value="SEK">SEK - Swedish Krona</option>
+                            <option value="NOK">NOK - Norwegian Krone</option>
+                            <option value="DKK">DKK - Danish Krone</option>
+                            <option value="PLN">PLN - Polish Zloty</option>
+                            <option value="CZK">CZK - Czech Koruna</option>
+                            <option value="HUF">HUF - Hungarian Forint</option>
+                            <option value="TRY">TRY - Turkish Lira</option>
+                            <option value="ZAR">ZAR - South African Rand</option>
+                            <option value="MXN">MXN - Mexican Peso</option>
+                            <option value="BRL">BRL - Brazilian Real</option>
+                            <option value="ARS">ARS - Argentine Peso</option>
+                            <option value="CLP">CLP - Chilean Peso</option>
+                            <option value="PEN">PEN - Peruvian Sol</option>
+                            <option value="COP">COP - Colombian Peso</option>
+                            <option value="UYU">UYU - Uruguayan Peso</option>
+                            <option value="BOB">BOB - Bolivian Boliviano</option>
+                            <option value="PYG">PYG - Paraguayan Guarani</option>
+                            <option value="GTQ">GTQ - Guatemalan Quetzal</option>
+                            <option value="HNL">HNL - Honduran Lempira</option>
+                            <option value="NIO">NIO - Nicaraguan Cordoba</option>
+                            <option value="CRC">CRC - Costa Rican Colon</option>
+                            <option value="PAB">PAB - Panamanian Balboa</option>
+                            <option value="DOP">DOP - Dominican Peso</option>
+                            <option value="JMD">JMD - Jamaican Dollar</option>
+                            <option value="TTD">TTD - Trinidad and Tobago Dollar</option>
+                            <option value="BBD">BBD - Barbadian Dollar</option>
+                            <option value="BSD">BSD - Bahamian Dollar</option>
+                            <option value="BZD">BZD - Belize Dollar</option>
+                            <option value="KYD">KYD - Cayman Islands Dollar</option>
+                            <option value="XCD">XCD - East Caribbean Dollar</option>
+                            <option value="SRD">SRD - Surinamese Dollar</option>
+                            <option value="ANG">ANG - Netherlands Antillean Guilder</option>
+                            <option value="AWG">AWG - Aruban Florin</option>
+                            <option value="BMD">BMD - Bermudian Dollar</option>
+                            <option value="FKP">FKP - Falkland Islands Pound</option>
+                            <option value="GIP">GIP - Gibraltar Pound</option>
+                            <option value="SHP">SHP - Saint Helena Pound</option>
+                            <option value="IMP">IMP - Isle of Man Pound</option>
+                            <option value="JEP">JEP - Jersey Pound</option>
+                            <option value="GGP">GGP - Guernsey Pound</option>
+                            <option value="RON">RON - Romanian Leu</option>
+                            <option value="BGN">BGN - Bulgarian Lev</option>
+                            <option value="HRK">HRK - Croatian Kuna</option>
+                            <option value="RSD">RSD - Serbian Dinar</option>
+                            <option value="MKD">MKD - Macedonian Denar</option>
+                            <option value="BAM">BAM - Bosnia and Herzegovina Convertible Mark</option>
+                            <option value="ALL">ALL - Albanian Lek</option>
+                            <option value="MDL">MDL - Moldovan Leu</option>
+                            <option value="UAH">UAH - Ukrainian Hryvnia</option>
+                            <option value="BYN">BYN - Belarusian Ruble</option>
+                            <option value="RUB">RUB - Russian Ruble</option>
+                            <option value="GEL">GEL - Georgian Lari</option>
+                            <option value="AMD">AMD - Armenian Dram</option>
+                            <option value="AZN">AZN - Azerbaijani Manat</option>
+                            <option value="KZT">KZT - Kazakhstani Tenge</option>
+                            <option value="UZS">UZS - Uzbekistani Som</option>
+                            <option value="KGS">KGS - Kyrgyzstani Som</option>
+                            <option value="TJS">TJS - Tajikistani Somoni</option>
+                            <option value="MNT">MNT - Mongolian Tugrik</option>
+                            <option value="KRW">KRW - South Korean Won</option>
+                            <option value="THB">THB - Thai Baht</option>
+                            <option value="VND">VND - Vietnamese Dong</option>
+                            <option value="IDR">IDR - Indonesian Rupiah</option>
+                            <option value="MYR">MYR - Malaysian Ringgit</option>
+                            <option value="PHP">PHP - Philippine Peso</option>
+                            <option value="BDT">BDT - Bangladeshi Taka</option>
+                            <option value="PKR">PKR - Pakistani Rupee</option>
+                            <option value="LKR">LKR - Sri Lankan Rupee</option>
+                            <option value="NPR">NPR - Nepalese Rupee</option>
+                            <option value="BTN">BTN - Bhutanese Ngultrum</option>
+                            <option value="MVR">MVR - Maldivian Rufiyaa</option>
+                            <option value="SCR">SCR - Seychellois Rupee</option>
+                            <option value="MUR">MUR - Mauritian Rupee</option>
+                            <option value="SZL">SZL - Swazi Lilangeni</option>
+                            <option value="LSL">LSL - Lesotho Loti</option>
+                            <option value="ZMW">ZMW - Zambian Kwacha</option>
+                            <option value="MWK">MWK - Malawian Kwacha</option>
+                            <option value="KES">KES - Kenyan Shilling</option>
+                            <option value="UGX">UGX - Ugandan Shilling</option>
+                            <option value="TZS">TZS - Tanzanian Shilling</option>
+                            <option value="RWF">RWF - Rwandan Franc</option>
+                            <option value="BIF">BIF - Burundian Franc</option>
+                            <option value="CDF">CDF - Congolese Franc</option>
+                            <option value="AOA">AOA - Angolan Kwanza</option>
+                            <option value="MZN">MZN - Mozambican Metical</option>
+                            <option value="ETB">ETB - Ethiopian Birr</option>
+                            <option value="ERN">ERN - Eritrean Nakfa</option>
+                            <option value="SOS">SOS - Somali Shilling</option>
+                            <option value="DJF">DJF - Djiboutian Franc</option>
+                            <option value="KMF">KMF - Comorian Franc</option>
+                            <option value="GMD">GMD - Gambian Dalasi</option>
+                            <option value="GNF">GNF - Guinean Franc</option>
+                            <option value="SLL">SLL - Sierra Leonean Leone</option>
+                            <option value="LRD">LRD - Liberian Dollar</option>
+                            <option value="GHS">GHS - Ghanaian Cedi</option>
+                            <option value="NGN">NGN - Nigerian Naira</option>
+                            <option value="XOF">XOF - West African CFA Franc</option>
+                            <option value="XAF">XAF - Central African CFA Franc</option>
+                            <option value="CVE">CVE - Cape Verdean Escudo</option>
+                            <option value="STN">STN - Sao Tome and Principe Dobra</option>
+                            <option value="KRW">KRW - South Korean Won</option>
+                            <option value="AFN">AFN - Afghan Afghani</option>
+                            <option value="IRR">IRR - Iranian Rial</option>
+                            <option value="IQD">IQD - Iraqi Dinar</option>
+                            <option value="SYP">SYP - Syrian Pound</option>
+                            <option value="JOD">JOD - Jordanian Dinar</option>
+                            <option value="LBP">LBP - Lebanese Pound</option>
+                            <option value="ILS">ILS - Israeli New Shekel</option>
+                            <option value="EGP">EGP - Egyptian Pound</option>
+                            <option value="SDG">SDG - Sudanese Pound</option>
+                            <option value="SSP">SSP - South Sudanese Pound</option>
+                            <option value="MAD">MAD - Moroccan Dirham</option>
+                            <option value="DZD">DZD - Algerian Dinar</option>
+                            <option value="TND">TND - Tunisian Dinar</option>
+                            <option value="LYD">LYD - Libyan Dinar</option>
+                            <option value="GMD">GMD - Gambian Dalasi</option>
+                            <option value="GNF">GNF - Guinean Franc</option>
+                            <option value="SLL">SLL - Sierra Leonean Leone</option>
+                            <option value="LRD">LRD - Liberian Dollar</option>
+                            <option value="GHS">GHS - Ghanaian Cedi</option>
+                            <option value="NGN">NGN - Nigerian Naira</option>
+                            <option value="XOF">XOF - West African CFA Franc</option>
+                            <option value="XAF">XAF - Central African CFA Franc</option>
+                            <option value="CVE">CVE - Cape Verdean Escudo</option>
+                            <option value="STN">STN - Sao Tome and Principe Dobra</option>
+                            <option value="MRO">MRO - Mauritanian Ouguiya</option>
+                            <option value="MRU">MRU - Mauritanian Ouguiya</option>
+                            <option value="TOP">TOP - Tongan Pa'anga</option>
+                            <option value="WST">WST - Samoan Tala</option>
+                            <option value="VUV">VUV - Vanuatu Vatu</option>
+                            <option value="XPF">XPF - CFP Franc</option>
+                            <option value="FJD">FJD - Fijian Dollar</option>
+                            <option value="PGK">PGK - Papua New Guinean Kina</option>
+                            <option value="SBD">SBD - Solomon Islands Dollar</option>
+                            <option value="WST">WST - Samoan Tala</option>
+                            <option value="TWD">TWD - New Taiwan Dollar</option>
+                            <option value="VES">VES - Venezuelan Bolívar</option>
+                            <option value="YER">YER - Yemeni Rial</option>
+                            <option value="ZWL">ZWL - Zimbabwean Dollar</option>
+                        </select>
+                        <button class="convert-btn" id="convertBtn">Convert</button>
+                    </div>
+                    <div id="currencyResult"></div>
+                </div>
+            </div>
+        </section>
     </main>
-  </div>
-  <script src="script.js"></script>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links and add to clicked link
+                document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Hide all tab content and show the selected one
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                const targetTab = this.getAttribute('data-tab');
+                document.getElementById(targetTab).classList.add('active');
+                
+                // Update URL hash
+                window.location.hash = targetTab;
+            });
+        });
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+        });
+
+        // Calculator functionality
+        const calcSelect = document.getElementById('calcSelect');
+        const calculators = document.querySelectorAll('.calculator');
+        
+        calcSelect.addEventListener('change', function() {
+        // Hide all calculators
+        calculators.forEach(calc => {
+            calc.style.display = 'none';
+            calc.classList.remove('active');
+        });
+        
+        // Show selected calculator
+        const selectedCalc = document.getElementById(this.value);
+        if (selectedCalc) {
+            selectedCalc.style.display = 'block';
+            selectedCalc.classList.add('active');
+        }
+        });
+
+    // Date Difference Calculator
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const dateDiffResult = document.getElementById('dateDiffResult');
+        
+        [startDateInput, endDateInput].forEach(input => {
+        input.addEventListener('change', calculateDateDifference);
+        });
+        
+        function calculateDateDifference() {
+        const start = new Date(startDateInput.value);
+        const end = new Date(endDateInput.value);
+        
+        if (start && end && !isNaN(start) && !isNaN(end)) {
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            dateDiffResult.textContent = `Difference: ${diffDays} days`;
+        } else {
+            dateDiffResult.textContent = '';
+        }
+        }
+
+        // Percentage Calculator
+        const baseValueInput = document.getElementById('baseValue');
+        const percentageValueInput = document.getElementById('percentageValue');
+        const percentageResult = document.getElementById('percentageResult');
+        
+        [baseValueInput, percentageValueInput].forEach(input => {
+        input.addEventListener('input', calculatePercentage);
+        });
+        
+        function calculatePercentage() {
+        const base = parseFloat(baseValueInput.value);
+        const percentage = parseFloat(percentageValueInput.value);
+        
+        if (!isNaN(base) && !isNaN(percentage)) {
+            const result = (base * percentage) / 100;
+            percentageResult.textContent = `${percentage}% of ${base} = ${result.toFixed(2)}`;
+        } else {
+            percentageResult.textContent = '';
+        }
+        }
+
+        // German DRG
+        const maxLos2 = document.getElementById("maxLos2");
+        const bundesland = document.getElementById("bundesland");
+        const col10 = document.getElementById("col10");
+        const actualLos2 = document.getElementById("actualLos2");
+        const bundeslandResult = document.getElementById("bundeslandResult");
+
+        function updateGermanDRG() {
+        const max = parseInt(maxLos2.value);
+        const rate = parseFloat(bundesland.value);
+        const factor = parseFloat(col10.value);
+        const actual = parseInt(actualLos2.value);
+
+        if ([max, rate, factor, actual].some(isNaN)) return;
+        const ext = actual - max;
+        if (ext <= 0) {
+            bundeslandResult.innerHTML = "LOS within limit.";
+        } else {
+            const res = rate * factor * ext;
+            bundeslandResult.innerHTML = `Extended: ${ext} days → <strong>${res.toFixed(2)}</strong>`;
+        }
+        }
+        [maxLos2, bundesland, col10, actualLos2].forEach(i => i.addEventListener("input", updateGermanDRG));
+
+          // Swiss DRG
+        const cw = document.getElementById("cw");
+        const maxLos = document.getElementById("maxLos");
+        const drgRate = document.getElementById("drgRate");
+        const col9 = document.getElementById("col9");
+        const actualLos = document.getElementById("actualLos");
+        const drgResult = document.getElementById("drgResult");
+
+        function updateSwissDRG() {
+        const c = parseFloat(cw.value);
+        const m = parseInt(maxLos.value);
+        const r = parseFloat(drgRate.value);
+        const f = parseFloat(col9.value);
+        const a = parseInt(actualLos.value);
+
+        // Check for any invalid input
+        if ([c, m, r, f, a].some(isNaN)) {
+            drgResult.innerHTML = "";
+            return;
+        }
+
+        // Base payment always exists: CW * DRG Rate
+        const basePayment = c * r;
+
+        const ext = a - m;
+
+        if (ext <= 0) {
+            // LOS is within limit: only base payment
+            drgResult.innerHTML = `LOS within limit. Payment: <strong>${basePayment.toFixed(2)}</strong>`;
+        } else {
+            // LOS exceeded: add cost weight for excess days
+            const comp = (ext + 1) * f;     // +1 rule? (common in some DRG models)
+            const finalCW = c + comp;
+            const payment = finalCW * r;
+            drgResult.innerHTML = `Excess days: ${ext}. Final CW: ${finalCW.toFixed(4)} → <strong>${payment.toFixed(2)}</strong>`;
+        }
+        }
+        [cw, maxLos, drgRate, col9, actualLos].forEach(i => i.addEventListener("input", updateSwissDRG));
+
+        // Currency Converter
+        const amountInput = document.getElementById('amount');
+        const fromCurrencySelect = document.getElementById('fromCurrency');
+        const toCurrencySelect = document.getElementById('toCurrency');
+        const convertBtn = document.getElementById('convertBtn');
+        const resultAmountInput = document.getElementById('resultAmount');
+        const currencyResult = document.getElementById('currencyResult');
+
+        convertBtn.addEventListener('click', convertCurrency);
+
+        async function convertCurrency() {
+            const amount = parseFloat(amountInput.value);
+            const fromCurrency = fromCurrencySelect.value;
+            const toCurrency = toCurrencySelect.value;
+            
+            if (isNaN(amount)) {
+                currencyResult.innerHTML = '<div style="color: red;">Please enter a valid amount</div>';
+                return;
+            }
+            
+            if (fromCurrency === toCurrency) {
+                currencyResult.innerHTML = `<div>Result: ${amount.toFixed(2)} ${toCurrency}</div>`;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`);
+                const data = await response.json();
+                
+                if (data && data.rates && data.rates[toCurrency]) {
+                    const rate = data.rates[toCurrency];
+                    const convertedAmount = (amount * rate).toFixed(2);
+                    currencyResult.innerHTML = `
+                        <div>Exchange Rate: 1 ${fromCurrency} = ${rate.toFixed(6)} ${toCurrency}</div>
+                        <div class="result">Result: ${convertedAmount} ${toCurrency}</div>
+                    `;
+                } else {
+                    currencyResult.innerHTML = '<div style="color: red;">Error: Unable to fetch exchange rate</div>';
+                }
+            } catch (error) {
+                currencyResult.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
+            }
+        }
+
+        
+            // Dashboard functionality
+            let charts = [];
+            let rawData = [];
+
+            // Initialize dashboard after the page loads
+            window.addEventListener('DOMContentLoaded', function() {
+                // Check if required libraries are loaded
+                if (typeof Chart === 'undefined') {
+                    console.error("Chart.js library not loaded.");
+                    showLibraryError("Chart.js");
+                    return;
+                }
+                if (typeof Papa === 'undefined') {
+                    console.error("PapaParse library not loaded.");
+                    showLibraryError("PapaParse");
+                    return;
+                }
+
+                // Set up event listeners for dashboard controls
+                document.getElementById('refreshBtn').addEventListener('click', fetchAndRenderData);
+                document.getElementById('userFilter').addEventListener('change', filterAndRenderData);
+                document.getElementById('dateRangeFilter').addEventListener('change', filterAndRenderData);
+                document.getElementById('viewType').addEventListener('change', filterAndRenderData);
+
+                // Initial data load
+                fetchAndRenderData();
+            });
+
+            function showLibraryError(libName) {
+                const container = document.getElementById('dashboardContainer');
+                if (container) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #ef5350;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                            <h3>Library Error</h3>
+                            <p>The required library <strong>${libName}</strong> failed to load.</p>
+                            <p>Please check your internet connection or the library URL.</p>
+                        </div>`;
+                }
+            }
+
+            async function fetchAndRenderData() {
+                // Basic check again
+                if (typeof Papa === 'undefined') {
+                    console.error("PapaParse library not available in fetchAndRenderData.");
+                    showLibraryError("PapaParse");
+                    return;
+                }
+
+                const container = document.getElementById('dashboardContainer');
+                const loadingIndicator = `
+                    <div id="loadingIndicator" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 15px;"></i>
+                        <p>Loading dashboard data...</p>
+                    </div>`;
+                
+                if (container) {
+                    container.innerHTML = loadingIndicator;
+                }
+
+                try {
+                    console.log("Attempting to fetch CSV data...");
+                    const response = await fetch('data/claim_review.csv');
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to load CSV file. Server status: ${response.status} ${response.statusText}`);
+                    }
+
+                    const csvText = await response.text();
+                    console.log("CSV Text fetched (first 200 chars):", csvText.substring(0, 200));
+
+                    // Use PapaParse to convert CSV text to JSON
+                    const result = Papa.parse(csvText, {
+                        header: true,        // Use first row as keys
+                        skipEmptyLines: true // Ignore empty rows
+                    });
+
+                    console.log("Parsed CSV Data (first 3 rows):", result.data.slice(0, 3));
+                    rawData = result.data;
+
+                    // Check if data was parsed correctly
+                    if (!Array.isArray(rawData) || rawData.length === 0) {
+                        throw new Error("CSV file appears to be empty or could not be parsed correctly.");
+                    }
+
+                    // Populate user filter dropdown
+                    populateUserFilter(rawData);
+
+                    // Render charts with all data initially
+                    renderDashboardCharts(rawData);
+
+                } catch (error) {
+                    console.error("Detailed error loading CSV:", error);
+                    if (container) {
+                        container.innerHTML = `
+                            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #ef5350;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                                <h3>Error Loading Data</h3>
+                                <p>Could not load or process the dashboard data.</p>
+                                <p style="font-size: 0.9em; margin-top: 10px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                                    Technical details: ${error.message}
+                                </p>
+                                <p style="font-size: 0.9em; margin-top: 15px;">
+                                    Please ensure:
+                                    <ul style="display: inline-block; text-align: left; margin-top: 5px;">
+                                        <li>The file <code>data/claim_review.csv</code> exists in the correct location.</li>
+                                        <li>The web server has permission to read the file.</li>
+                                        <li>The CSV file is formatted correctly with headers.</li>
+                                    </ul>
+                                </p>
+                            </div>`;
+                    }
+                }
+            }
+
+            function populateUserFilter(data) {
+                const userFilter = document.getElementById('userFilter');
+                if (!userFilter) return;
+
+                const currentUserSelection = userFilter.value;
+                userFilter.innerHTML = '<option value="">All Users</option>';
+
+                const uniqueUsers = [...new Set(data.map(item => item.Name).filter(name => name && name.trim() !== ''))];
+                uniqueUsers.sort(); // Sort alphabetically
+
+                uniqueUsers.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user;
+                    option.textContent = user;
+                    userFilter.appendChild(option);
+                });
+
+                if (currentUserSelection && uniqueUsers.includes(currentUserSelection)) {
+                    userFilter.value = currentUserSelection;
+                }
+            }
+
+            function filterAndRenderData() {
+                if (!rawData || rawData.length === 0) {
+                    console.warn("No raw data to filter.");
+                    return;
+                }
+
+                const userFilterElement = document.getElementById('userFilter');
+                const dateRangeFilterElement = document.getElementById('dateRangeFilter');
+                const viewTypeElement = document.getElementById('viewType');
+
+                if (!userFilterElement || !dateRangeFilterElement || !viewTypeElement) {
+                    console.error("One or more filter elements not found.");
+                    return;
+                }
+
+                const userFilter = userFilterElement.value;
+                const dateRangeFilter = dateRangeFilterElement.value;
+                const viewType = viewTypeElement.value;
+
+                let filteredData = [...rawData];
+
+                if (userFilter) {
+                    filteredData = filteredData.filter(item => item.Name === userFilter);
+                }
+
+                if (dateRangeFilter !== 'all') {
+                    const days = parseInt(dateRangeFilter, 10);
+                    if (!isNaN(days)) {
+                        const cutoffDate = new Date();
+                        cutoffDate.setDate(cutoffDate.getDate() - days);
+
+                        filteredData = filteredData.filter(item => {
+                            const dateStr = item.Date?.trim() || item.Datein?.trim(); // Try 'Date' then 'Datein'
+                            if (!dateStr) return false;
+                            const itemDate = new Date(dateStr);
+                            // Check if date is valid
+                            return itemDate instanceof Date && !isNaN(itemDate) && itemDate >= cutoffDate;
+                        });
+                    }
+                }
+
+                renderDashboardCharts(filteredData);
+            }
+
+
+            function renderDashboardCharts(data) {
+                // Destroy existing charts
+                charts.forEach(chart => {
+                    if (chart && typeof chart.destroy === 'function') {
+                        chart.destroy();
+                    }
+                });
+                charts = [];
+
+                const container = document.getElementById('dashboardContainer');
+                if (!container) return;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                            <i class="fas fa-chart-bar" style="font-size: 48px; margin-bottom: 15px; color: #90a4ae;"></i>
+                            <h3>No Data Available</h3>
+                            <p>Try adjusting your filters to see dashboard results.</p>
+                        </div>`;
+                    return;
+                }
+
+                // Restore the chart grid container HTML
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; margin-top: 20px;">
+                        <div class="chart-container">
+                            <canvas id="userChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="dateChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="workTypeChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="savingsChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>`;
+
+                try {
+                    // Render all charts
+                    charts.push(renderUserChart(data));
+                    charts.push(renderStatusChart(data));
+                    charts.push(renderDateChart(data));
+                    charts.push(renderWorkTypeChart(data));
+                    charts.push(renderSavingsChart(data));
+                    charts.push(renderCountryChart(data));
+                } catch (chartError) {
+                    console.error("Error rendering charts:", chartError);
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #ef5350;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                            <h3>Error Rendering Charts</h3>
+                            <p>An error occurred while drawing the charts.</p>
+                            <p style="font-size: 0.9em; margin-top: 10px;">Technical details: ${chartError.message}</p>
+                        </div>`;
+                }
+            }
+
+            // --- Chart Rendering Functions ---
+            // (The rest of your chart functions remain the same)
+
+            function groupAndCount(data, key) {
+                const map = {};
+                data.forEach(row => {
+                    // Handle potential missing or null values
+                    const rawValue = row[key];
+                    const value = (rawValue != null && typeof rawValue === 'string') ? rawValue.trim() : (rawValue != null ? String(rawValue) : "Unknown");
+                    if (value === "") {
+                        map["Unknown"] = (map["Unknown"] || 0) + 1;
+                    } else {
+                        map[value] = (map[value] || 0) + 1;
+                    }
+                });
+                return map;
+            }
+
+            function renderUserChart(data) {
+                const counts = groupAndCount(data, "Name");
+                const ctxElement = document.getElementById('userChart');
+                if (!ctxElement) {
+                    console.error("Canvas element 'userChart' not found.");
+                    return null;
+                }
+                const ctx = ctxElement.getContext('2d');
+
+                return new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(counts),
+                        datasets: [{
+                            label: 'Cases per User',
+                            data: Object.values(counts),
+                            backgroundColor: [
+                                '#42a5f5', '#66bb6a', '#ff7043', '#ab47bc', '#26a69a',
+                                '#ffee58', '#29b6f6', '#8d6e63', '#9575cd', '#4db6ac'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // Important for grid layout
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Cases per User',
+                                font: { size: 16 }
+                            },
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Cases'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function renderStatusChart(data) {
+                const counts = groupAndCount(data, "Status");
+                const ctxElement = document.getElementById('statusChart');
+                if (!ctxElement) {
+                    console.error("Canvas element 'statusChart' not found.");
+                    return null;
+                }
+                const ctx = ctxElement.getContext('2d');
+
+                return new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(counts),
+                        datasets: [{
+                            label: 'Status Distribution',
+                            data: Object.values(counts),
+                            backgroundColor: [
+                                '#66bb6a', '#ef5350', '#ffa726', '#26c6da', '#ab47bc'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Case Status Distribution',
+                                font: { size: 16 }
+                            },
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+            }
+
+            function renderDateChart(data) {
+                const viewType = (document.getElementById('viewType')?.value) || 'daily';
+                let aggregatedData = {};
+
+                data.forEach(row => {
+                    // Try 'Date' first, then 'Datein'
+                    const dateStr = row["Date"]?.trim() || row["Datein"]?.trim();
+                    if (!dateStr) return;
+
+                    const date = new Date(dateStr);
+                    if (!(date instanceof Date) || isNaN(date)) {
+                        // Invalid date, skip
+                        return;
+                    }
+
+                    let key;
+                    switch(viewType) {
+                        case 'weekly':
+                            const year = date.getFullYear();
+                            const startOfYear = new Date(year, 0, 1);
+                            const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
+                            const week = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+                            key = `${year}-W${week.toString().padStart(2, '0')}`;
+                            break;
+                        case 'monthly':
+                            key = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                            break;
+                        case 'daily':
+                        default:
+                            key = date.toISOString().split('T')[0]; // Use ISO date string for daily
+                            break;
+                    }
+
+                    aggregatedData[key] = (aggregatedData[key] || 0) + 1;
+                });
+
+                // Sort by date key
+                const sortedEntries = Object.entries(aggregatedData)
+                    .sort(([a], [b]) => new Date(a) - new Date(b));
+
+                const labels = sortedEntries.map(([date]) => date);
+                const values = sortedEntries.map(([, count]) => count);
+
+                const ctxElement = document.getElementById('dateChart');
+                if (!ctxElement) {
+                    console.error("Canvas element 'dateChart' not found.");
+                    return null;
+                }
+                const ctx = ctxElement.getContext('2d');
+
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Cases Over Time',
+                            data: values,
+                            fill: true,
+                            backgroundColor: 'rgba(63, 81, 181, 0.1)',
+                            borderColor: 'rgba(63, 81, 181, 1)',
+                            tension: 0.4,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `Cases Trend (${viewType.charAt(0).toUpperCase() + viewType.slice(1)})`,
+                                font: { size: 16 }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Cases'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time Period'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function renderWorkTypeChart(data) {
+                const counts = groupAndCount(data, "Work type");
+                const ctxElement = document.getElementById('workTypeChart');
+                if (!ctxElement) {
+                    console.error("Canvas element 'workTypeChart' not found.");
+                    return null;
+                }
+                const ctx = ctxElement.getContext('2d');
+
+                return new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(counts),
+                        datasets: [{
+                            label: 'Cases by Work Type',
+                            data: Object.values(counts),
+                            backgroundColor: '#26a69a',
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Work Type Distribution',
+                                font: { size: 16 }
+                            },
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Cases'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function renderSavingsChart(data) {
+                const savingsPerUser = {};
+                data.forEach(row => {
+                    const name = row["Name"]?.trim();
+                    // Try different potential column names for savings amount
+                    const amountStr = (row["Amount Saved (if any) USD only"]?.trim()) ||
+                                    (row["Amount Saved"]?.trim()) ||
+                                    "0";
+                    // Handle cases like "USD 123.45" or just "123.45"
+                    const cleanedAmountStr = amountStr.replace(/[^\d.-]/g, '');
+                    const amount = parseFloat(cleanedAmountStr) || 0;
+
+                    if (!name) return;
+                    savingsPerUser[name] = (savingsPerUser[name] || 0) + amount;
+                });
+
+                const ctxElement = document.getElementById('savingsChart');
+                if (!ctxElement) {
+                    console.error("Canvas element 'savingsChart' not found.");
+                    return null;
+                }
+                const ctx = ctxElement.getContext('2d');
+
+                return new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(savingsPerUser),
+                        datasets: [{
+                            label: 'Total Savings per User (USD)',
+                            data: Object.values(savingsPerUser),
+                            backgroundColor: [
+                                '#ab47bc', '#7e57c2', '#5c6bc0', '#42a5f5', '#26c6da',
+                                '#26a69a', '#66bb6a', '#9ccc65', '#d4e157', '#ffee58'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Cost Savings by User',
+                                font: { size: 16 }
+                            },
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Savings Amount (USD)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function renderCountryChart(data) {
+                const counts = groupAndCount(data, "Country");
+                const ctxElement = document.getElementById('countryChart');
+                if (!ctxElement) {
+                    console.error("Canvas element 'countryChart' not found.");
+                    return null;
+                }
+                const ctx = ctxElement.getContext('2d');
+
+                return new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(counts),
+                        datasets: [{
+                            label: 'Cases by Country',
+                            data: Object.values(counts),
+                            backgroundColor: [
+                                '#ef5350', '#42a5f5', '#66bb6a', '#ffca28', '#ab47bc',
+                                '#26a69a', '#78909c', '#ffa726', '#26c6da', '#8d6e63'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Cases by Country',
+                                font: { size: 16 }
+                            },
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+            }
+
+        
+
+		// Search links functionality
+		const searchLinksInput = document.getElementById('searchLinks');
+		const linksContainer = document.getElementById('linksContainer');
+		const linkItems = linksContainer.querySelectorAll('li');
+		
+		searchLinksInput.addEventListener('input', function() {
+		  const searchTerm = this.value.toLowerCase();
+		  
+		  linkItems.forEach(item => {
+			const linkText = item.textContent.toLowerCase();
+			if (linkText.includes(searchTerm)) {
+			  item.style.display = '';
+			} else {
+			  item.style.display = 'none';
+			}
+		  });
+		});
+
+
+
+
+
+
+        // Initialize calculators
+        updateGermanDRG();
+        updateSwissDRG();
+        calculateDateDifference();
+        calculatePercentage();
+    </script>
 </body>
 </html>
