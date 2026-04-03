@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Auditor Performance Dashboard</title>
+
+<!-- CSS -->
+<link rel="stylesheet" href="X:\4 - Team Leaders\10 - OPEX\TQS Reports\4- Dashboard\Raw data_TQS\2026\data\libs\dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root {
+  /* Navy theme */
+  --primary:#0f2744; --primary-light:#1e3a5f; --accent:#3b82f6; --accent-hover:#2563eb;
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-header: #0f2744;
+  --border-color: #cbd5e1;
+  --chart-red: #f87171;
+  --chart-blue: #60a5fa;
+  --chart-green: #22c55e;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --transition: all 0.2s ease;
+  --active-card-bg: #eff6ff;
+  --active-card-border: #3b82f6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: var(--text-header);
+  padding: 14px 24px;
+  box-shadow: 0 2px 12px rgba(15, 39, 68, 0.08);
+  border-bottom: 2px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header h1 { margin: 0; font-size: 20px; font-weight: 600; display:flex; align-items:center; gap:10px; color: var(--text-header); }
+header h1 i { color: var(--accent); font-size: 22px; }
+.a-btn { background: var(--bg-tertiary); border:1px solid var(--border-color); color: var(--text-header); padding:8px 14px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:500; transition:var(--transition); display:inline-flex; align-items:center; gap:6px; }
+.a-btn:hover { background: var(--bg-secondary); border-color: var(--accent); color: var(--accent); }
+.help-btn { background: linear-gradient(135deg, var(--accent), var(--primary-light)); border:none; color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600; transition:var(--transition); display:inline-flex; align-items:center; gap:6px; box-shadow: 0 2px 4px rgba(59,130,246,0.2); }
+.help-btn:hover { background: linear-gradient(135deg, var(--accent-hover), var(--primary)); transform: translateY(-1px); box-shadow: 0 4px 8px rgba(59,130,246,0.3); }
+.help-btn i { font-size: 14px; }
+.header-right { display:flex; align-items:center; gap:12px; }
+.brand-logo { height: 52px; width:auto; object-fit:contain; display:block; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08)); max-width:260px; }
+#lastUpdated { font-size: 11px; color: var(--text-muted); text-align: right; }
+.container { padding: 20px 24px 40px; max-width: 1680px; margin: 0 auto; }
+.error-state { text-align:center; padding:60px 20px; color:#b91c1c; background:#fef2f2; border-radius:var(--radius-md); border:1px solid #fecaca; margin: 20px 0; }
+.error-state i { font-size:48px; margin-bottom:12px; opacity:0.8; }
+.error-state h3 { font-size:18px; margin-bottom:8px; }
+.error-state p { font-size:13px; color: var(--text-secondary); }
+.filters { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:12px; padding:16px; background: var(--bg-secondary); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border:1px solid var(--border-color); align-items: flex-end; }
+.filter-group { display:flex; flex-direction:column; min-width: 150px; flex:1; max-width: 210px; }
+.filter-group label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color: var(--text-secondary); margin-bottom:6px; display:flex; align-items:center; gap:5px; }
+.filter-group select { padding:9px 28px 9px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:8px; background: var(--bg-tertiary); color: var(--text-primary); cursor:pointer; transition: var(--transition); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; background-size:16px; }
+.filter-group select:focus { outline:none; border-color: var(--chart-blue); box-shadow: 0 0 0 3px rgba(96,165,250,0.2); }
+.clear-filters-btn { background:#ef4444; color:white; border:none; padding:9px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; transition:var(--transition); margin-left:auto; }
+.clear-filters-btn:hover { background:#dc2626; transform: translateY(-1px); }
+.export-btn { background:#16a34a; color:white; border:none; padding:9px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; transition:var(--transition); }
+.export-btn:hover { background:#15803d; transform: translateY(-1px); }
+.scope-banner { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:24px; padding:10px 12px; background:#fff7ed; border:1px dashed #fdba74; color:#9a3412; border-radius:8px; font-size:12px; }
+.scope-chip { background:#ffedd5; border:1px solid #fdba74; color:#7c2d12; padding:3px 8px; border-radius:999px; font-weight:600; }
+.main-layout { display:grid; grid-template-columns: 340px 1fr; gap:24px; margin-bottom:24px; align-items:start; }
+.kpi-sidebar { display:flex; flex-direction:column; gap:12px; }
+.kpi-card { background:var(--bg-secondary); border-radius:var(--radius-md); padding:14px 16px; box-shadow: var(--shadow-sm); border:1px solid var(--border-color); transition:var(--transition); cursor:pointer; position:relative; overflow:hidden; }
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.kpi-card.active { border-color: var(--active-card-border); background: var(--active-card-bg); }
+.kpi-card.active::after { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background: var(--active-card-border); }
+.kpi-card.active .kpi-value { color: var(--text-header); font-weight: 800; }
+.kpi-title { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color: var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.kpi-value { font-size:22px; font-weight:700; color: var(--text-primary); line-height:1.2; }
+.kpi-sub { font-size:11px; color: var(--text-secondary); margin-top:6px; display:none; }
+.kpi-card.active .kpi-sub { display:block; }
+.content-area { display:flex; flex-direction:column; gap:24px; }
+.chart-container { background:var(--bg-secondary); border-radius:var(--radius-md); padding:16px; box-shadow: var(--shadow-sm); border:1px solid var(--border-color); height:540px; position:relative; }
+.chart-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+.chart-title { font-size:14px; font-weight:600; color: var(--text-primary); display:flex; align-items:center; gap:8px; }
+.chart-title i { color: var(--chart-blue); }
+#dataTable_wrapper { background:var(--bg-secondary); border-radius:var(--radius-md); padding:16px; box-shadow: var(--shadow-sm); border:1px solid var(--border-color); }
+table.dataTable thead th { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color: var(--text-muted); background: var(--bg-tertiary) !important; border-bottom:2px solid var(--border-color) !important; padding:12px 10px !important; }
+table.dataTable tbody td { font-size:12px; padding:10px !important; color: var(--text-primary); border-bottom:1px solid var(--border-color) !important; }
+table.dataTable tbody tr:hover { background: var(--bg-tertiary) !important; }
+.dataTables_paginate .paginate_button { padding:4px 10px !important; margin:0 2px !important; border-radius:8px !important; background: var(--bg-tertiary) !important; border:1px solid var(--border-color) !important; color: var(--text-primary) !important; }
+.dataTables_paginate .paginate_button.current { background: var(--chart-blue) !important; border-color: var(--chart-blue) !important; color:white !important; }
+.empty-state { text-align:center; padding:40px 20px; color: var(--text-muted); }
+.empty-state i { font-size:40px; margin-bottom:12px; opacity:0.6; }
+
+@media (max-width:1100px) { .main-layout { grid-template-columns: 1fr; } .kpi-sidebar { display:grid; grid-template-columns: repeat(2,1fr); } }
+@media (max-width:900px)  { header{padding:12px 16px; gap:12px; flex-wrap:wrap;} .header-right{width:100%; justify-content:space-between;} .filters{flex-direction:column;} .filter-group{max-width:100%; min-width:100%;} .clear-filters-btn{margin-left:0; width:100%; justify-content:center;} .kpi-sidebar{grid-template-columns:1fr;} }
+@media (max-width:600px)  { .kpi-value{font-size:20px;} .brand-logo{height:44px;} }
+</style>
+</head>
+<body>
+  <header>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <a href="Quality Management Portal.html" class="a-btn"><i class="fas fa-arrow-left"></i> Home</a>
+      <h1><i class="fas fa-user-check"></i> Auditor Performance</h1>
+    </div>
+    <div class="header-right">
+      <div id="lastUpdated">Loading...</div>
+      <a href="user-guide-Auditor.html" class="help-btn" target="_blank" title="Open User Guide">
+        <i class="fas fa-question-circle"></i> Help &amp; Guide
+      </a>
+      <img src="https://via.placeholder.com/140x52?text=Auditor+Performance" alt="ReSourcePro" class="brand-logo"
+        onerror="this.style.display='none';" />
+    </div>
+  </header>
+
+<div class="container">
+  <!-- Data Error State -->
+  <div class="error-state" id="dataError" style="display:none;">
+    <i class="fas fa-exclamation-triangle"></i>
+    <h3>Data Loading Error</h3>
+    <p id="errorMessage">Unable to load dashboard data. Please check your data file path and variable name.</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters" id="filtersSection">
+    <div class="filter-group">
+      <label for="yearFilter"><i class="fas fa-calendar"></i> Year</label>
+      <select id="yearFilter"><option value="">All Years</option></select>
+    </div>
+    <div class="filter-group">
+      <label for="monthFilter"><i class="fas fa-calendar-day"></i> Month</label>
+      <select id="monthFilter"><option value="">All Months</option></select>
+    </div>
+    <div class="filter-group">
+      <label for="managerFilter"><i class="fas fa-user-cog"></i> Account Manager</label>
+      <select id="managerFilter"><option value="">All Managers</option></select>
+    </div>
+    <div class="filter-group">
+      <label for="supervisorFilter"><i class="fas fa-user-tie"></i> Supervisor</label>
+      <select id="supervisorFilter"><option value="">All Supervisors</option></select>
+    </div>
+    <div class="filter-group">
+      <label for="leaderFilter"><i class="fas fa-users"></i> Team Leader</label>
+      <select id="leaderFilter"><option value="">All Leaders</option></select>
+    </div>
+
+    <!-- New: Director -->
+    <div class="filter-group">
+      <label for="directorFilter"><i class="fas fa-user-shield"></i> Director</label>
+      <select id="directorFilter"><option value="">All Directors</option></select>
+    </div>
+    <!-- New: Shift -->
+    <div class="filter-group">
+      <label for="shiftFilter"><i class="fas fa-clock"></i> Shift</label>
+      <select id="shiftFilter"><option value="">All Shifts</option></select>
+    </div>
+
+    <div class="filter-group">
+      <label for="auditorFilter"><i class="fas fa-user"></i> Auditor</label>
+      <select id="auditorFilter"><option value="">All Auditors</option></select>
+    </div>
+    <div class="filter-group">
+      <label for="qualFilter"><i class="fas fa-award"></i> Qualification</label>
+      <select id="qualFilter">
+        <option value="">All</option>
+        <option value="Qualified">Qualified</option>
+        <option value="Not Qualified">Non Qualified</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="accountFilter"><i class="fas fa-building"></i> Account Code</label>
+      <select id="accountFilter"><option value="">All Accounts</option></select>
+    </div>
+
+    <button class="clear-filters-btn" onclick="clearAllFilters()"><i class="fas fa-undo"></i> Clear All</button>
+    <button class="export-btn" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Export</button>
+  </div>
+
+  <!-- Scope banner -->
+  <div class="scope-banner" id="scopeBanner">
+    <i class="fas fa-sliders"></i>
+    KPIs reflect the <strong>current filters</strong>. Change filters to see different durations.
+  </div>
+
+  <!-- Main Layout -->
+  <div class="main-layout">
+    <div class="kpi-sidebar" id="kpiSection"></div>
+
+    <div class="content-area">
+      <div class="chart-container">
+        <div class="chart-header">
+          <div class="chart-title" id="chartTitle">
+            <i class="fas fa-chart-line"></i>
+            <span>MoM Trend: Error Rates</span>
+          </div>
+        </div>
+        <canvas id="mainChart"></canvas>
+      </div>
+
+      <div id="dataTable_wrapper">
+        <table id="dataTable" class="display" style="width:100%">
+          <thead>
+            <tr>
+              <th>Year</th><th>Month</th><th>Account</th><th>Auditor</th><th>Qualification</th><th>Team Leader</th>
+              <th>Supervisor</th><th>Manager</th>
+              <!-- New table headers -->
+              <th>Director</th><th>Shift</th>
+              <th>Errors</th><th>Audited FTE</th><th>Error Per Hour</th>
+              <th>Avg Working Days</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<!-- libs -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- Data -->
+<script src="Auditor Performance data.js"></script>
+
+<script>
+// =====================
+// Utility Helpers
+// =====================
+const HRS_PER_DAY = 7;
+
+function formatDisplayValue(val, decimals = 3) {
+  const num = Number(val);
+  if (!isFinite(num)) return '0';
+  if (num === 0) return '0';
+  return num.toFixed(decimals);
+}
+
+function parseMonthToken(m) {
+  if (!m) return {num:0, label:String(m||'')};
+  const s = String(m).trim();
+  const part = s.split(/[^A-Za-z0-9]/)[0];
+  const map = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  const lower = part.toLowerCase().slice(0,3);
+  if (map[lower]) return {num:map[lower], label: s};
+  const n = parseInt(s,10);
+  if (!isNaN(n) && n>=1 && n<=12) return {num:n, label: s};
+  return {num:0, label:s};
+}
+
+function monthToNumber(m){ return parseMonthToken(m).num; }
+
+function monthLabel(m){
+  const t = parseMonthToken(m);
+  if (t.num>=1 && t.num<=12) {
+    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return names[t.num-1] + (String(m).match(/\d{2,4}$/) ? ('-' + String(m).match(/\d{2,4}$/)[0]) : '');
+  }
+  return String(m||'');
+}
+
+function sortByYearMonth(arr, yearField, monthField) {
+  return arr.slice().sort((a,b)=>{
+    const yA = Number(a[yearField])||0, yB = Number(b[yearField])||0;
+    if (yA!==yB) return yA - yB;
+    const mA = monthToNumber(a[monthField]);
+    const mB = monthToNumber(b[monthField]);
+    return mA - mB;
+  });
+}
+function strictNum(v){ const n = Number(v); return (v===null||v===undefined||v===''||isNaN(n))?0:n; }
+function strictSum(arr){ return arr.reduce((acc,v)=> acc + strictNum(v), 0); }
+function strictAvg(arr){ const vals = arr.map(strictNum).filter(v=>Number.isFinite(v)); if(!vals.length) return 0; return vals.reduce((a,b)=>a+b,0)/vals.length; }
+function groupBy(arr, keyFn){ return arr.reduce((map, item)=>{ const k=keyFn(item); (map[k]||(map[k]=[])).push(item); return map; },{}); }
+
+// =====================
+// Data field mapping
+// =====================
+const FIELDS = {
+  Year:'Year',
+  Month:'Month',
+  Account:'Account Abbreviation',
+  Auditor:'Auditor',
+  Qualification:'Auditor Qualification Status',
+  Manager:'Account Manager',
+  Supervisor:'Account Supervisor',
+  Leader:'Team Leader',
+  Director:'Director',  // NEW
+  Shift:'Shift',        // NEW
+
+  ErrQ:'Error Qualified',
+  FTEQ:'Total Audited FTE Qualified',
+  ErrNQ:'Error Non Qualified',
+  FTENQ:'Total Audited FTE Non Qualified',
+  ErrTotal:'Total Errors',
+  FTETotal:'Total Audited FTE',
+  AvgWD:'Average Working Days'
+};
+
+// =====================
+// Global State
+// =====================
+let RAW = [];
+let filtered = [];
+let mainChart = null;
+let dataTable = null;
+let currentKPI = 'rateQ'; // Default KPI for chart
+
+// KPI Definitions
+const kpis = [
+  { key:'rateQ', label:'Error per hour (Qualified)', icon:'fa-circle-check', decimals:3 },
+  { key:'rateNQ', label:'Error per hour (Non Qualified)', icon:'fa-circle-xmark', decimals:3 },
+  { key:'rateOverall', label:'Overall Error per hour', icon:'fa-bullseye', decimals:3 },
+  { key:'errorsTotal', label:'Total Errors', icon:'fa-triangle-exclamation', decimals:0 },
+  { key:'fteTotal', label:'Total Audited FTE', icon:'fa-users', decimals:2 },
+  { key:'avgWD', label:'Working Days', icon:'fa-business-time', decimals:2 }, 
+  { key:'audQ', label:'Auditors – Qualified', icon:'fa-award', decimals:0 },
+  { key:'audNQ', label:'Auditors – Non Qualified', icon:'fa-user-slash', decimals:0 }
+];
+
+// Extractors
+const KPI_DATA_MAP = {
+  rateQ: (r) => {
+    const errors = strictNum(r[FIELDS.ErrQ]);
+    const fte = strictNum(r[FIELDS.FTEQ]);
+    const avgWD = strictNum(r[FIELDS.AvgWD]);
+    const exposure = fte * avgWD * HRS_PER_DAY;
+    return exposure > 0 ? errors / exposure : 0;
+  },
+  rateNQ: (r) => {
+    const errors = strictNum(r[FIELDS.ErrNQ]);
+    const fte = strictNum(r[FIELDS.FTENQ]);
+    const avgWD = strictNum(r[FIELDS.AvgWD]);
+    const exposure = fte * avgWD * HRS_PER_DAY;
+    return exposure > 0 ? errors / exposure : 0;
+  },
+  rateOverall: (r) => {
+    const errors = strictNum(r[FIELDS.ErrTotal]);
+    const fte = strictNum(r[FIELDS.FTETotal]);
+    const avgWD = strictNum(r[FIELDS.AvgWD]);
+    const exposure = fte * avgWD * HRS_PER_DAY;
+    return exposure > 0 ? errors / exposure : 0;
+  },
+  errorsTotal: (r) => strictNum(r[FIELDS.ErrTotal]),
+  fteTotal: (r) => strictNum(r[FIELDS.FTETotal]),
+  avgWD: (r) => strictNum(r[FIELDS.AvgWD]),
+  errorsQ: (r) => strictNum(r[FIELDS.ErrQ]),
+  fteQ: (r) => strictNum(r[FIELDS.FTEQ]),
+  errorsNQ: (r) => strictNum(r[FIELDS.ErrNQ]),
+  fteNQ: (r) => strictNum(r[FIELDS.FTENQ]),
+  auditorsDistinct: (r) => 1,
+  audQ: (r) => (r[FIELDS.Qualification] === 'Qualified' ? 1 : 0),
+  audNQ: (r) => (r[FIELDS.Qualification] === 'Not Qualified' ? 1 : 0)
+};
+
+// =====================
+// Boot
+// =====================
+(function init(){
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof auditorData !== 'undefined' && Array.isArray(auditorData)) {
+      RAW = auditorData;
+    } else if (typeof myData !== 'undefined' && Array.isArray(myData)) {
+      RAW = myData;
+    }
+
+    if (!RAW || !Array.isArray(RAW) || RAW.length===0) {
+      document.getElementById('dataError').style.display = 'block';
+      document.getElementById('errorMessage').textContent = 'Data variable not found. Expected: auditorData (preferred) or myData.';
+      return;
+    }
+
+    document.getElementById('lastUpdated').textContent = 'Data Loaded: ' + new Date().toLocaleDateString();
+    initFilters();
+
+    // Default year
+    document.getElementById("yearFilter").value = "2026";
+
+    setupFilterListeners();
+    applyFilters();
+
+    currentKPI = 'rateQ';
+    updateChart();
+  });
+})();
+
+// =====================
+// Filters
+// =====================
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let isUpdatingOptions = false;
+
+function populateSelectNormalized(selectId, dataRows, fieldProp, defaultText) {
+  const select = document.getElementById(selectId);
+  const valuesRaw = [...new Set(
+    dataRows
+      .map(r => r[fieldProp])
+      .filter(v => v !== null && v !== undefined && v !== '')
+  )];
+
+  const values = valuesRaw.map(v => String(v));
+  const sortedValues = (fieldProp === FIELDS.Year)
+    ? values.sort((a, b) => Number(a) - Number(b))
+    : values.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+  const current = String(select.value || '');
+
+  select.innerHTML = `<option value="">${defaultText}</option>`;
+  sortedValues.forEach(val => {
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = val;
+    select.appendChild(opt);
+  });
+
+  if (current && sortedValues.includes(current)) {
+    select.value = current;
+  }
+}
+
+function populateMonthSelectNormalized(selectId, dataRows, fieldProp, defaultText) {
+  const select = document.getElementById(selectId);
+
+  const uniq = [...new Set(
+    dataRows
+      .map(r => monthToNumber(r[fieldProp]))
+      .filter(n => Number.isFinite(n) && n >= 1 && n <= 12)
+  )].sort((a, b) => a - b);
+
+  const current = String(select.value || '');
+
+  select.innerHTML = `<option value="">${defaultText}</option>`;
+  uniq.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = String(n).padStart(2, '0');
+    opt.textContent = MONTH_NAMES[n - 1];
+    select.appendChild(opt);
+  });
+
+  const validValues = uniq.map(n => String(n).padStart(2, '0'));
+  if (current && validValues.includes(current)) {
+    select.value = current;
+  }
+}
+
+function initFilters() {
+  populateSelectNormalized('yearFilter',       RAW, FIELDS.Year,       'All Years');
+  populateSelectNormalized('managerFilter',    RAW, FIELDS.Manager,    'All Managers');
+  populateSelectNormalized('supervisorFilter', RAW, FIELDS.Supervisor, 'All Supervisors');
+  populateSelectNormalized('leaderFilter',     RAW, FIELDS.Leader,     'All Leaders');
+
+  // New
+  populateSelectNormalized('directorFilter',   RAW, FIELDS.Director,   'All Directors');
+  populateSelectNormalized('shiftFilter',      RAW, FIELDS.Shift,      'All Shifts');
+
+  populateSelectNormalized('auditorFilter',    RAW, FIELDS.Auditor,    'All Auditors');
+  populateSelectNormalized('qualFilter',       RAW, FIELDS.Qualification, 'All');
+  populateSelectNormalized('accountFilter',    RAW, FIELDS.Account,    'All Accounts');
+
+  populateMonthSelectNormalized('monthFilter', RAW, FIELDS.Month, 'All Months');
+}
+
+function getDataForOptions(excludeFieldProp) {
+  const selected = {
+    [FIELDS.Year]:         document.getElementById('yearFilter').value,
+    [FIELDS.Month]:        document.getElementById('monthFilter').value,
+    [FIELDS.Manager]:      document.getElementById('managerFilter').value,
+    [FIELDS.Supervisor]:   document.getElementById('supervisorFilter').value,
+    [FIELDS.Leader]:       document.getElementById('leaderFilter').value,
+    [FIELDS.Director]:     document.getElementById('directorFilter').value, // New
+    [FIELDS.Shift]:        document.getElementById('shiftFilter').value,    // New
+    [FIELDS.Auditor]:      document.getElementById('auditorFilter').value,
+    [FIELDS.Qualification]:document.getElementById('qualFilter').value,
+    [FIELDS.Account]:      document.getElementById('accountFilter').value
+  };
+
+  return RAW.filter(row => {
+    if (excludeFieldProp !== FIELDS.Year &&
+        selected[FIELDS.Year] &&
+        String(row[FIELDS.Year]) !== String(selected[FIELDS.Year])) return false;
+
+    if (excludeFieldProp !== FIELDS.Month &&
+        selected[FIELDS.Month]) {
+      const m = String(monthToNumber(row[FIELDS.Month])).padStart(2,'0');
+      if (m !== selected[FIELDS.Month]) return false;
+    }
+
+    if (excludeFieldProp !== FIELDS.Manager &&
+        selected[FIELDS.Manager] &&
+        row[FIELDS.Manager] !== selected[FIELDS.Manager]) return false;
+
+    if (excludeFieldProp !== FIELDS.Supervisor &&
+        selected[FIELDS.Supervisor] &&
+        row[FIELDS.Supervisor] !== selected[FIELDS.Supervisor]) return false;
+
+    if (excludeFieldProp !== FIELDS.Leader &&
+        selected[FIELDS.Leader] &&
+        row[FIELDS.Leader] !== selected[FIELDS.Leader]) return false;
+
+    if (excludeFieldProp !== FIELDS.Director &&
+        selected[FIELDS.Director] &&
+        row[FIELDS.Director] !== selected[FIELDS.Director]) return false;
+
+    if (excludeFieldProp !== FIELDS.Shift &&
+        selected[FIELDS.Shift] &&
+        row[FIELDS.Shift] !== selected[FIELDS.Shift]) return false;
+
+    if (excludeFieldProp !== FIELDS.Auditor &&
+        selected[FIELDS.Auditor] &&
+        row[FIELDS.Auditor] !== selected[FIELDS.Auditor]) return false;
+
+    if (excludeFieldProp !== FIELDS.Qualification &&
+        selected[FIELDS.Qualification] &&
+        row[FIELDS.Qualification] !== selected[FIELDS.Qualification]) return false;
+
+    if (excludeFieldProp !== FIELDS.Account &&
+        selected[FIELDS.Account] &&
+        row[FIELDS.Account] !== selected[FIELDS.Account]) return false;
+
+    return true;
+  });
+}
+
+function setupFilterListeners() {
+  [
+    'yearFilter',
+    'monthFilter',
+    'managerFilter',
+    'supervisorFilter',
+    'leaderFilter',
+    'directorFilter', // New
+    'shiftFilter',    // New
+    'auditorFilter',
+    'qualFilter',
+    'accountFilter'
+  ].forEach(id => {
+    document.getElementById(id).addEventListener('change', function() {
+      updateDependentFilterOptions();
+      applyFilters();
+    });
+  });
+}
+
+function updateDependentFilterOptions() {
+  if (isUpdatingOptions) return;
+  isUpdatingOptions = true;
+
+  populateSelectNormalized('yearFilter',       getDataForOptions(FIELDS.Year),       FIELDS.Year,       'All Years');
+  populateMonthSelectNormalized('monthFilter', getDataForOptions(FIELDS.Month),      FIELDS.Month,      'All Months');
+  populateSelectNormalized('managerFilter',    getDataForOptions(FIELDS.Manager),    FIELDS.Manager,    'All Managers');
+  populateSelectNormalized('supervisorFilter', getDataForOptions(FIELDS.Supervisor), FIELDS.Supervisor, 'All Supervisors');
+  populateSelectNormalized('leaderFilter',     getDataForOptions(FIELDS.Leader),     FIELDS.Leader,     'All Leaders');
+
+  populateSelectNormalized('directorFilter',   getDataForOptions(FIELDS.Director),   FIELDS.Director,   'All Directors'); // New
+  populateSelectNormalized('shiftFilter',      getDataForOptions(FIELDS.Shift),      FIELDS.Shift,      'All Shifts');    // New
+
+  populateSelectNormalized('auditorFilter',    getDataForOptions(FIELDS.Auditor),    FIELDS.Auditor,    'All Auditors');
+  populateSelectNormalized('qualFilter',       getDataForOptions(FIELDS.Qualification), FIELDS.Qualification, 'All');
+  populateSelectNormalized('accountFilter',    getDataForOptions(FIELDS.Account),    FIELDS.Account,    'All Accounts');
+
+  isUpdatingOptions = false;
+}
+
+function clearAllFilters() {
+  document.getElementById('yearFilter').value       = '';
+  document.getElementById('monthFilter').value      = '';
+  document.getElementById('managerFilter').value    = '';
+  document.getElementById('supervisorFilter').value = '';
+  document.getElementById('leaderFilter').value     = '';
+  document.getElementById('directorFilter').value   = ''; // New
+  document.getElementById('shiftFilter').value      = ''; // New
+  document.getElementById('auditorFilter').value    = '';
+  document.getElementById('qualFilter').value       = '';
+  document.getElementById('accountFilter').value    = '';
+
+  initFilters();
+  // document.getElementById('yearFilter').value = '2026';
+
+  updateDependentFilterOptions();
+  applyFilters();
+}
+
+function applyFilters() {
+  const yearVal       = document.getElementById('yearFilter').value;
+  const monthVal      = document.getElementById('monthFilter').value;
+  const managerVal    = document.getElementById('managerFilter').value;
+  const supervisorVal = document.getElementById('supervisorFilter').value;
+  const leaderVal     = document.getElementById('leaderFilter').value;
+  const directorVal   = document.getElementById('directorFilter').value; // New
+  const shiftVal      = document.getElementById('shiftFilter').value;    // New
+  const auditorVal    = document.getElementById('auditorFilter').value;
+  const qualVal       = document.getElementById('qualFilter').value;
+  const accountVal    = document.getElementById('accountFilter').value;
+
+  filtered = RAW.filter(row => {
+    if (yearVal && String(row[FIELDS.Year]) !== String(yearVal)) return false;
+
+    if (monthVal) {
+      const m = String(monthToNumber(row[FIELDS.Month])).padStart(2, '0');
+      if (m !== monthVal) return false;
+    }
+
+    if (managerVal    && row[FIELDS.Manager]      !== managerVal)    return false;
+    if (supervisorVal && row[FIELDS.Supervisor]   !== supervisorVal) return false;
+    if (leaderVal     && row[FIELDS.Leader]       !== leaderVal)     return false;
+    if (directorVal   && row[FIELDS.Director]     !== directorVal)   return false; // New
+    if (shiftVal      && row[FIELDS.Shift]        !== shiftVal)      return false; // New
+    if (auditorVal    && row[FIELDS.Auditor]      !== auditorVal)    return false;
+    if (qualVal       && row[FIELDS.Qualification]!== qualVal)       return false;
+    if (accountVal    && row[FIELDS.Account]      !== accountVal)    return false;
+
+    return true;
+  });
+
+  updateScopeBanner();
+  updateKPIs();
+  updateChart();
+  updateTable();
+}
+
+function updateScopeBanner() {
+  const yearVal = document.getElementById('yearFilter').value || 'All Years';
+
+  const monthVal = document.getElementById('monthFilter').value;
+  const monthTxt = monthVal
+    ? (MONTH_NAMES[Math.max(1, parseInt(monthVal, 10)) - 1] || monthVal)
+    : 'All Months';
+
+  const managerVal    = document.getElementById('managerFilter').value    || 'All Managers';
+  const supervisorVal = document.getElementById('supervisorFilter').value || 'All Supervisors';
+  const leaderVal     = document.getElementById('leaderFilter').value     || 'All Leaders';
+  const directorVal   = document.getElementById('directorFilter').value   || 'All Directors'; // New
+  const shiftVal      = document.getElementById('shiftFilter').value      || 'All Shifts';    // New
+  const auditorVal    = document.getElementById('auditorFilter').value    || 'All Auditors';
+  const qualVal       = document.getElementById('qualFilter').value       || 'All';
+  const accountVal    = document.getElementById('accountFilter').value    || 'All Accounts';
+
+  const parts = [];
+  parts.push(`<span class="scope-chip"><i class="fas fa-calendar"></i> ${yearVal}</span>`);
+  parts.push(`<span class="scope-chip"><i class="fas fa-calendar-day"></i> ${monthTxt}</span>`);
+  parts.push(`<span class="scope-chip"><i class="fas fa-user-cog"></i> ${managerVal}</span>`);
+  parts.push(`<span class="scope-chip"><i class="fas fa-user-tie"></i> ${supervisorVal}</span>`);
+  parts.push(`<span class="scope-chip"><i class="fas fa-users"></i> ${leaderVal}</span>`);
+  parts.push(`<span class="scope-chip"><i class="fas fa-user-shield"></i> ${directorVal}</span>`);
+  parts.push(`<span class="scope-chip"><i class="fas fa-clock"></i> ${shiftVal}</span>`);
+  parts.push(`<span class="scope-chip"><i class="fas fa-user"></i> ${auditorVal}</span>`);
+  parts.push(`<span class="scope-chip"><i class="fas fa-award"></i> ${qualVal}</span>`);
+  parts.push(`<span class="scope-chip"><i class="fas fa-building"></i> ${accountVal}</span>`);
+
+  document.getElementById('scopeBanner').innerHTML = `
+    <i class="fas fa-sliders"></i>
+    KPIs reflect the <strong>current filters</strong>. Change filters to see different durations.
+    &nbsp;•&nbsp; ${parts.join(' ')}
+  `;
+}
+
+// =====================
+// Core Calculations
+// =====================
+function calcAggregates(rows){
+  const errorsQ = strictSum(rows.map(r=> r[FIELDS.ErrQ]));
+  const fteQ    = strictSum(rows.map(r=> r[FIELDS.FTEQ]));
+  const errorsNQ= strictSum(rows.map(r=> r[FIELDS.ErrNQ]));
+  const fteNQ   = strictSum(rows.map(r=> r[FIELDS.FTENQ]));
+  const errorsT = strictSum(rows.map(r=> r[FIELDS.ErrTotal]));
+  const fteT    = strictSum(rows.map(r=> r[FIELDS.FTETotal]));
+  const avgWD   = strictAvg(rows.map(r=> r[FIELDS.AvgWD]));
+
+  const exposureQ = fteQ * avgWD * HRS_PER_DAY;
+  const exposureNQ= fteNQ * avgWD * HRS_PER_DAY;
+  const exposureT = fteT * avgWD * HRS_PER_DAY;
+
+  const rateQ = exposureQ>0 ? (errorsQ / exposureQ) : 0;
+  const rateNQ= exposureNQ>0 ? (errorsNQ / exposureNQ) : 0;
+  const rateO = exposureT>0 ? (errorsT / exposureT) : 0;
+
+  const auds  = new Set(rows.map(r=> r[FIELDS.Auditor]).filter(Boolean));
+  const audQ  = new Set(rows.filter(r=> r[FIELDS.Qualification]==='Qualified')
+                        .map(r=> r[FIELDS.Auditor]).filter(Boolean));
+  const audNQ = new Set(rows.filter(r=> r[FIELDS.Qualification]==='Not Qualified')
+                        .map(r=> r[FIELDS.Auditor]).filter(Boolean));
+
+  const totalDistinct = auds.size;
+  const audQPct  = totalDistinct > 0 ? (audQ.size  / totalDistinct) * 100 : 0;
+  const audNQPct = totalDistinct > 0 ? (audNQ.size / totalDistinct) * 100 : 0;
+
+  return {
+    errorsQ, fteQ, rateQ,
+    errorsNQ, fteNQ, rateNQ,
+    errorsTotal: errorsT, fteTotal: fteT, rateOverall: rateO,
+    avgWD,
+    auditorsDistinct: totalDistinct,
+    audQ: audQ.size,
+    audNQ: audNQ.size,
+    audQPct,
+    audNQPct
+  };
+}
+
+// =====================
+// KPIs
+// =====================
+function updateKPIs(){
+  const box = document.getElementById('kpiSection');
+  box.innerHTML = '';
+  if (!filtered.length) { 
+    box.innerHTML = "<div class='empty-state'><i class='fas fa-info-circle'></i><br>No data for selected filters</div>"; 
+    return; 
+  }
+  const agg = calcAggregates(filtered);
+
+  kpis.forEach((k)=>{
+    const isActive = (k.key === currentKPI);
+    const card = document.createElement('div');
+    card.className = 'kpi-card' + (isActive ? ' active' : '');
+    card.setAttribute('data-kpi', k.key);
+
+    card.innerHTML = `
+      <div class="kpi-title"><i class="fas ${k.icon}"></i> ${k.label}</div>
+      <div class="kpi-value"></div>
+      <div class="kpi-sub"></div>
+    `;
+
+    const valueEl = card.querySelector('.kpi-value');
+    const subEl = card.querySelector('.kpi-sub');
+
+    if (k.key === 'audQ' || k.key === 'audNQ') {
+      const isQualified = (k.key === 'audQ');
+      const count = isQualified ? agg.audQ : agg.audNQ;
+      const pct = isQualified ? agg.audQPct : agg.audNQPct;
+
+      if (isActive) {
+        valueEl.textContent = String(count);
+        subEl.textContent = `${formatDisplayValue(pct, 1)}% contribution`;
+      } else {
+        valueEl.textContent = `${formatDisplayValue(pct, 1)}%`;
+        subEl.textContent = `${count} of ${agg.auditorsDistinct} auditors`;
+      }
+    } else {
+      const val = agg[k.key] ?? 0;
+      valueEl.textContent = formatDisplayValue(val, k.decimals);
+      subEl.textContent = '';
+    }
+
+    card.onclick = () => {
+      currentKPI = k.key;
+      updateChart();
+      updateKPIs();
+    };
+
+    box.appendChild(card);
+  });
+}
+
+// =====================
+// Charting
+// =====================
+function timeKey(r){
+  const y = String(r[FIELDS.Year]||'');
+  const m = monthToNumber(r[FIELDS.Month]);
+  return y+ '-' + String(m).padStart(2,'0');
+}
+
+function updateChart(){
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  if (mainChart) { mainChart.destroy(); mainChart = null; }
+  if (!filtered.length) return;
+
+  const sorted = sortByYearMonth(filtered, FIELDS.Year, FIELDS.Month);
+
+  const timeGroups = groupBy(sorted, r => timeKey(r));
+  const timeKeys = Object.keys(timeGroups).sort();
+  const labels = timeKeys.map(k => {
+    const [y, m] = k.split('-');
+    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return names[parseInt(m,10)-1] + '-' + y.slice(-2);
+  });
+
+  const kpiConfig = kpis.find(k => k.key === currentKPI);
+  const decimals = kpiConfig ? kpiConfig.decimals : 3;
+
+  const dataValues = timeKeys.map(k => {
+    const rows = timeGroups[k];
+    if (['auditorsDistinct','audQ','audNQ'].includes(currentKPI)) {
+      const auds = new Set(rows.map(r => r[FIELDS.Auditor]).filter(Boolean));
+      if (currentKPI === 'auditorsDistinct') return auds.size;
+      if (currentKPI === 'audQ') return new Set(rows.filter(r => r[FIELDS.Qualification]==='Qualified').map(r => r[FIELDS.Auditor]).filter(Boolean)).size;
+      if (currentKPI === 'audNQ') return new Set(rows.filter(r => r[FIELDS.Qualification]==='Not Qualified').map(r => r[FIELDS.Auditor]).filter(Boolean)).size;
+    }
+    if (['errorsTotal','fteTotal','errorsQ','errorsNQ','fteQ','fteNQ','avgWD'].includes(currentKPI)) {
+      return strictSum(rows.map(r => KPI_DATA_MAP[currentKPI] ? KPI_DATA_MAP[currentKPI](r) : 0));
+    }
+    if (['rateQ','rateNQ','rateOverall'].includes(currentKPI)) {
+      return calcAggregates(rows)[currentKPI];
+    }
+    return 0;
+  });
+
+  let paddedLabels = labels.slice();
+  let paddedData = dataValues.slice();
+  if (labels.length === 1) {
+    paddedLabels = ['', labels[0], ''];
+    paddedData = [null, dataValues[0], null];
+  }
+
+  const realVals = paddedData.filter(v => v != null && isFinite(v));
+  let yMin = Math.min(...realVals, 0);
+  let yMax = Math.max(...realVals, 0.001);
+  if (yMin === yMax) { yMax = yMin + Math.abs(yMin * 0.2) + 0.001; }
+  const pad = (yMax - yMin) * 0.15;
+  yMin = Math.max(0, yMin - pad);
+  yMax = yMax + pad;
+
+  const isRate = currentKPI.includes('rate');
+  const lineColor = isRate ? '#2563eb' : '#16a34a';
+  const fillColor = isRate ? 'rgba(37, 99, 235, 0.1)' : 'rgba(22, 163, 74, 0.1)';
+
+  mainChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: paddedLabels,
+      datasets: [{
+        label: kpiConfig?.label || currentKPI,
+        data: paddedData,
+        borderColor: lineColor,
+        backgroundColor: fillColor,
+        tension: 0.3,
+        fill: true,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: lineColor,
+        pointBorderWidth: 2,
+        pointHoverRadius: 6,
+        spanGaps: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 40, right: 40, bottom: 60, left: 60 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          mode: 'index',
+          intersect: false,
+          filter: (item) => Number.isFinite(item.parsed.y),
+          callbacks: {
+            label: (ctx) => {
+              const val = ctx.parsed.y;
+              return `${kpiConfig?.label || currentKPI}: ${formatDisplayValue(val, decimals)}`;
+            }
+          }
+        },
+        datalabels: {
+          display: (ctx) => Number.isFinite(ctx?.dataset?.data?.[ctx.dataIndex]),
+          anchor: 'center',
+          align: 'center',
+          offset: 0,
+          font: { size: 11, weight: '700' },
+          color: '#0f172a',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          borderColor: '#0f172a',
+          borderWidth: 1.5,
+          borderRadius: 4,
+          padding: { top: 3, bottom: 3, left: 8, right: 8 },
+          formatter: (val) => formatDisplayValue(val, decimals),
+          clip: false,
+          clamp: true
+        }
+      },
+      scales: {
+        x: {
+          offset: true,
+          grid: { display: false },
+          ticks: {
+            autoSkip: true,
+            maxRotation: 0,
+            minRotation: 0,
+            font: { size: 12 },
+            padding: 6,
+            callback: function(value) {
+              const raw = this.getLabelForValue(value);
+              return raw === '' ? '' : raw;
+            }
+          }
+        },
+        y: {
+          min: yMin,
+          max: yMax,
+          grid: { color: 'rgba(0,0,0,0.06)' },
+          ticks: {
+            display: false,
+            callback: function(val) {
+              return formatDisplayValue(val, Math.min(decimals, 3));
+            }
+          },
+          title: { display: false }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+  
+  document.querySelector('#chartTitle span').textContent = `MoM Trend: ${kpiConfig?.label || currentKPI}`;
+}
+
+// =====================
+// Table
+// =====================
+function updateTable(){
+  const tbody = document.querySelector('#dataTable tbody');
+  tbody.innerHTML = '';
+
+  if (dataTable) { dataTable.clear(); dataTable.destroy(); dataTable=null; }
+
+  if (!filtered.length){
+    // 12 original cols + 2 new = 14
+    tbody.innerHTML = `<tr><td colspan="14" class="empty-state"><i class='fas fa-database'></i><br>No data matches filters</td></tr>`;
+  } else {
+    const rows = sortByYearMonth(filtered, FIELDS.Year, FIELDS.Month);
+    rows.forEach(r=>{
+      const obj = calcAggregates([r]);
+      const tr = document.createElement('tr');
+      const monthName = monthLabel(r[FIELDS.Month]);
+      const cells = [
+        r[FIELDS.Year], monthName, r[FIELDS.Account]||'', r[FIELDS.Auditor]||'', r[FIELDS.Qualification]||'', r[FIELDS.Leader]||'',
+        r[FIELDS.Supervisor]||'', r[FIELDS.Manager]||'',
+        // New columns
+        r[FIELDS.Director]||'', r[FIELDS.Shift]||'',
+        formatDisplayValue(strictNum(r[FIELDS.ErrTotal]), 0), formatDisplayValue(strictNum(r[FIELDS.FTETotal]), 2), formatDisplayValue(obj.rateOverall, 6),
+        formatDisplayValue(strictNum(r[FIELDS.AvgWD]), 2)
+      ];
+      cells.forEach((v,idx)=>{ 
+        const td=document.createElement('td'); 
+        td.textContent = v; 
+        if (idx===0) td.setAttribute('data-order', Number(r[FIELDS.Year])||0); 
+        if (idx===1) td.setAttribute('data-order', String(monthToNumber(r[FIELDS.Month])).padStart(2,'0')); 
+        tr.appendChild(td); 
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  dataTable = $('#dataTable').DataTable({ 
+    pageLength: 10, 
+    lengthChange:false, 
+    ordering:true, 
+    order:[[0,'asc'],[1,'asc']], 
+    searching:true, 
+    info:true 
+  });
+}
+
+// =====================
+// Export
+// =====================
+function exportToExcel(){
+  if (typeof XLSX==='undefined'){ alert('Export library not loaded.'); return; }
+  const sorted = sortByYearMonth(filtered, FIELDS.Year, FIELDS.Month);
+  const header = [
+    'Year','Month','Account','Auditor','Qualification','Team Leader','Supervisor','Manager',
+    // New
+    'Director','Shift',
+    'Errors Q','FTE Q','Rate Q','Errors NQ','FTE NQ','Rate NQ','Total Errors','Total FTE','Overall Rate','Avg Working Days'
+  ];
+  const rows = sorted.map(r=>{
+    const a = calcAggregates([r]);
+    return [
+      Number(r[FIELDS.Year])||null,
+      monthLabel(r[FIELDS.Month]),
+      r[FIELDS.Account]||'', r[FIELDS.Auditor]||'', r[FIELDS.Qualification]||'', r[FIELDS.Leader]||'', r[FIELDS.Supervisor]||'', r[FIELDS.Manager]||'',
+      // New fields in export
+      r[FIELDS.Director]||'', r[FIELDS.Shift]||'',
+      strictNum(r[FIELDS.ErrQ]), strictNum(r[FIELDS.FTEQ]), Number(formatDisplayValue(a.rateQ, 6)),
+      strictNum(r[FIELDS.ErrNQ]), strictNum(r[FIELDS.FTENQ]), Number(formatDisplayValue(a.rateNQ, 6)),
+      strictNum(r[FIELDS.ErrTotal]), strictNum(r[FIELDS.FTETotal]), Number(formatDisplayValue(a.rateOverall, 6)),
+      strictNum(r[FIELDS.AvgWD])
+    ];
+  });
+  const aoa = [header, ...rows];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [
+    {wch:6},{wch:7},{wch:16},{wch:18},{wch:14},{wch:14},{wch:14},{wch:14},
+    {wch:12},{wch:10},
+    {wch:10},{wch:9},{wch:10},{wch:11},{wch:9},{wch:10},{wch:12},{wch:10},{wch:12},{wch:14}
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Auditor Performance');
+  const fileName = `Auditor_Performance_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, fileName);
+}
+</script>
+
+</body>
+</html>

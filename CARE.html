@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CARE Dashboard</title>
+
+<!-- External Libraries -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root {
+  --primary: #0f2744; --primary-light: #1e3a5f; --accent: #3b82f6; --accent-hover: #2563eb;
+  --bg-primary: #f1f5f9; --bg-secondary: #ffffff; --bg-tertiary: #f8fafc;
+  --text-primary: #1e293b; --text-secondary: #475569; --text-muted: #64748b; --text-header: #0f2744;
+  --border-color: #cbd5e1;
+  --chart-red: #f87171; --chart-yellow: #f59e0b; --chart-blue: #3b82f6;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05); --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --radius-sm: 8px; --radius-md: 12px;
+  --transition: all 0.2s ease;
+  --active-card-bg: #eff6ff; --active-card-border: #3b82f6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; overflow-x: hidden; }
+
+/* HEADER */
+header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: var(--text-header); padding: 12px 24px; box-shadow: 0 2px 12px rgba(15, 39, 68, 0.08);
+  border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+}
+header h1 { font-size: 19px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+header h1 i { color: var(--accent); font-size: 20px; }
+.home-btn { 
+    text-decoration: none; color: var(--text-header); background: var(--bg-tertiary); 
+    padding: 6px 12px; border-radius: var(--radius-sm); border:1px solid var(--border-color);
+    font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;
+}
+.home-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.container { padding: 16px 24px 40px; max-width: 1600px; margin: 0 auto; }
+
+/* Filters */
+.filters {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
+  padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+}
+.filter-group { display: flex; flex-direction: column; min-width: 120px; flex: 1; }
+.filter-group label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 5px; }
+.filter-group select {
+  padding: 6px 22px 6px 8px; font-size: 11px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  background: var(--bg-tertiary); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center; background-size: 12px; cursor: pointer;
+}
+.clear-btn { background: #ef4444; color: white; border: none; padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; font-weight: 600; align-self: flex-end; }
+
+/* Layout */
+.main-layout { display: grid; grid-template-columns: 240px 1fr; gap: 20px; }
+.kpi-sidebar { display: flex; flex-direction: column; gap: 8px; }
+.kpi-card { 
+    background: var(--bg-secondary); border-radius: 10px; padding: 10px 12px; border: 1px solid var(--border-color); 
+    cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); position: relative;
+}
+.kpi-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.kpi-card.active { border-color: var(--active-card-border); background: var(--active-card-bg); }
+.kpi-card.active::after { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--active-card-border); border-radius: 4px 0 0 4px; }
+.kpi-title { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items:center; gap:5px; }
+.kpi-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.kpi-sub { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+
+/* Chart Area */
+.chart-area { display: flex; flex-direction: column; gap: 20px; }
+.chart-container { 
+    background: var(--bg-secondary); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border-color); 
+    height: 480px; box-shadow: var(--shadow-sm);
+}
+.yoy-container { 
+    background: var(--bg-secondary); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border-color); 
+    height: 280px; box-shadow: var(--shadow-sm);
+}
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.chart-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.status-dot.red { background: var(--chart-red); }
+.status-dot.yellow { background: var(--chart-yellow); }
+.status-dot.blue { background: var(--chart-blue); }
+</style>
+</head>
+<body>
+
+<header>
+  <div><h1><i class="fas fa-heartbeat"></i> CARE Performance</h1></div>
+  <a href="Quality Management Portal.html" class="home-btn"><i class="fas fa-home"></i> Back to Portal</a>
+</header>
+
+<div class="container">
+  <div class="filters">
+    <div class="filter-group"><label>Created Year</label><select id="yearF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Parent Company</label><select id="parentF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Account Name</label><select id="accF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Manager</label><select id="mgrF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Supervisor</label><select id="supF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Team Leader</label><select id="tlF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Executive</label><select id="execF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Color</label><select id="colorF"><option value="">All</option><option value="Red">Red</option><option value="Yellow">Yellow</option><option value="Blue">Blue</option></select></div>
+    <button class="clear-btn" onclick="clearFilt()">Clear</button>
+  </div>
+
+  <div class="main-layout">
+    <div class="kpi-sidebar" id="kpiList"></div>
+    <div class="chart-area">
+      <div class="chart-container">
+        <div class="chart-header">
+          <div class="chart-title"><i class="fas fa-chart-line"></i> <span id="mainChartTitle">Trend by Year</span></div>
+        </div>
+        <canvas id="mainChart"></canvas>
+      </div>
+      <div class="yoy-container">
+        <div class="chart-header">
+            <div class="chart-title"><i class="fas fa-chart-bar"></i> <span>YOY: Red / Yellow / Blue Distribution</span></div>
+        </div>
+        <canvas id="yoyChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="./care.js"></script>
+
+<script>
+let filtered = [];
+let mainChart = null, yoyChart = null;
+let currentMetric = 'total';
+const CURRENT_YEAR = new Date().getFullYear();
+
+const kpiConfig = [
+  { key: 'total', label: 'Total Records', icon: 'fa-file-alt' },
+  { key: 'open', label: 'Open CARE', icon: 'fa-toggle-on' },
+  { key: 'closed', label: 'Closed CARE', icon: 'fa-toggle-off' },
+  { key: 'red', label: 'Red CARE', icon: 'fa-circle', iconColor: 'red' },
+  { key: 'yellow', label: 'Yellow CARE', icon: 'fa-circle', iconColor: 'yellow' },
+  { key: 'blue', label: 'Blue CARE', icon: 'fa-circle', iconColor: 'blue' },
+  { key: 'health', label: 'Health Score', icon: 'fa-heartbeat' }
+];
+
+function pop(id, field) {
+  const s = document.getElementById(id); const val = s.value;
+  const vals = [...new Set(myData.map(r => r[field]).filter(x => x))].sort();
+  s.innerHTML = '<option value="">All</option>';
+  vals.forEach(v => s.appendChild(new Option(v, v)));
+  if(val) s.value = val;
+}
+
+function initFilt() {
+  pop('yearF', 'Created Year'); pop('parentF', 'Parent Company'); pop('accF', 'Account Name'); 
+  pop('mgrF', 'Manager'); pop('supF', 'Supervisor'); pop('tlF', 'Teamleader'); pop('execF', 'Client Executive');
+  ['yearF','parentF','accF','mgrF','supF','tlF','execF','colorF'].forEach(id => document.getElementById(id).onchange = run);
+}
+
+function clearFilt() {
+  ['yearF','parentF','accF','mgrF','supF','tlF','execF','colorF'].forEach(id => document.getElementById(id).value = '');
+  run();
+}
+
+function run() {
+  const [yr, pa, ac, mg, su, tl, ex, co] = ['yearF','parentF','accF','mgrF','supF','tlF','execF','colorF'].map(id => document.getElementById(id).value);
+  filtered = myData.filter(r => 
+    (!yr || String(r['Created Year']) === yr) &&
+    (!pa || r['Parent Company'] === pa) &&
+    (!ac || r['Account Name'] === ac) &&
+    (!mg || r['Manager'] === mg) &&
+    (!su || r['Supervisor'] === su) &&
+    (!tl || r['Teamleader'] === tl) &&
+    (!ex || r['Client Executive'] === ex) &&
+    (!co || r['Color'] === co)
+  );
+  updateKPI(); updateMainChart(); updateYOYChart();
+}
+
+function getMetricVal(key, data) {
+    if(key === 'total') return data.length;
+    if(key === 'open') return data.filter(r => r.Status === 'Open').length;
+    if(key === 'closed') return data.filter(r => r.Status === 'Closed').length;
+    if(key === 'red') return data.filter(r => (r.Color||'').toLowerCase() === 'red').length;
+    if(key === 'yellow') return data.filter(r => (r.Color||'').toLowerCase() === 'yellow').length;
+    if(key === 'blue') return data.filter(r => (r.Color||'').toLowerCase() === 'blue').length;
+    if(key === 'health') {
+        if(!data.length) return 0;
+        const total = data.length;
+        const red = data.filter(r => (r.Color||'').toLowerCase() === 'red').length;
+        const blue = data.filter(r => (r.Color||'').toLowerCase() === 'blue').length;
+        return ((blue * 100 + (total - red - blue) * 50) / total).toFixed(1);
+    }
+    return 0;
+}
+
+function updateKPI() {
+  const list = document.getElementById('kpiList'); list.innerHTML = '';
+  kpiConfig.forEach(k => {
+    const val = getMetricVal(k.key, filtered);
+    const d = document.createElement('div');
+    d.className = 'kpi-card' + (currentMetric === k.key ? ' active' : '');
+    let iconHTML = `<i class="fas ${k.icon}"></i>`;
+    if(k.iconColor) iconHTML = `<span class="status-dot ${k.iconColor}"></span>`;
+    
+    d.innerHTML = `<div class="kpi-title">${iconHTML} ${k.label}</div><div class="kpi-value">${val}${k.key==='health'?'%':''}</div>`;
+    d.onclick = () => { currentMetric = k.key; document.getElementById('mainChartTitle').innerText = 'Trend: ' + k.label; run(); };
+    list.appendChild(d);
+  });
+}
+
+const dataLabelsBox = {
+    id: 'dataLabelsBox',
+    afterDatasetsDraw(c) {
+      const {ctx} = c;
+      c.data.datasets.forEach((ds, dsI) => {
+        const meta = c.getDatasetMeta(dsI);
+        meta.data.forEach((p, i) => {
+          const val = ds.data[i]; if(val === null || val === undefined) return;
+          ctx.save(); ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+          const txt = String(val);
+          const w = ctx.measureText(txt).width + 10, h = 18;
+          ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.strokeStyle = ds.borderColor;
+          ctx.beginPath(); ctx.roundRect(p.x - w/2, p.y - h - 6, w, h, 4); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#1e293b'; ctx.fillText(txt, p.x, p.y - h/2 - 7);
+          ctx.restore();
+        });
+      });
+    }
+};
+
+function updateMainChart() {
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  if(mainChart) mainChart.destroy();
+
+  const years = [...new Set(filtered.map(r => r['Created Year']).filter(x => x))].sort();
+  const datasets = [];
+  
+  if(currentMetric === 'total') {
+      datasets.push({ label: 'Open', data: years.map(y => filtered.filter(r => String(r['Created Year']) === String(y) && r.Status === 'Open').length), borderColor: '#f87171', backgroundColor: 'rgba(248,113,113,0.1)', fill:true, tension: 0.3 });
+      datasets.push({ label: 'Closed', data: years.map(y => filtered.filter(r => String(r['Created Year']) === String(y) && r.Status === 'Closed').length), borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill:true, tension: 0.3 });
+  } else {
+      const col = currentMetric === 'red' ? '#f87171' : (currentMetric === 'yellow' ? '#f59e0b' : (currentMetric==='blue'?'#3b82f6':'#60a5fa'));
+      datasets.push({ label: currentMetric, data: years.map(y => getMetricVal(currentMetric, filtered.filter(r => String(r['Created Year']) === String(y)))), borderColor: col, backgroundColor: col+'1A', fill:true, tension: 0.3 });
+  }
+
+  mainChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: years, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: currentMetric === 'total' } },
+      scales: { x: { grid: { display: false } }, y: { grid: { display: false }, ticks: { display: false } } }
+    },
+    plugins: [dataLabelsBox]
+  });
+}
+
+function updateYOYChart() {
+    const ctx = document.getElementById('yoyChart').getContext('2d');
+    if(yoyChart) yoyChart.destroy();
+    
+    const years = [...new Set(filtered.map(r => r['Created Year']).filter(x => x))].sort();
+    const red = years.map(y => filtered.filter(r => String(r['Created Year']) === String(y) && (r.Color||'').toLowerCase() === 'red').length);
+    const yellow = years.map(y => filtered.filter(r => String(r['Created Year']) === String(y) && (r.Color||'').toLowerCase() === 'yellow').length);
+    const blue = years.map(y => filtered.filter(r => String(r['Created Year']) === String(y) && (r.Color||'').toLowerCase() === 'blue').length);
+
+    yoyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: years,
+            datasets: [
+                { label: 'Red', data: red, backgroundColor: '#f87171' },
+                { label: 'Yellow', data: yellow, backgroundColor: '#f59e0b' },
+                { label: 'Blue', data: blue, backgroundColor: '#3b82f6' }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: { x: { grid: { display: false }, stacked: true }, y: { grid: { display: false }, ticks: { display: false }, stacked: true } }
+        },
+        plugins: [dataLabelsBox]
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => { initFilt(); run(); });
+</script>
+</body>
+</html>

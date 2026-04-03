@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Total Quality System – User Guide</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root{
+      /* Professional Navy Theme - Light Header */
+      --primary:#0f2744; --primary-light:#1e3a5f; --accent:#3b82f6; --accent-hover:#2563eb;
+      --bg:#f1f5f9; --card:#ffffff; --header-bg:#ffffff; 
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f8fafc;
+      --border:#cbd5e1; --border-color:#cbd5e1; --muted:#64748b; --text:#1e293b; --text-header:#0f2744;
+      --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; 
+      --shadow:0 2px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.08);
+      --transition: all 0.2s ease;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;}
+    
+    header{
+      background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      color:var(--text-header);
+      padding:16px 40px;
+      position:sticky;
+      top:0;
+      z-index:10;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:0 2px 12px rgba(15, 39, 68, 0.08);
+      border-bottom:2px solid #e2e8f0;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    /* Back Button */
+    .back-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-header);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-btn:hover { 
+      background: var(--bg-secondary); 
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .title{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:600;
+      font-size:22px;
+      color:var(--text-header);
+      letter-spacing:-0.025em;
+    }
+    
+    .title i{
+      color:var(--accent);
+      font-size:24px;
+    }
+    
+    .brand-logo{
+      height:56px;
+      width:auto;
+      object-fit:contain;
+      display:block;
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,0.08));
+      max-width:280px;
+    }
+    
+    .container{max-width:1100px;margin:32px auto;padding:0 24px 60px}
+    
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:24px;
+      margin:16px 0;
+      transition:all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card:hover{
+      box-shadow:0 12px 24px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.08);
+    }
+    
+    h2{font-size:20px;margin:0 0 12px;color:var(--primary);font-weight:700}
+    h3{font-size:16px;margin:20px 0 10px;color:var(--primary-light);font-weight:600}
+    p{margin:10px 0;color:#334155;line-height:1.6}
+    .tiny{font-size:12px;color:#64748b;margin-top:20px}
+    ol,ul{padding-left:20px;margin:10px 0}
+    li{margin:6px 0}
+    code{
+      background:#f1f5f9;
+      border:1px solid #e2e8f0;
+      padding:2px 8px;
+      border-radius:6px;
+      font-family:ui-monospace,Consolas,Menlo,monospace;
+      font-size:13px;
+      color:#0f2744;
+    }
+    
+    /* Path block */
+    .path-box{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin:12px 0;
+    }
+    
+    .path-field{
+      flex:1;
+      min-width:280px;
+      background:#f8fafc;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:12px 14px;
+      font-family:ui-monospace,Consolas,Menlo,monospace;
+      font-size:12px;
+      white-space:nowrap;
+      overflow:auto;
+      color:var(--text);
+    }
+    
+    .btn{
+      background:var(--accent);
+      color:#fff;
+      border:none;
+      border-radius:10px;
+      padding:10px 16px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      text-decoration:none;
+      font-weight:600;
+      font-size:14px;
+      transition:all 0.2s;
+      box-shadow:0 2px 4px rgba(59, 130, 246, 0.2);
+    }
+    
+    .btn:hover{
+      background:var(--accent-hover);
+      transform:translateY(-1px);
+      box-shadow:0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn:active{
+      transform:translateY(0);
+    }
+    
+    .btn:disabled{
+      opacity:0.6;
+      cursor:not-allowed;
+      transform:none;
+    }
+    
+    /* Table */
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+      margin:12px 0;
+    }
+    
+    th,td{
+      padding:12px;
+      border-bottom:1px solid var(--border);
+      font-size:13px;
+      text-align:left;
+    }
+    
+    th{
+      background:#f1f5f9;
+      text-transform:uppercase;
+      font-size:11px;
+      letter-spacing:0.5px;
+      color:#475569;
+      font-weight:700;
+    }
+    
+    tr:last-child td{
+      border-bottom:none;
+    }
+    
+    tr:hover td{
+      background:#f8fafc;
+    }
+    
+    /* Callouts */
+    .note{
+      background:linear-gradient(135deg, #eff6ff, #dbeafe);
+      border:1px solid #bfdbfe;
+      color:#1e40af;
+      padding:12px 16px;
+      border-radius:10px;
+      margin:12px 0;
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+    }
+    
+    .note i{
+      margin-top:2px;
+      flex-shrink:0;
+    }
+    
+    .warn{
+      background:linear-gradient(135deg, #fff7ed, #ffedd5);
+      border:1px dashed #fdba74;
+      color:#9a3412;
+      padding:12px 16px;
+      border-radius:10px;
+      margin:12px 0;
+    }
+    
+    /* Links */
+    a{
+      color:var(--accent);
+      text-decoration:none;
+      font-weight:600;
+      transition:color 0.2s;
+    }
+    
+    a:hover{
+      color:var(--accent-hover);
+      text-decoration:underline;
+    }
+    
+    /* Simple responsive tweaks */
+    @media (max-width:720px){
+      header{
+        padding:14px 20px;
+        flex-direction:column;
+        gap:16px;
+        text-align:center;
+      }
+      
+      .header-left {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .title{
+        font-size:18px;
+      }
+      
+      .brand-logo{
+        height:48px;
+        max-width:240px;
+      }
+      
+      .container{
+        margin:24px auto;
+        padding:0 16px 60px;
+      }
+      
+      .path-box{
+        flex-direction:column;
+        align-items:stretch;
+      }
+      
+      .card{
+        padding:18px;
+      }
+      
+      table{
+        font-size:12px;
+      }
+      
+      th,td{
+        padding:8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <!-- Back Button - Links to TQS Dashboard -->
+      <a href="X:\4 - Team Leaders\10 - OPEX\TQS Reports\4- Dashboard\Raw data_TQS\2026\data\pages\TQS Dashboard.html" class="back-btn" title="Return to Dashboard">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+      </a>
+      
+      <div class="title">
+        <i class="fas fa-book"></i> 
+        <span>Total Quality System – User Guide</span>
+      </div>
+    </div>
+    
+    <!-- Brand Logo -->
+    <img
+      src="X:\4 - Team Leaders\10 - OPEX\TQS Reports\4- Dashboard\Raw data_TQS\2026\data\img\STANDARD_OL.png"
+      alt="ReSourcePro"
+      class="brand-logo"
+      onerror="this.style.display='none'; console.warn('Logo not found - check file path');"
+    />
+  </header>
+	
+  <div class="container">
+
+    <!-- Getting Started -->
+    <div class="card">
+      <h2>Getting Started</h2>
+      <p>Open the following file to launch the portal:</p>
+      <div class="path-box">
+        <div id="tqsPath" class="path-field">X:\4 - Team Leaders\10 - OPEX\TQS Reports\4- Dashboard\2026\Quality Management Portal.html</div>
+        <button class="btn" id="copyBtn"><i class="fas fa-copy"></i> Copy Path</button>
+      </div>
+      <p>On the home page, click the <strong>TQS</strong> card to open the Total Quality System dashboard.</p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="card">
+      <h2>Navigation</h2>
+      <ol>
+        <li>Use the <strong>TQS card</strong> on the home page to enter the dashboard.</li>
+        <li>Use the top <strong>filters</strong> (Year, Account Manager, Supervisor, Team Leader, Account) to refine the scope. The page updates instantly.</li>
+        <li>Click a <strong>KPI card</strong> on the left to switch the main trend chart to that metric.</li>
+        <li>Use the <strong>data table</strong> at the bottom to search, sort, and review detailed account level data.</li>
+        <li>Click <strong>Export to Excel</strong> to download the current, filtered view.</li>
+      </ol>
+      <div class="note">
+        <i class="fas fa-circle-info"></i>
+        <span>Filter dropdowns automatically adapt to your selections and only show valid options.</span>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="card">
+      <h2>KPI Cards</h2>
+      <table>
+        <thead>
+          <tr><th>KPI</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Total Billed FTE</strong></td>
+            <td>Total Full-Time Equivalent billed within the selected scope.</td>
+            
+          </tr>
+          <tr>
+            <td><strong>Client Found Errors</strong></td>
+            <td>Total errors identified by the client.</td>
+            
+          </tr>
+          <tr>
+            <td><strong>Internal Errors</strong></td>
+            <td>Total errors identified in internal audit.</td>
+            
+          </tr>
+          <tr>
+            <td><strong>Client Found Error per FTE</strong></td>
+            <td>Client-found errors relative to billed FTE.</td>
+            
+          </tr>
+          <tr>
+            <td><strong>Error per Hour</strong></td>
+            <td>Errors per audit hour.</td>
+            
+          </tr>
+          <tr>
+            <td><strong>FTE Audited %</strong></td>
+            <td>Percent of production audited.</td>
+            
+          </tr>
+          <tr>
+            <td><strong>FTE Meet Compliance %</strong></td>
+            <td>Extent to which the audit plan was followed.</td>
+            
+          </tr>
+          <tr>
+            <td><strong>FTE Meeting TQL %</strong></td>
+            <td>Percent of audited volume meeting TQL standards.</td>
+            
+          </tr>
+          <tr>
+            <td><strong>Audit Time per Audited FTE (Minutes)</strong></td>
+            <td>Average audit time per audited FTE.</td>
+            
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Metric Formulas (from definitions) -->
+    <div class="card">
+      <h2>Metric Formulas</h2>
+      <div class="warn">
+        <i class="fas fa-exclamation-triangle" style="margin-right:8px;"></i>
+        These definitions reflect the underlying business formulas used to derive the KPIs.
+      </div>
+      
+      <h3>Client Reported Error per Billed FTE</h3>
+      <p><em>Formula:</em> <code>Total Client-Reported Errors ÷ FTE Billed</code></p>
+
+      <h3>Error per Hour</h3>
+      <p><em>Formula:</em> <code>Total Errors ÷ (Audited FTE × Calendar Working Days × 7 hours)</code></p>
+
+      <h3>Percentage FTE Audited</h3>
+      <p><em>Formula:</em> <code>Total Audited FTE ÷ Total FTE Work Produced</code></p>
+
+      <h3>Percentage FTE Meet Compliance</h3>
+      <p><em>Formula:</em> <code>Compliant FTE ÷ Total FTE</code></p>
+
+      <h3>Percentage FTE Volume Meeting TQL</h3>
+      <p><em>Formula:</em> <code>FTE Meeting TQL ÷ Total Audited FTE</code></p>
+
+      <h3>Audit Time / FTE / Day (Minutes)</h3>
+      <p><em>Formula:</em> <code>Total Audit Time (Qualified only) ÷ (Total Charged FTE × Calendar Working Days × (235/250))</code></p>
+    </div>
+
+    <!-- Reading the Chart -->
+    <div class="card">
+      <h2>Reading the Trend Chart</h2>
+      <ul>
+        <li><strong>Trend line:</strong> monthly progression of the selected KPI.</li>
+        <li><strong>Dashed target line:</strong> the configured target, where applicable.</li>
+        <li><strong>Colored regions:</strong> visual cue of performance against the target.</li>
+        <li><strong>Value labels:</strong> exact values shown near each data point.</li>
+      </ul>
+    </div>
+
+    <!-- Support -->
+    <div class="card">
+      <h2>Support</h2>
+      <p>For any technical issues (other than basic filter usage and navigation), please contact:</p>
+      <p style="margin-top:12px;padding:12px;background:#f8fafc;border-radius:8px;border-left:4px solid var(--accent);">
+        <i class="fas fa-envelope" style="margin-right:8px;color:var(--accent);"></i>
+        <a href="mailto:aathiyappa_sundar@resourcepro.in">aathiyappa_sundar@resourcepro.in</a>
+      </p>
+    </div>
+
+    <p class="tiny" style="text-align:center;border-top:1px solid var(--border);padding-top:16px;">
+      © Total Quality System – User Guide | ReSourcePro
+    </p>
+  </div>
+
+  <script>
+    // Copy Path button
+    (function(){
+      const btn = document.getElementById('copyBtn');
+      const pathEl = document.getElementById('tqsPath');
+      if(!btn || !pathEl) return;
+      
+      btn.addEventListener('click', async () => {
+        const text = pathEl.textContent.trim();
+        try{
+          await navigator.clipboard.writeText(text);
+          const old = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+          btn.style.background = '#16a34a';
+          btn.disabled = true;
+          setTimeout(()=>{ 
+            btn.innerHTML = old; 
+            btn.disabled = false; 
+            btn.style.background = '';
+          }, 2000);
+        }catch(e){
+          // Fallback
+          const sel = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(pathEl);
+          sel.removeAllRanges(); 
+          sel.addRange(range);
+          document.execCommand('copy');
+          sel.removeAllRanges();
+          
+          const old = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+          btn.style.background = '#16a34a';
+          btn.disabled = true;
+          setTimeout(()=>{ 
+            btn.innerHTML = old; 
+            btn.disabled = false; 
+            btn.style.background = '';
+          }, 2000);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

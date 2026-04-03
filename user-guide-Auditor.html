@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Auditor Performance – User Guide</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<style>
+:root{
+ --primary:#0f2744; --primary-light:#1e3a5f; --accent:#3b82f6; --accent-hover:#2563eb;
+ --bg:#f1f5f9; --card:#ffffff; --header-bg:#ffffff;
+ --bg-secondary:#ffffff; --bg-tertiary:#f8fafc;
+ --border:#cbd5e1; --text:#1e293b; --text-header:#0f2744;
+ --shadow:0 2px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.08);
+}
+body{margin:0;font-family:'Segoe UI',system-ui;background:var(--bg);color:var(--text);} 
+header{
+ background:linear-gradient(135deg,#ffffff 0%,#f8fafc 100%);
+ padding:16px 40px; display:flex; justify-content:space-between; align-items:center;
+ box-shadow:0 2px 12px rgba(15,39,68,0.08); border-bottom:2px solid #e2e8f0;
+ position:sticky; top:0; z-index:10;
+}
+.header-left{display:flex;align-items:center;gap:16px;}
+.title{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:600;color:var(--text-header);} 
+.title i{color:var(--accent);font-size:24px;}
+.brand-logo{height:56px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.08));}
+.container{max-width:1100px;margin:32px auto;padding:0 24px 60px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:24px;margin:16px 0;}
+h2{font-size:20px;color:var(--primary);} h3{font-size:16px;color:var(--primary-light);} 
+ul{padding-left:20px;} .formula{background:#f1f5f9;border:1px solid #e2e8f0;padding:6px 10px;border-radius:6px;display:inline-block;font-family:ui-monospace;color:#0f2744;}
+.path-box{display:flex;gap:12px;align-items:center;margin:12px 0;}
+.path-field{background:#f8fafc;border:1px solid var(--border);padding:10px;border-radius:10px;font-family:ui-monospace;overflow:auto;white-space:nowrap;}
+.btn{background:var(--accent);color:#fff;padding:10px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:600;}
+</style>
+</head>
+<body>
+<header>
+ <div class="header-left">
+   <a href="X:\4 - Team Leaders\10 - OPEX\TQS Reports\4- Dashboard\Raw data_TQS\2026\data\pages\Auditor_Performance_Dashboard.html" class="back-btn" style="background:var(--bg-tertiary);padding:8px 14px;border-radius:8px;border:1px solid var(--border);text-decoration:none;color:var(--primary);font-size:13px;font-weight:500;">
+     <i class="fas fa-arrow-left"></i> Back to Dashboard
+   </a>
+   <div class="title"><i class="fas fa-user-check"></i>Auditor Performance – User Guide</div>
+ </div>
+ <img src="X:\4 - Team Leaders\10 - OPEX\TQS Reports\4- Dashboard\Raw data_TQS\2026\data\img\STANDARD_OL.png" class="brand-logo" />
+</header>
+<div class="container">
+ <div class="card">
+  <h2>Getting Started</h2>
+  <p>Open the Quality Management Portal from the following path:</p>
+  <div class="path-box">
+    <div id="portalPath" class="path-field">X:\4 - Team Leaders\10 - OPEX\TQS Reports\4- Dashboard\2026\Quality Management Portal.html</div>
+    <button class="btn" id="copyPortal">Copy Path</button>
+  </div>
+  <p>Inside the Portal home page, click the <strong>Auditor Performance</strong> card to access the dashboard.</p>
+ </div>
+
+ <div class="card">
+  <h2>Data Lineage & Expected Columns</h2>
+  <p>Each row in the dataset represents an auditor's monthly performance for a specific account.</p>
+  <ul>
+   <li><strong>Year</strong> – Reporting year.</li>
+   <li><strong>Month</strong> – Month label (e.g., Jan-24).</li>
+   <li><strong>Account Abbreviation</strong> – Account code.</li>
+   <li><strong>Auditor</strong> – Name of the auditor.</li>
+   <li><strong>Qualification Status</strong> – Qualified / Not Qualified.</li>
+   <li><strong>Error – Qualified</strong> – Errors by Qualified auditors.</li>
+   <li><strong>Error – Not Qualified</strong> – Errors by Not Qualified auditors.</li>
+   <li><strong>Total Errors</strong> – All errors combined.</li>
+   <li><strong>FTE – Qualified</strong> – Audited FTE for Qualified auditors.</li>
+   <li><strong>FTE – Not Qualified</strong> – Audited FTE for Not Qualified.</li>
+   <li><strong>Total Audited FTE</strong> – Combined FTE.</li>
+   <li><strong>Average Working Days</strong> – Avg. calendar working days for the selected period.</li>
+  </ul>
+ </div>
+
+ <div class="card">
+  <h2>Business Logic & Formulas</h2>
+
+  <h3>Error Counts</h3>
+  <ul>
+    <li><strong>Error – Qualified</strong> = Total errors by Qualified auditors</li>
+    <li><strong>Error – Not Qualified</strong> = Total errors by Not Qualified auditors</li>
+    <li><strong>Total Errors</strong> = Qualified Errors + Not Qualified Errors</li>
+  </ul>
+
+  <h3>Audited FTE</h3>
+  <p>Audited effort is converted into FTE using the following denominator:</p>
+  <div class="formula">Total Audit Minutes = If (Audited # = 0 , Audit Time , Audited # * Average Processing time)</div>
+  <p>  </p>
+  <div class="formula">Audited FTE = Total Audit Minutes ÷ (7 × 60 × (235/250) × Working Days)</div>
+
+  <h3>Error per Hour (Error Rate)</h3>
+  <p>Indicates errors per hour of audited work.</p>
+  <div class="formula">Error per Hour = Total Errors ÷ (Audited FTE × Working Days × 7)</div>
+
+  <h3>Overall Error Rate</h3>
+  <div class="formula">Overall Error per Hour = Total Errors ÷ (Total Audited FTE × Working Days × 7)</div>
+ </div>
+
+ <div class="card">
+  <h2>Reading the Trend Chart</h2>
+  <ul>
+    <li><strong>Trend Line:</strong> Represents KPI changes month over month.</li>
+    <li><strong>Markers:</strong> Points show exact month values.</li>
+    <li><strong>Labels:</strong> Display computed KPI values.</li>
+    <li><strong>Filters:</strong> All results adjust instantly based on selections.</li>
+  </ul>
+ </div>
+
+ <div class="card">
+  <h2>Support</h2>
+  <p>For dashboard assistance, contact:</p>
+  <p style="padding:10px;background:#f8fafc;border-left:4px solid var(--accent);border-radius:8px;display:inline-block;">
+    <i class="fas fa-envelope" style="color:var(--accent);"></i>
+    <a href="mailto:aathiyappa_sundar@resourcepro.in">aathiyappa_sundar@resourcepro.in</a>
+  </p>
+ </div>
+</div>
+
+<script>
+function copyText(btnId, fieldId){
+ const btn=document.getElementById(btnId);
+ const field=document.getElementById(fieldId);
+ btn.addEventListener('click',async()=>{
+   const text=field.textContent.trim();
+   await navigator.clipboard.writeText(text);
+   btn.textContent='Copied!';
+   setTimeout(()=>btn.textContent='Copy Path',1500);
+ });
+}
+copyText('copyPortal','portalPath');
+</script>
+</body>
+</html>

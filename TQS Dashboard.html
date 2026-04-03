@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Total Quality System Dashboard</title>
+<!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+/* Professional Navy Theme - Light Header */
+--primary:#0f2744; --primary-light:#1e3a5f; --accent:#3b82f6; --accent-hover:#2563eb;
+--bg-primary: #f1f5f9;
+--bg-secondary: #ffffff;
+--bg-tertiary: #f8fafc;
+--text-primary: #1e293b;
+--text-secondary: #475569;
+--text-muted: #64748b;
+--text-header: #0f2744;
+--border-color: #cbd5e1;
+--chart-red: #f87171;
+--chart-blue: #60a5fa;
+--chart-green: #22c55e;
+--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+--radius-sm: 8px;
+--radius-md: 12px;
+--transition: all 0.2s ease;
+--active-card-bg: #eff6ff;
+--active-card-border: #3b82f6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+background: var(--bg-primary);
+color: var(--text-primary);
+line-height: 1.5;
+-webkit-font-smoothing: antialiased;
+}
+/* ===== HEADER - LIGHT THEME ===== */
+header {
+background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+color: var(--text-header);
+padding: 14px 24px;
+box-shadow: 0 2px 12px rgba(15, 39, 68, 0.08);
+border-bottom: 2px solid #e2e8f0;
+position: sticky;
+top: 0;
+z-index: 100;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+header h1 {
+margin: 0;
+font-size: 20px;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 10px;
+color: var(--text-header);
+}
+header h1 i {
+color: var(--accent);
+font-size: 22px;
+}
+/* Back Button */
+.back-btn {
+background: var(--bg-tertiary);
+border: 1px solid var(--border-color);
+color: var(--text-header);
+padding: 8px 14px;
+border-radius: 8px;
+cursor: pointer;
+text-decoration: none;
+font-size: 13px;
+font-weight: 500;
+transition: var(--transition);
+display: inline-flex;
+align-items: center;
+gap: 6px;
+}
+.back-btn:hover {
+background: var(--bg-secondary);
+border-color: var(--accent);
+color: var(--accent);
+}
+/* Help Button */
+.help-btn {
+background: linear-gradient(135deg, var(--accent), var(--primary-light));
+border: none;
+color: white;
+padding: 8px 16px;
+border-radius: 8px;
+cursor: pointer;
+text-decoration: none;
+font-size: 13px;
+font-weight: 600;
+transition: var(--transition);
+display: inline-flex;
+align-items: center;
+gap: 6px;
+box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+.help-btn:hover {
+background: linear-gradient(135deg, var(--accent-hover), var(--primary));
+transform: translateY(-1px);
+box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+.help-btn i { font-size: 14px; }
+/* Header Right Section */
+.header-right {
+display: flex;
+align-items: center;
+gap: 12px;
+}
+/* Brand Logo */
+.brand-logo {
+height: 52px;
+width: auto;
+object-fit: contain;
+display: block;
+filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08));
+max-width: 260px;
+}
+#lastUpdated {
+font-size: 11px;
+color: var(--text-muted);
+text-align: right;
+}
+.container {
+padding: 20px 24px 40px;
+max-width: 1600px;
+margin: 0 auto;
+}
+/* Error State */
+.error-state {
+text-align: center;
+padding: 60px 20px;
+color: #b91c1c;
+background: #fef2f2;
+border-radius: var(--radius-md);
+border: 1px solid #fecaca;
+margin: 20px 0;
+}
+.error-state i { font-size: 48px; margin-bottom: 12px; opacity: 0.8; }
+.error-state h3 { margin: 0 0 8px 0; font-size: 18px; }
+.error-state p { margin: 0; font-size: 13px; color: var(--text-secondary); }
+/* Filters */
+.filters {
+display: flex;
+flex-wrap: wrap;
+gap: 14px;
+margin-bottom: 12px;
+padding: 16px;
+background: var(--bg-secondary);
+border-radius: var(--radius-md);
+box-shadow: var(--shadow-sm);
+border: 1px solid var(--border-color);
+align-items: flex-end;
+}
+.filter-group {
+display: flex;
+flex-direction: column;
+min-width: 150px;
+flex: 1;
+max-width: 190px;
+}
+.filter-group label {
+font-size: 11px;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+color: var(--text-secondary);
+margin-bottom: 6px;
+display: flex;
+align-items: center;
+gap: 5px;
+}
+.filter-group select {
+padding: 9px 28px 9px 12px;
+font-size: 13px;
+border: 1px solid var(--border-color);
+border-radius: var(--radius-sm);
+background: var(--bg-tertiary);
+color: var(--text-primary);
+cursor: pointer;
+transition: var(--transition);
+appearance: none;
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+background-repeat: no-repeat;
+background-position: right 8px center;
+background-size: 16px;
+}
+.filter-group select:focus {
+outline: none;
+border-color: var(--chart-blue);
+box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+.clear-filters-btn {
+background: #ef4444;
+color: white;
+border: none;
+padding: 9px 16px;
+border-radius: var(--radius-sm);
+cursor: pointer;
+font-size: 13px;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+transition: var(--transition);
+margin-left: auto;
+}
+.clear-filters-btn:hover {
+background: #dc2626;
+transform: translateY(-1px);
+}
+/* Export button */
+.export-btn {
+background: #16a34a;
+color: white;
+border: none;
+padding: 9px 16px;
+border-radius: var(--radius-sm);
+cursor: pointer;
+font-size: 13px;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+transition: var(--transition);
+}
+.export-btn:hover {
+background: #15803d;
+transform: translateY(-1px);
+}
+/* Scope banner under filters */
+.scope-banner {
+display: flex;
+align-items: center;
+gap: 8px;
+flex-wrap: wrap;
+margin-bottom: 24px;
+padding: 10px 12px;
+background: #fff7ed;
+border: 1px dashed #fdba74;
+color: #9a3412;
+border-radius: 8px;
+font-size: 12px;
+}
+.scope-chip {
+background: #ffedd5;
+border: 1px solid #fdba74;
+color: #7c2d12;
+padding: 3px 8px;
+border-radius: 999px;
+font-weight: 600;
+}
+/* Main Layout */
+.main-layout {
+display: grid;
+grid-template-columns: 340px 1fr;
+gap: 24px;
+margin-bottom: 24px;
+align-items: start;
+}
+/* KPI Sidebar */
+.kpi-sidebar {
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+.kpi-card {
+background: var(--bg-secondary);
+border-radius: var(--radius-md);
+padding: 14px 16px;
+box-shadow: var(--shadow-sm);
+border: 1px solid var(--border-color);
+transition: var(--transition);
+cursor: pointer;
+position: relative;
+overflow: hidden;
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.kpi-card.active { border-color: var(--active-card-border); background: var(--active-card-bg); }
+.kpi-card.active::after {
+content: '';
+position: absolute;
+left: 0; top: 0; bottom: 0;
+width: 4px;
+background: var(--active-card-border);
+}
+.kpi-title {
+font-size: 11px;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+color: var(--text-muted);
+margin-bottom: 6px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+.kpi-value { font-size: 22px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+.kpi-sub { font-size: 11px; color: var(--text-secondary); margin-top: 6px; display: none; }
+.kpi-card.active .kpi-sub { display: block; }
+/* Traffic-light dot styles */
+.status-dot {
+width: 10px;
+height: 10px;
+border-radius: 50%;
+display: inline-block;
+box-shadow: inset 0 0 0 2px rgba(0,0,0,0.06);
+}
+.status-dot.green { background: #16a34a; }
+.status-dot.amber { background: #f59e0b; }
+.status-dot.red   { background: #ef4444; }
+/* Chart Area */
+.content-area { display: flex; flex-direction: column; gap: 24px; }
+.chart-container {
+background: var(--bg-secondary);
+border-radius: var(--radius-md);
+padding: 16px;
+box-shadow: var(--shadow-sm);
+border: 1px solid var(--border-color);
+height: 520px;
+position: relative;
+}
+.chart-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 15px;
+}
+.chart-title {
+font-size: 14px; font-weight: 600; color: var(--text-primary);
+display: flex; align-items: center; gap: 8px;
+}
+.chart-title i { color: var(--chart-blue); }
+/* Data Table */
+#dataTable_wrapper {
+background: var(--bg-secondary);
+border-radius: var(--radius-md);
+padding: 16px;
+box-shadow: var(--shadow-sm);
+border: 1px solid var(--border-color);
+}
+table.dataTable thead th {
+font-size: 11px;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+color: var(--text-muted);
+background: var(--bg-tertiary) !important;
+border-bottom: 2px solid var(--border-color) !important;
+padding: 12px 10px !important;
+}
+table.dataTable tbody td {
+font-size: 12px;
+padding: 10px !important;
+color: var(--text-primary);
+border-bottom: 1px solid var(--border-color) !important;
+}
+table.dataTable tbody tr:hover { background: var(--bg-tertiary) !important; }
+.dataTables_paginate .paginate_button {
+padding: 4px 10px !important;
+margin: 0 2px !important;
+border-radius: var(--radius-sm) !important;
+background: var(--bg-tertiary) !important;
+border: 1px solid var(--border-color) !important;
+color: var(--text-primary) !important;
+}
+.dataTables_paginate .paginate_button.current {
+background: var(--chart-blue) !important;
+border-color: var(--chart-blue) !important;
+color: white !important;
+}
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.empty-state i { font-size: 40px; margin-bottom: 12px; opacity: 0.6; }
+/* Responsive */
+@media (max-width: 1100px) {
+.main-layout { grid-template-columns: 1fr; }
+.kpi-sidebar { display: grid; grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+header {
+padding: 12px 16px;
+flex-wrap: wrap;
+gap: 12px;
+}
+.header-right {
+width: 100%;
+justify-content: space-between;
+}
+.filters { flex-direction: column; }
+.filter-group { max-width: 100%; min-width: 100%; }
+.clear-filters-btn { margin-left: 0; width: 100%; justify-content: center; }
+.kpi-sidebar { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+.kpi-value { font-size: 20px; }
+.brand-logo { height: 44px; }
+}
+</style>
+</head>
+<body>
+  <header>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <a href="Quality Management Portal.html" class="back-btn"><i class="fas fa-arrow-left"></i> Home</a>
+      <h1><i class="fas fa-clipboard-check"></i> Total Quality System</h1>
+    </div>
+    <div class="header-right">
+      <div id="lastUpdated">Loading...</div>
+      <a href="user-guide-TQS.html" class="help-btn" target="_blank" title="Open User Guide">
+        <i class="fas fa-question-circle"></i> Help &amp; Guide
+      </a>
+      <img
+        src="https://via.placeholder.com/140x52?text=TQS+Dashboard"
+        alt="ReSourcePro"
+        class="brand-logo"
+        onerror="this.style.display='none';"
+      />
+    </div>
+  </header>
+<div class="container">
+<!-- Data Error State -->
+<div class="error-state" id="dataError" style="display: none;">
+<i class="fas fa-exclamation-triangle"></i>
+<h3>Data Loading Error</h3>
+<p id="errorMessage">Unable to load dashboard data. Please check your data.js file.</p>
+</div>
+<!-- Filters -->
+<div class="filters" id="filtersSection">
+<div class="filter-group">
+<label for="managerFilter"><i class="fas fa-user-cog"></i> Account Manager</label>
+<select id="managerFilter"><option value="">All Managers</option></select>
+</div>
+<div class="filter-group">
+<label for="supervisorFilter"><i class="fas fa-user-tie"></i> Supervisor</label>
+<select id="supervisorFilter"><option value="">All Supervisors</option></select>
+</div>
+<div class="filter-group">
+<label for="leaderFilter"><i class="fas fa-users"></i> Team Leader</label>
+<select id="leaderFilter"><option value="">All Leaders</option></select>
+</div>
+<div class="filter-group">
+<label for="accountFilter"><i class="fas fa-building"></i> Account Code</label>
+<select id="accountFilter"><option value="">All Accounts</option></select>
+</div>
+<!-- NEW: Director Filter -->
+<div class="filter-group">
+<label for="directorFilter"><i class="fas fa-user-shield"></i> Director</label>
+<select id="directorFilter"><option value="">All Directors</option></select>
+</div>
+<!-- NEW: Shift Filter -->
+<div class="filter-group">
+<label for="shiftFilter"><i class="fas fa-clock"></i> Shift</label>
+<select id="shiftFilter"><option value="">All Shifts</option></select>
+</div>
+<div class="filter-group" style="min-width: 120px; max-width: 140px;">
+<label for="yearFilter"><i class="fas fa-calendar"></i> Year</label>
+<select id="yearFilter"><option value="">All Years</option></select>
+</div>
+<!-- ADD: Month filter -->
+<div class="filter-group" style="min-width: 120px; max-width: 140px;">
+<label for="monthFilter"><i class="fas fa-calendar-day"></i> Month</label>
+<select id="monthFilter"><option value="">All Months</option></select>
+</div>
+<button class="clear-filters-btn" onclick="clearAllFilters()">
+<i class="fas fa-undo"></i> Clear All Filters
+</button>
+<button class="export-btn" onclick="exportToExcel()">
+<i class="fas fa-file-excel"></i> Export to Excel
+</button>
+</div>
+<!-- Scope banner -->
+<div class="scope-banner" id="scopeBanner">
+<i class="fas fa-sliders"></i>
+KPIs reflect the <strong>current filters</strong>. Change filters to see different durations.
+</div>
+<!-- Main Layout -->
+<div class="main-layout">
+<div class="kpi-sidebar" id="kpiSection"></div>
+<div class="content-area">
+<div class="chart-container">
+<div class="chart-header">
+<div class="chart-title" id="chartTitle">
+<i class="fas fa-chart-line"></i>
+<span>MoM Trend: Total Billed FTE</span>
+</div>
+</div>
+<canvas id="mainChart"></canvas>
+</div>
+<div id="dataTable_wrapper">
+<table id="dataTable" class="display" style="width:100%">
+<thead>
+<tr>
+<th>Year</th><th>Month</th><th>Director</th><th>Shift</th><th>Account</th><th>Team Leader</th>
+<th>Supervisor</th><th>Manager</th><th>Billed FTE</th>
+<th>Client Errors</th><th>Internal Errors</th><th>CFE / FTE</th>
+<th>Error / Hour</th><th>FTE Audited %</th><th>Compliance %</th>
+<th>TQL %</th><th>Audit Time (Min)</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+  <!-- libs -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Data -->
+  <script src="TQS data.js"></script>
+<script>
+// ==== UTILITY FUNCTIONS ====
+// Robust month parse: supports "3","03","Mar","March","Mar-2026", etc.
+function monthToNumber(m) {
+if (m == null) return 0;
+const s = String(m).trim();
+// Try simple numeric first
+const n = parseInt(s, 10);
+if (!isNaN(n) && n >= 1 && n <= 12) return n;
+// Otherwise try token before separators
+const token = s.split(/[^A-Za-z0-9]/)[0];
+const map = { jan:1,feb:2,mar:3,apr:4,may:5,jun:6, jul:7,aug:8,sep:9,oct:10,nov:11,dec:12 };
+const key = token.toLowerCase().slice(0,3);
+return map[key] || 0;
+}
+// Global month names
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function formatNumber(n, decimals = 0) {
+if (n === null || n === undefined || isNaN(n)) return "-";
+return Number(n).toLocaleString(undefined, {
+minimumFractionDigits: decimals,
+maximumFractionDigits: decimals
+});
+}
+function groupBy(arr, keyFn) {
+return arr.reduce((map, item) => {
+const key = keyFn(item);
+if (!map[key]) map[key] = [];
+map[key].push(item);
+return map;
+}, {});
+}
+function sortByYearMonth(arr) {
+return arr.slice().sort((a, b) => {
+const yearA = parseInt(a.Year) || 0;
+const yearB = parseInt(b.Year) || 0;
+if (yearA !== yearB) return yearA - yearB;
+const monthA = monthToNumber(a.Month);
+const monthB = monthToNumber(b.Month);
+return monthA - monthB;
+});
+}
+function strictAvg(arr, excludeZero = false) {
+const valid = arr.filter(v => {
+const num = Number(v);
+if (v === null || v === undefined || v === '' || v === 'NaN' || isNaN(num)) return false;
+if (excludeZero && num === 0) return false;
+return true;
+});
+if (!valid.length) return 0;
+return valid.reduce((a, b) => Number(a) + Number(b), 0) / valid.length;
+}
+function strictSum(arr) {
+const valid = arr.filter(v => {
+const num = Number(v);
+return v !== null && v !== undefined && v !== '' && v !== 'NaN' && !isNaN(num);
+});
+if (!valid.length) return 0;
+return valid.reduce((a, b) => Number(a) + Number(b), 0);
+}
+// ==== GLOBAL STATE ====
+let filteredData = [];
+let mainChart = null;
+let dataTable = null;
+let currentMetric = 'Billed_FTE';
+let isUpdatingOptions = false;
+// KPI Configuration
+const kpiConfig = [
+{ key: 'Billed_FTE',            label: 'Total Billed FTE',                 icon: 'fa-users',               isSum: true,  suffix: '',     decimals: 1 },
+{ key: 'Client_Found_Errors',   label: 'Client Found Errors',              icon: 'fa-exclamation-triangle',isSum: true,  suffix: '',     decimals: 0 },
+{ key: 'Internal_Errors',       label: 'Internal Errors',                  icon: 'fa-circle-exclamation',  isSum: true,  suffix: '',     decimals: 0 },
+{ key: 'CFE_per_Billed_FTE',    label: 'Client Found Error per Billed FTE',icon: 'fa-chart-line',          isSum: false, suffix: '',     decimals: 3 },
+{ key: 'Error_per_Hour_AVG',    label: 'Error per Hour',                   icon: 'fa-stopwatch',           isSum: false, suffix: '',     decimals: 3 },
+{ key: 'FTE_Audited_Pct',       label: '% FTE Audited',                    icon: 'fa-search',              isSum: false, suffix: '%',    decimals: 1 },
+{ key: 'FTE_Compliance_Pct',    label: '% FTE Meet Compliance',            icon: 'fa-check-circle',        isSum: false, suffix: '%',    decimals: 1 },
+{ key: 'FTE_TQL_Pct',           label: '% FTE Vol Meet TQL',         icon: 'fa-star',                isSum: false, suffix: '%',    decimals: 1 },
+{ key: 'Audit_Time_Minutes',    label: 'Audit Time/FTE/Day (minutes)',icon: 'fa-hourglass-half',     isSum: false, suffix: ' Mins', decimals: 1 }
+];
+/* ===== TARGETS ===== */
+const targetConfig = {
+CFE_per_Billed_FTE: { value: 0.10, direction: 'max' },
+FTE_Audited_Pct:    { value: 4,    direction: 'min' },
+FTE_Compliance_Pct: { value: 90,   direction: 'min' },
+// ✅ Add target for Error per Hour (lower is better)
+Error_per_Hour_AVG: { value: 0.07, direction: 'max' }
+};
+const cfeTargetsByAccount = {};
+function getTargetForMetric(metricKey) {
+if (metricKey === 'CFE_per_Billed_FTE') {
+const acct = document.getElementById("accountFilter").value;
+const value = (acct && cfeTargetsByAccount[acct] != null)
+? Number(cfeTargetsByAccount[acct])
+: targetConfig.CFE_per_Billed_FTE.value;
+return { value, direction: 'max' };
+}
+if (targetConfig[metricKey]) return targetConfig[metricKey];
+return null;
+}
+// ==== INITIALIZATION ====
+document.addEventListener("DOMContentLoaded", function () {
+if (typeof myData === 'undefined' || !Array.isArray(myData) || myData.length === 0) {
+console.error("myData is not defined or empty.");
+document.getElementById('dataError').style.display = 'block';
+document.getElementById('errorMessage').textContent = "myData is not defined or empty. Please check data.js file.";
+return;
+}
+document.getElementById('lastUpdated').textContent = "Data Loaded: " + new Date().toLocaleDateString();
+initFilters();
+// 🔹 Set default year = 2026
+document.getElementById("yearFilter").value = "2026";
+// Rebuild dependent options (including Month) based on default year
+updateDependentFilterOptions();
+setupFilterListeners();
+applyFilters();
+});
+// ==== FILTERS ====
+// Normalized populate (ALL values treated as strings; Year sorted numerically)
+function populateSelect(selectId, data, field, defaultText) {
+const select = document.getElementById(selectId);
+const valuesRaw = [...new Set(
+data
+.map(r => r[field])
+.filter(v => v !== null && v !== undefined && v !== '')
+)];
+const values = valuesRaw.map(v => String(v));
+const sortedValues = (field === 'Year')
+? values.sort((a, b) => Number(a) - Number(b))
+: values.sort((a, b) => a.localeCompare(b));
+const current = String(select.value || '');
+select.innerHTML = `<option value="">${defaultText}</option>`;
+sortedValues.forEach(val => {
+const opt = document.createElement("option");
+opt.value = val;
+opt.textContent = val;
+select.appendChild(opt);
+});
+if (current && sortedValues.includes(current)) {
+select.value = current;
+}
+}
+// Month select population with dedupe + sorted Jan..Dec
+function populateMonthSelect(selectId, data, field, defaultText) {
+const select = document.getElementById(selectId);
+const uniq = [...new Set(
+data
+.map(r => monthToNumber(r[field]))
+.filter(n => n >= 1 && n <= 12)
+)].sort((a,b) => a - b);
+const current = String(select.value || '');
+// value uses "01".."12", label shows "Jan".."Dec"
+select.innerHTML = `<option value="">${defaultText}</option>`;
+uniq.forEach(n => {
+const opt = document.createElement('option');
+opt.value = String(n).padStart(2, '0');
+opt.textContent = MONTH_NAMES[n - 1];
+select.appendChild(opt);
+});
+const validValues = uniq.map(n => String(n).padStart(2, '0'));
+if (current && validValues.includes(current)) {
+select.value = current;
+}
+}
+function initFilters() {
+populateSelect('yearFilter',       myData, 'Year',                 'All Years');
+populateSelect('managerFilter',    myData, 'Account_Manager',      'All Managers');
+populateSelect('supervisorFilter', myData, 'Account_Supervisor',   'All Supervisors');
+populateSelect('leaderFilter',     myData, 'Team_Leader',          'All Leaders');
+populateSelect('accountFilter',    myData, 'Account_Abbreviation', 'All Accounts');
+// NEW: Director & Shift
+populateSelect('directorFilter',   myData, 'Director',             'All Directors');
+populateSelect('shiftFilter',      myData, 'Shift',                'All Shifts');
+// Month populate
+populateMonthSelect('monthFilter', myData, 'Month', 'All Months');
+}
+function getDataForOptions(excludeField) {
+const selected = {
+Year:                 document.getElementById("yearFilter").value,
+Month:                document.getElementById("monthFilter").value, // "01".."12"
+Account_Manager:      document.getElementById("managerFilter").value,
+Account_Supervisor:   document.getElementById("supervisorFilter").value,
+Team_Leader:          document.getElementById("leaderFilter").value,
+Account_Abbreviation: document.getElementById("accountFilter").value,
+// NEW: Director & Shift
+Director:             document.getElementById("directorFilter").value,
+Shift:                document.getElementById("shiftFilter").value
+};
+return myData.filter(row => {
+if (excludeField !== 'Year'
+&& selected.Year
+&& String(row.Year) !== String(selected.Year)) return false;
+if (excludeField !== 'Month'
+&& selected.Month
+&& String(monthToNumber(row.Month)).padStart(2,'0') !== selected.Month) return false;
+if (excludeField !== 'Account_Manager'
+&& selected.Account_Manager
+&& row.Account_Manager !== selected.Account_Manager) return false;
+if (excludeField !== 'Account_Supervisor'
+&& selected.Account_Supervisor
+&& row.Account_Supervisor !== selected.Account_Supervisor) return false;
+if (excludeField !== 'Team_Leader'
+&& selected.Team_Leader
+&& row.Team_Leader !== selected.Team_Leader) return false;
+if (excludeField !== 'Account_Abbreviation'
+&& selected.Account_Abbreviation
+&& row.Account_Abbreviation !== selected.Account_Abbreviation) return false;
+// NEW: Director & Shift
+if (excludeField !== 'Director'
+&& selected.Director
+&& row.Director !== selected.Director) return false;
+if (excludeField !== 'Shift'
+&& selected.Shift
+&& row.Shift !== selected.Shift) return false;
+return true;
+});
+}
+function setupFilterListeners() {
+['managerFilter', 'supervisorFilter', 'leaderFilter', 'accountFilter', 'directorFilter', 'shiftFilter', 'yearFilter', 'monthFilter'].forEach(id => {
+document.getElementById(id).addEventListener("change", function() {
+updateDependentFilterOptions();
+applyFilters();
+});
+});
+}
+function updateDependentFilterOptions() {
+if (isUpdatingOptions) return;
+isUpdatingOptions = true;
+populateSelect('managerFilter',    getDataForOptions('Account_Manager'),      'Account_Manager',      'All Managers');
+populateSelect('supervisorFilter', getDataForOptions('Account_Supervisor'),   'Account_Supervisor',   'All Supervisors');
+populateSelect('leaderFilter',     getDataForOptions('Team_Leader'),          'Team_Leader',          'All Leaders');
+populateSelect('accountFilter',    getDataForOptions('Account_Abbreviation'), 'Account_Abbreviation', 'All Accounts');
+// NEW: Director & Shift
+populateSelect('directorFilter',   getDataForOptions('Director'),             'Director',             'All Directors');
+populateSelect('shiftFilter',      getDataForOptions('Shift'),                'Shift',                'All Shifts');
+populateSelect('yearFilter',       getDataForOptions('Year'),                 'Year',                 'All Years');
+populateMonthSelect('monthFilter', getDataForOptions('Month'),                'Month',                'All Months');
+isUpdatingOptions = false;
+}
+function clearAllFilters() {
+document.getElementById("managerFilter").value = "";
+document.getElementById("supervisorFilter").value = "";
+document.getElementById("leaderFilter").value = "";
+document.getElementById("accountFilter").value = "";
+document.getElementById("directorFilter").value = "";
+document.getElementById("shiftFilter").value = "";
+document.getElementById("yearFilter").value = "";
+document.getElementById("monthFilter").value = "";
+populateSelect('managerFilter',    myData, 'Account_Manager',      'All Managers');
+populateSelect('supervisorFilter', myData, 'Account_Supervisor',   'All Supervisors');
+populateSelect('leaderFilter',     myData, 'Team_Leader',          'All Leaders');
+populateSelect('accountFilter',    myData, 'Account_Abbreviation', 'All Accounts');
+// NEW: Director & Shift
+populateSelect('directorFilter',   myData, 'Director',             'All Directors');
+populateSelect('shiftFilter',      myData, 'Shift',                'All Shifts');
+populateSelect('yearFilter',       myData, 'Year',                 'All Years');
+populateMonthSelect('monthFilter', myData, 'Month',                'All Months');
+applyFilters();
+}
+// ==== APPLY FILTERS ====
+function applyFilters() {
+const yearVal      = document.getElementById("yearFilter").value;
+const monthVal     = document.getElementById("monthFilter").value; // "01".."12" or ""
+const managerVal   = document.getElementById("managerFilter").value;
+const supervisorVal= document.getElementById("supervisorFilter").value;
+const leaderVal    = document.getElementById("leaderFilter").value;
+const accountVal   = document.getElementById("accountFilter").value;
+// NEW: Director & Shift
+const directorVal  = document.getElementById("directorFilter").value;
+const shiftVal     = document.getElementById("shiftFilter").value;
+
+filteredData = myData.filter(row => {
+if (yearVal && String(row.Year) !== String(yearVal)) return false;
+if (monthVal) {
+const m = String(monthToNumber(row.Month)).padStart(2, '0');
+if (m !== monthVal) return false;
+}
+if (managerVal    && row.Account_Manager      !== managerVal)    return false;
+if (supervisorVal && row.Account_Supervisor   !== supervisorVal) return false;
+if (leaderVal     && row.Team_Leader          !== leaderVal)     return false;
+if (accountVal    && row.Account_Abbreviation !== accountVal)    return false;
+// NEW: Director & Shift
+if (directorVal   && row.Director             !== directorVal)   return false;
+if (shiftVal      && row.Shift                !== shiftVal)      return false;
+return true;
+});
+updateScopeBanner();
+updateKPIs();
+updateChart();
+updateTable();
+}
+// ==== SCOPE BANNER ====
+function updateScopeBanner() {
+const yVal = document.getElementById("yearFilter").value || 'All Years';
+const mVal = document.getElementById("monthFilter").value;
+const mTxt = mVal ? (MONTH_NAMES[parseInt(mVal,10) - 1] || mVal) : 'All Months';
+const am   = document.getElementById("managerFilter").value    || 'All Managers';
+const as   = document.getElementById("supervisorFilter").value || 'All Supervisors';
+const tl   = document.getElementById("leaderFilter").value     || 'All Leaders';
+const ac   = document.getElementById("accountFilter").value    || 'All Accounts';
+// NEW: Director & Shift
+const di   = document.getElementById("directorFilter").value   || 'All Directors';
+const sh   = document.getElementById("shiftFilter").value      || 'All Shifts';
+
+const parts = [];
+parts.push(`<span class="scope-chip"><i class="fas fa-calendar"></i> ${yVal}</span>`);
+parts.push(`<span class="scope-chip"><i class="fas fa-calendar-day"></i> ${mTxt}</span>`);
+parts.push(`<span class="scope-chip"><i class="fas fa-user-shield"></i> ${di}</span>`);
+parts.push(`<span class="scope-chip"><i class="fas fa-clock"></i> ${sh}</span>`);
+parts.push(`<span class="scope-chip"><i class="fas fa-user-cog"></i> ${am}</span>`);
+parts.push(`<span class="scope-chip"><i class="fas fa-user-tie"></i> ${as}</span>`);
+parts.push(`<span class="scope-chip"><i class="fas fa-users"></i> ${tl}</span>`);
+parts.push(`<span class="scope-chip"><i class="fas fa-building"></i> ${ac}</span>`);
+document.getElementById('scopeBanner').innerHTML = `
+<i class="fas fa-sliders"></i>
+KPIs reflect the <strong>current filters</strong>. Change filters to see different durations.
+&nbsp;•&nbsp; ${parts.join(' ')}
+`;
+}
+// ==== KPI CARDS ====
+function updateKPIs() {
+const container = document.getElementById("kpiSection");
+container.innerHTML = "";
+if (!filteredData.length) {
+container.innerHTML = "<div class='empty-state'><i class='fas fa-info-circle'></i><br>No data for selected filters</div>";
+return;
+}
+const dataSource = filteredData;
+kpiConfig.forEach((kpi) => {
+let val = 0;
+if (kpi.key === 'Audit_Time_Minutes') {
+// Special: Audit Time per Audited FTE (mins)
+const totalBilled = strictSum(dataSource.map(r => r.Billed_FTE));
+const avgAuditedPct = strictAvg(dataSource.map(r => r.FTE_Audited_Pct));
+const totalAuditTime = strictSum(dataSource.map(r => r.Audit_Time_Minutes));
+const auditedFTE = totalBilled * (avgAuditedPct / 100);
+val = auditedFTE > 0 ? (totalAuditTime / auditedFTE) : 0;
+} else if (kpi.key === 'CFE_per_Billed_FTE') {
+// Weighted rate: sum of errors / sum of FTE
+const totalCFE = strictSum(dataSource.map(r => r.Client_Found_Errors));
+const totalFTE = strictSum(dataSource.map(r => r.Billed_FTE));
+val = totalFTE > 0 ? (totalCFE / totalFTE) : 0;
+} else if (kpi.isSum) {
+val = strictSum(dataSource.map(r => r[kpi.key]));
+} else {
+val = strictAvg(dataSource.map(r => r[kpi.key]));
+}
+const formattedVal = typeof val === 'number' ? val.toFixed(kpi.decimals || 0) : val;
+const displayVal = formattedVal + (kpi.suffix || '');
+const card = document.createElement("div");
+card.className = `kpi-card ${currentMetric === kpi.key ? 'active' : ''}`;
+card.onclick = () => {
+currentMetric = kpi.key;
+document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active'));
+card.classList.add('active');
+document.querySelector('#chartTitle span').textContent = `MoM Trend: ${kpi.label}`;
+updateChart();
+};
+// Target + status dot
+const targetInfo = getTargetForMetric(kpi.key);
+let dotHTML = '';
+let targetLine = '';
+if (targetInfo) {
+const t = Number(targetInfo.value);
+const v = Number(val) || 0;
+let good = false, near = false;
+if (targetInfo.direction === 'max') { // lower is better
+good = v <= t;
+near = !good && v <= t * 1.10;
+} else { // higher is better
+good = v >= t;
+near = !good && v >= t * 0.90;
+}
+const dotClass = good ? 'green' : (near ? 'amber' : 'red');
+const statusText = good ? 'On target' : (near ? 'Near miss' : 'Off target');
+dotHTML = `
+<span title="${statusText}" aria-label="${statusText}" style="margin-left:auto; display:inline-flex; align-items:center; gap:6px;">
+<span class="status-dot ${dotClass}"></span>
+</span>
+`;
+const tDisplay =
+(kpi.suffix === '%') ? `${t.toFixed(1)}%` :
+`${t.toFixed(kpi.decimals || 2)}${kpi.suffix || ''}`;
+targetLine = `<i class="fas fa-bullseye"></i> Target: ${tDisplay}`;
+}
+card.innerHTML = `
+<div class="kpi-title">
+<i class="fas ${kpi.icon}"></i> ${kpi.label}
+${dotHTML}
+</div>
+<div class="kpi-value">${displayVal}</div>
+<div class="kpi-sub">
+${targetInfo ? ` &nbsp;•&nbsp; ${targetLine}` : ''}
+</div>
+`;
+container.appendChild(card);
+});
+}
+// ==== CHART ====
+function updateChart() {
+const ctx = document.getElementById("mainChart").getContext("2d");
+if (mainChart) { mainChart.destroy(); mainChart = null; }
+if (!filteredData.length) return;
+const sorted = sortByYearMonth(filteredData);
+const timeGroups = groupBy(sorted, r => `${r.Year}-${String(monthToNumber(r.Month)).padStart(2,'0')}`);
+const labels = Object.keys(timeGroups).sort();
+const formattedLabels = labels.map(label => {
+const [year, month] = label.split('-');
+const monthNum = parseInt(month);
+const yearShort = String(year).slice(-2);
+return `${MONTH_NAMES[monthNum - 1]}-${yearShort}`;
+});
+const kpi = kpiConfig.find(k => k.key === currentMetric);
+// Build series with special handling
+const dataPoints = labels.map(label => {
+const rows = timeGroups[label];
+if (kpi.key === 'Audit_Time_Minutes') {
+const totalBilled = strictSum(rows.map(r => r.Billed_FTE));
+const avgAuditedPct = strictAvg(rows.map(r => r.FTE_Audited_Pct));
+const totalAuditTime = strictSum(rows.map(r => r.Audit_Time_Minutes));
+const auditedFTE = totalBilled * (avgAuditedPct / 100);
+return auditedFTE > 0 ? (totalAuditTime / auditedFTE) : 0;
+}
+// Weighted monthly rate for CFE per Billed FTE
+if (kpi.key === 'CFE_per_Billed_FTE') {
+const cfe = strictSum(rows.map(r => r.Client_Found_Errors));
+const fte = strictSum(rows.map(r => r.Billed_FTE));
+return fte > 0 ? (cfe / fte) : 0;
+}
+if (kpi.isSum) {
+return strictSum(rows.map(r => r[currentMetric]));
+} else {
+return strictAvg(rows.map(r => r[currentMetric]));
+}
+});
+// Series color
+let color = '#60a5fa';
+if (currentMetric.includes('Error') || currentMetric.includes('CFE')) color = '#f87171';
+if (currentMetric.includes('TQL') || currentMetric.includes('Compliance') || currentMetric.includes('Audited')) color = '#22c55e';
+// Ensure y-axis includes the target (so target line is visible)
+const targetInfo = getTargetForMetric(currentMetric);
+const valuesForScale = [...dataPoints];
+if (targetInfo && isFinite(targetInfo.value)) valuesForScale.push(Number(targetInfo.value));
+const finiteVals = valuesForScale.filter(v => v != null && isFinite(v));
+const rawMin = finiteVals.length ? Math.min(...finiteVals) : 0;
+const rawMax = finiteVals.length ? Math.max(...finiteVals) : 1;
+let range = rawMax - rawMin;
+if (range === 0) range = rawMax === 0 ? 1 : Math.abs(rawMax) * 0.2;
+const pad = range * 0.10;
+let yMin = rawMin - pad;
+let yMax = rawMax + pad;
+// Clamp at 0 for inherently non-negative metrics
+if (currentMetric === 'Error_per_Hour_AVG' || currentMetric === 'CFE_per_Billed_FTE') {
+yMin = Math.max(0, yMin);
+}
+// Leave headroom above the target for Error per Hour
+if (currentMetric === 'Error_per_Hour_AVG' && targetInfo) {
+const t = Number(targetInfo.value);
+if (isFinite(t)) {
+yMax = Math.max(yMax, t + (range * 0.12));
+}
+}
+// Data label boxes plugin (lightweight)
+const dataLabelBoxesPlugin = {
+id: 'dataLabelBoxes',
+afterDatasetsDraw(chart) {
+const { ctx, chartArea } = chart;
+const dataset = chart.data.datasets[0];
+const meta = chart.getDatasetMeta(0);
+if (!meta || !meta.data) return;
+ctx.save();
+ctx.font = '600 12px Segoe UI, system-ui, -apple-system, sans-serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+const paddingX = 6, paddingY = 4, radius = 4;
+const strokeColor = dataset.borderColor || color;
+const textColor = '#0f172a';
+function roundRect(ctx, x, y, w, h, r) {
+const rad = Math.min(r, h/2, w/2);
+ctx.beginPath();
+ctx.moveTo(x + rad, y);
+ctx.lineTo(x + w - rad, y);
+ctx.arcTo(x + w, y, x + w, y + rad, rad);
+ctx.lineTo(x + w, y + h - rad);
+ctx.arcTo(x + w, y + h, x + w - rad, y + h, rad);
+ctx.lineTo(x + rad, y + h);
+ctx.arcTo(x, y + h, x, y + h - rad, rad);
+ctx.lineTo(x, y + rad);
+ctx.arcTo(x, y, x + rad, y, rad);
+ctx.closePath();
+}
+meta.data.forEach((point, i) => {
+const v = dataset.data[i];
+if (v == null || isNaN(v)) return;
+const decimals = (kpi && typeof kpi.decimals === 'number') ? kpi.decimals : 0;
+const suffix = (kpi && kpi.suffix) ? kpi.suffix : '';
+const text = `${Number(v).toFixed(decimals)}${suffix}`;
+const metrics = ctx.measureText(text);
+const textW = metrics.width, textH = 10 * 1.2;
+const boxW = textW + paddingX * 2, boxH = textH + paddingY * 2;
+let boxX = point.x - boxW / 2;
+let boxY = point.y - boxH - 10;
+if (boxY < chartArea.top + 4) boxY = point.y + 10;
+boxX = Math.max(chartArea.left + 2, Math.min(boxX, chartArea.right - boxW - 2));
+boxY = Math.max(chartArea.top + 2, Math.min(boxY, chartArea.bottom - boxH - 2));
+ctx.strokeStyle = strokeColor;
+ctx.lineWidth = 1.25;
+ctx.fillStyle = 'rgba(255,255,255,0)';
+roundRect(ctx, boxX, boxY, boxW, boxH, radius);
+ctx.stroke();
+ctx.fillStyle = textColor;
+ctx.fillText(text, boxX + boxW/2, boxY + boxH/2);
+});
+ctx.restore();
+}
+};
+// ==== TARGET LINE / SHADING PLUGIN ====
+const targetInfillPlugin = {
+id: 'targetInfillPlugin',
+beforeDatasetsDraw(chart) {
+const tInfo = getTargetForMetric(currentMetric);
+if (!tInfo) return;
+const { ctx, chartArea, scales } = chart;
+const yScale = scales.y;
+if (!yScale) return;
+const t = Number(tInfo.value);
+const yTarget = yScale.getPixelForValue(t);
+const left = chartArea.left;
+const right = chartArea.right;
+const top = chartArea.top;
+const bottom = chartArea.bottom;
+// Error per Hour -> only dashed target line + label (no shading)
+if (currentMetric === 'Error_per_Hour_AVG') {
+ctx.save();
+ctx.beginPath();
+ctx.setLineDash([6, 6]);
+ctx.strokeStyle = '#ef4444';
+ctx.lineWidth = 1.8;
+ctx.moveTo(left, yTarget);
+ctx.lineTo(right, yTarget);
+ctx.stroke();
+ctx.setLineDash([]);
+ctx.restore();
+// Label
+const kpiDef = kpiConfig.find(k => k.key === currentMetric);
+const decimals = (kpiDef && typeof kpiDef.decimals === 'number') ? kpiDef.decimals : 3;
+const label = `Target: ${t.toFixed(decimals)}`;
+ctx.save();
+ctx.font = '600 10px Segoe UI, system-ui, -apple-system, sans-serif';
+const textW = ctx.measureText(label).width;
+const pad = 6, h = 18;
+const boxW = textW + pad * 2;
+let bx = right - boxW - 8;
+let by = yTarget - h - 6;
+if (by < top + 4) by = yTarget + 6;
+const r = 6;
+ctx.strokeStyle = '#ef4444';
+ctx.lineWidth = 1;
+ctx.fillStyle = '#ffffff';
+ctx.beginPath();
+ctx.moveTo(bx + r, by);
+ctx.lineTo(bx + boxW - r, by);
+ctx.quadraticCurveTo(bx + boxW, by, bx + boxW, by + r);
+ctx.lineTo(bx + boxW, by + h - r);
+ctx.quadraticCurveTo(bx + boxW, by + h, bx + boxW - r, by + h);
+ctx.lineTo(bx + r, by + h);
+ctx.quadraticCurveTo(bx, by + h, bx, by + h - r);
+ctx.lineTo(bx, by + r);
+ctx.quadraticCurveTo(bx, by, bx + r, by);
+ctx.closePath();
+ctx.fill();
+ctx.stroke();
+ctx.fillStyle = '#b91c1c';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText(label, bx + boxW / 2, by + h / 2);
+ctx.restore();
+return;
+}
+// Other metrics (direction-aware shading under the curve)
+const meta = chart.getDatasetMeta(0);
+const points = meta?.data;
+if (!points || points.length === 0) return;
+const ds = chart.data?.datasets?.[0]?.data || [];
+const direction = tInfo.direction; // 'max' -> lower is better; 'min' -> higher is better
+const meetsTarget = (v) => {
+if (v == null || !isFinite(v)) return true; // ignore gaps
+return direction === 'max' ? (Number(v) <= t) : (Number(v) >= t);
+};
+const anyMiss = ds.some(v => !meetsTarget(v));
+ctx.save();
+ctx.beginPath();
+ctx.moveTo(points[0].x, yScale.getBasePixel());
+for (let i = 0; i < points.length; i++) {
+const p = points[i];
+if (!isFinite(p.x) || !isFinite(p.y)) continue;
+ctx.lineTo(p.x, p.y);
+}
+ctx.lineTo(points[points.length - 1].x, yScale.getBasePixel());
+ctx.closePath();
+ctx.clip();
+const fillGood = () => {
+ctx.fillStyle = 'rgba(34, 197, 94, 0.18)'; // green
+if (direction === 'max') {
+const greenTop = Math.min(Math.max(yTarget, top), bottom);
+const greenHeight = Math.max(0, bottom - greenTop);
+if (greenHeight > 0) ctx.fillRect(left, greenTop, right - left, greenHeight);
+} else {
+const greenTop = top;
+const greenHeight = Math.max(0, Math.min(yTarget, bottom) - greenTop);
+if (greenHeight > 0) ctx.fillRect(left, greenTop, right - left, greenHeight);
+}
+};
+const fillBad = () => {
+ctx.fillStyle = 'rgba(239, 68, 68, 0.18)'; // red
+if (direction === 'max') {
+const redTop = top;
+const redHeight = Math.max(0, Math.min(yTarget, bottom) - redTop);
+if (redHeight > 0) ctx.fillRect(left, redTop, right - left, redHeight);
+} else {
+const redTop = Math.min(Math.max(yTarget, top), bottom);
+const redHeight = Math.max(0, bottom - redTop);
+if (redHeight > 0) ctx.fillRect(left, redTop, right - left, redHeight);
+}
+};
+if (anyMiss) {
+fillBad();
+fillGood();
+} else {
+fillGood();
+}
+ctx.restore();
+// Draw dashed target line
+ctx.save();
+ctx.beginPath();
+ctx.setLineDash([6, 6]);
+ctx.strokeStyle = '#ef4444';
+ctx.lineWidth = 1.5;
+ctx.moveTo(left, yTarget);
+ctx.lineTo(right, yTarget);
+ctx.stroke();
+ctx.setLineDash([]);
+ctx.restore();
+// Target label
+const kpiDef = kpiConfig.find(k => k.key === currentMetric);
+const decimals = (kpiDef && typeof kpiDef.decimals === 'number') ? kpiDef.decimals : 2;
+const label = `Target: ${t.toFixed(decimals)}${kpiDef?.suffix || ''}`;
+ctx.save();
+ctx.font = '600 10px Segoe UI, system-ui, -apple-system, sans-serif';
+const textW = ctx.measureText(label).width;
+const pad = 6, h = 18;
+const bw = textW + pad * 2;
+const bx = Math.min(right - bw - 6, left + (right - left) - bw - 6);
+const by = Math.min(Math.max(yTarget - h - 6, top + 6), bottom - h - 6);
+function roundRect(ctx, x, y, w, h, rad) {
+const rr = Math.min(rad, h/2, w/2);
+ctx.beginPath();
+ctx.moveTo(x + rr, y);
+ctx.lineTo(x + w - rr, y);
+ctx.arcTo(x + w, y, x + w, y + rr, rr);
+ctx.lineTo(x + w, y + h - rr);
+ctx.arcTo(x + w, y + h, x + w - rr, y + h, rr);
+ctx.lineTo(x + rr, y + h);
+ctx.arcTo(x, y + h, x, y + h - rr, rr);
+ctx.lineTo(x, y + rr);
+ctx.arcTo(x, y, x + rr, y, rr);
+ctx.closePath();
+}
+ctx.beginPath();
+ctx.rect(left, top, right - left, bottom - top);
+ctx.clip();
+ctx.fillStyle = 'rgba(239, 68, 68, 0.08)';
+ctx.strokeStyle = '#ef4444';
+ctx.lineWidth = 1;
+roundRect(ctx, bx, by, bw, h, 6);
+ctx.fill();
+ctx.stroke();
+ctx.fillStyle = '#b91c1c';
+ctx.textBaseline = 'middle';
+ctx.textAlign = 'center';
+ctx.fillText(label, bx + bw/2, by + h/2);
+ctx.restore();
+}
+};
+mainChart = new Chart(ctx, {
+type: "line",
+data: {
+labels: formattedLabels,
+datasets: [{
+label: kpi.label,
+data: dataPoints,
+borderColor: color,
+backgroundColor: 'rgba(0,0,0,0)',
+tension: 0.3,
+fill: true,
+borderWidth: 2,
+spanGaps: true,
+pointRadius: 3,
+pointHoverRadius: 5,
+pointBackgroundColor: '#ffffff',
+pointBorderColor: color,
+pointBorderWidth: 2,
+clip: 0
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+layout: { padding: { top: 44, right: 24, bottom: 56, left: 48 } },
+plugins: {
+legend: { display: false },
+tooltip: {
+enabled: true,
+mode: 'index',
+intersect: false,
+callbacks: {
+label: (ctx) => {
+const decimals = (kpi && typeof kpi.decimals === 'number') ? kpi.decimals : 0;
+const suffix = (kpi && kpi.suffix) ? kpi.suffix : '';
+return kpi.label + ': ' + ctx.parsed.y.toFixed(decimals) + suffix;
+}
+}
+}
+},
+scales: {
+x: { grid: { display: false }, offset: true, ticks: { autoSkip: false, maxRotation: 0, minRotation: 0, font: { size: 12 }, padding: 6 } },
+y: {
+min: yMin,
+max: yMax,
+beginAtZero: false,
+grid: { color: 'rgba(0,0,0,0.05)' },
+ticks: { display: false }
+}
+}
+},
+plugins: [targetInfillPlugin, dataLabelBoxesPlugin]
+});
+}
+// ==== DATA TABLE ====
+function updateTable() {
+const tbody = document.querySelector("#dataTable tbody");
+tbody.innerHTML = "";
+if (!filteredData.length) {
+tbody.innerHTML = `<tr><td colspan="17" class="empty-state"><i class="fas fa-database"></i><br>No data matches filters</td></tr>`;
+if (dataTable) { dataTable.destroy(); dataTable = null; }
+dataTable = $("#dataTable").DataTable({
+pageLength: 10,
+lengthChange: false,
+searching: true,
+info: true,
+ordering: true,
+order: [[0,"asc"],[1,"asc"]]
+});
+return;
+}
+if (dataTable) { dataTable.clear(); dataTable.destroy(); dataTable = null; }
+filteredData.forEach(r => {
+const tr = document.createElement("tr");
+const mNum = monthToNumber(r.Month);
+const mName = MONTH_NAMES[mNum - 1] || r.Month;
+// UPDATED: Added Director and Shift columns
+const cells = [
+r.Year, mName, r.Director ?? '', r.Shift ?? '', r.Account_Abbreviation, r.Team_Leader, r.Account_Supervisor, r.Account_Manager,
+formatNumber(r.Billed_FTE,1), formatNumber(r.Client_Found_Errors,0), formatNumber(r.Internal_Errors,0),
+formatNumber(r.CFE_per_Billed_FTE,2), formatNumber(r.Error_per_Hour_AVG,3),
+formatNumber(r.FTE_Audited_Pct,1)+"%", formatNumber(r.FTE_Compliance_Pct,1)+"%",
+formatNumber(r.FTE_TQL_Pct,1)+"%", formatNumber(r.Audit_Time_Minutes,0)
+];
+cells.forEach((val, idx) => {
+const td = document.createElement("td");
+td.textContent = val;
+if (idx === 0) td.setAttribute('data-order', Number(r.Year) || 0);
+if (idx === 1) td.setAttribute('data-order', String(mNum).padStart(2, '0'));
+tr.appendChild(td);
+});
+tbody.appendChild(tr);
+});
+dataTable = $("#dataTable").DataTable({
+pageLength: 10,
+lengthChange: false,
+ordering: true,
+order: [[0,"asc"],[1,"asc"]],
+searching: true,
+info: true,
+language: {
+emptyTable: "No data", info: "Showing _START_ to _END_ of _TOTAL_",
+search: "Search:",
+paginate: { previous: "<i class='fas fa-chevron-left'></i>", next: "<i class='fas fa-chevron-right'></i>" }
+}
+});
+}
+// ==== EXPORT ====
+function exportToExcel() {
+if (typeof XLSX === 'undefined') {
+alert('Export library failed to load.');
+return;
+}
+const sorted = sortByYearMonth(filteredData);
+// UPDATED: Added Director and Shift to header
+const header = [
+'Year','Month','Director','Shift','Account','Team Leader','Supervisor','Manager',
+'Billed FTE','Client Errors','Internal Errors','CFE / FTE','Error / Hour',
+'FTE Audited %','Compliance %','TQL %','Audit Time (Min)'
+];
+const rows = sorted.map(r => {
+const mNum = monthToNumber(r.Month);
+const mName = MONTH_NAMES[mNum - 1] || r.Month;
+// UPDATED: Added Director and Shift to row data
+return [
+Number(r.Year) || null,
+mName,
+r.Director ?? '',
+r.Shift ?? '',
+r.Account_Abbreviation ?? '',
+r.Team_Leader ?? '',
+r.Account_Supervisor ?? '',
+r.Account_Manager ?? '',
+toNum(r.Billed_FTE),
+toNum(r.Client_Found_Errors),
+toNum(r.Internal_Errors),
+toNum(r.CFE_per_Billed_FTE),
+toNum(r.Error_per_Hour_AVG),
+toNum(r.FTE_Audited_Pct),
+toNum(r.FTE_Compliance_Pct),
+toNum(r.FTE_TQL_Pct),
+toNum(r.Audit_Time_Minutes)
+];
+});
+function toNum(v) {
+return (v !== null && v !== undefined && v !== '' && !isNaN(v)) ? Number(v) : null;
+}
+const aoa = [header, ...rows];
+const ws = XLSX.utils.aoa_to_sheet(aoa);
+ws['!cols'] = [
+{ wch: 6 }, { wch: 7 }, { wch: 14 }, { wch: 10 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 14 },
+{ wch: 12 }, { wch: 13 }, { wch: 13 }, { wch: 12 }, { wch: 12 },
+{ wch: 13 }, { wch: 12 }, { wch: 9 }, { wch: 14 }
+];
+const wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, "TQS Data");
+const fileName = `TQS_Filtered_${new Date().toISOString().slice(0,10)}.xlsx`;
+XLSX.writeFile(wb, fileName);
+}
+</script>
+</body>
+</html>

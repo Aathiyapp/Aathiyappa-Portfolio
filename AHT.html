@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AHT / Efficiency Performance</title>
+
+<!-- External Libraries -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root {
+  --primary:#0f2744; --primary-light:#1e3a5f; --accent:#3b82f6; --accent-hover:#2563eb;
+  --bg-primary: #f1f5f9; --bg-secondary: #ffffff; --bg-tertiary: #f8fafc;
+  --text-primary: #1e293b; --text-secondary: #475569; --text-muted: #64748b; --text-header: #0f2744;
+  --border-color: #cbd5e1;
+  --chart-blue: #60a5fa; --chart-green: #22c55e; --chart-red: #f87171;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --radius-sm: 8px; --radius-md: 12px;
+  --active-card-bg: #eff6ff; --active-card-border: #3b82f6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; }
+
+/* HEADER */
+header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: var(--text-header); padding: 12px 24px; box-shadow: 0 2px 12px rgba(15, 39, 68, 0.08);
+  border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+}
+header h1 { font-size: 19px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+header h1 i { color: var(--accent); font-size: 20px; }
+.home-btn { 
+    text-decoration: none; color: var(--text-header); background: var(--bg-tertiary); 
+    padding: 6px 12px; border-radius: var(--radius-sm); border:1px solid var(--border-color);
+    font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;
+}
+.home-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.container { padding: 16px 24px 40px; max-width: 1600px; margin: 0 auto; }
+
+/* Filters */
+.filters {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;
+  padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+}
+.filter-group { display: flex; flex-direction: column; min-width: 130px; flex: 1; }
+.filter-group label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 5px; }
+.filter-group select {
+  padding: 7px 28px 7px 10px; font-size: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  background: var(--bg-tertiary); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center; background-size: 14px; cursor: pointer;
+}
+.clear-btn {
+  background: #ef4444; color: white; border: none; padding: 7px 14px; border-radius: var(--radius-sm);
+  cursor: pointer; font-size: 12px; font-weight: 600; align-self: flex-end; display: flex; align-items: center; gap: 6px;
+}
+
+/* Side Layout */
+.main-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+.kpi-section { display: flex; flex-direction: column; gap: 10px; }
+.kpi-card { 
+    background: var(--bg-secondary); border-radius: var(--radius-md); padding: 12px 14px; border: 1px solid var(--border-color); 
+    cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); position: relative;
+}
+.kpi-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.kpi-card.active { border-color: var(--active-card-border); background: var(--active-card-bg); }
+.kpi-card.active::after { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--active-card-border); border-radius: 4px 0 0 4px; }
+.kpi-title { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+.kpi-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+
+/* Chart Area */
+.chart-container { 
+    background: var(--bg-secondary); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border-color); 
+    height: 500px; box-shadow: var(--shadow-sm);
+}
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.chart-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1><i class="fas fa-gauge-high"></i> AHT / Efficiency Performance</h1>
+  </div>
+  <a href="Quality Management Portal.html" class="home-btn"><i class="fas fa-home"></i> Back to Portal</a>
+</header>
+
+<div class="container">
+  <div class="filters">
+    <div class="filter-group"><label>Account</label><select id="accF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>LOB</label><select id="lobF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Director</label><select id="dirF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Manager</label><select id="mgrF"><option value="">All</option></select></div>
+    <button class="clear-btn" onclick="clearFilt()"><i class="fas fa-undo"></i> Clear</button>
+  </div>
+
+  <div class="main-layout">
+    <div class="kpi-section" id="kpiList"></div>
+    <div class="chart-container">
+      <div class="chart-header">
+        <div class="chart-title"><i class="fas fa-chart-line"></i> <span id="chartLabel">Monthly Trend: Standard vs Actual AHT</span></div>
+      </div>
+      <canvas id="mainChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="./AHT.js"></script>
+
+<script>
+let filtered = [];
+let chart = null;
+let currentMetric = 'aht';
+
+// Utility: Apply lookups to compressed keys
+function decodeRow(r) {
+  const obj = {};
+  for(let k in r) {
+    const header = window.HEADERS[k];
+    if(!header) { obj[k] = r[k]; continue; }
+    
+    // Check if it's a dimension key (h0-h7)
+    const idx = parseInt(k.substring(1));
+    if(idx <= 7) {
+      const lookupArr = window['L' + idx];
+      obj[header] = (lookupArr && typeof r[k] === 'number') ? lookupArr[r[k]] : r[k];
+    } else {
+      obj[header] = r[k];
+    }
+  }
+  return obj;
+}
+
+const myDecData = myData.map(decodeRow);
+
+function pop(id, field) {
+  const s = document.getElementById(id);
+  const val = s.value;
+  const vals = [...new Set(myDecData.map(r => r[field]).filter(x => x))].sort();
+  s.innerHTML = '<option value="">All</option>';
+  vals.forEach(v => s.appendChild(new Option(v, v)));
+  if(val) s.value = val;
+}
+
+function initFilt() {
+  pop('accF', 'Account Abbreviation');
+  pop('lobF', 'LOB');
+  pop('dirF', 'Director');
+  pop('mgrF', 'Manager');
+  ['accF','lobF','dirF','mgrF'].forEach(id => document.getElementById(id).onchange = run);
+}
+
+function clearFilt() {
+  ['accF','lobF','dirF','mgrF'].forEach(id => document.getElementById(id).value = '');
+  run();
+}
+
+function run() {
+  const [a, l, d, m] = ['accF','lobF','dirF','mgrF'].map(id => document.getElementById(id).value);
+  filtered = myDecData.filter(r => 
+    (!a || r['Account Abbreviation'] === a) &&
+    (!l || r['LOB'] === l) &&
+    (!d || r['Director'] === d) &&
+    (!m || r['Manager'] === m)
+  );
+  updateKPI();
+  updateChart();
+}
+
+// Extract monthly columns
+function getMonths() {
+    // Look for h8-h19 (Standard AHT)
+    const months = [];
+    for(let k in window.HEADERS) {
+        if(k.startsWith('h') && parseInt(k.substring(1)) >= 8 && parseInt(k.substring(1)) <= 19) {
+            months.push({ key: k, label: window.HEADERS[k].replace('Standard AHT ', '') });
+        }
+    }
+    return months;
+}
+
+const MONTHS = getMonths();
+
+function updateKPI() {
+  const list = document.getElementById('kpiList');
+  list.innerHTML = '';
+  
+  const getSum = (prefix) => {
+      let s = 0; 
+      filtered.forEach(r => {
+          MONTHS.forEach((m, i) => {
+              const hIdx = parseInt(m.key.substring(1)); // 8-19
+              let targetKey;
+              if(prefix === 'std') targetKey = window.HEADERS['h'+hIdx];
+              if(prefix === 'act') targetKey = window.HEADERS['h'+(hIdx+14)]; // h22-h33
+              if(prefix === 'vol') targetKey = window.HEADERS['h'+(hIdx+28)]; // h36-h47
+              s += parseFloat(r[targetKey] || 0);
+          });
+      });
+      return s;
+  };
+
+  const std = getSum('std'), act = getSum('act'), vol = getSum('vol');
+  const avgStd = filtered.length ? (std / (filtered.length * MONTHS.length)) : 0;
+  const avgAct = filtered.length ? (act / (filtered.length * MONTHS.length)) : 0;
+
+  const kpis = [
+    { label: 'Avg Standard AHT', val: avgStd.toFixed(2) + 'm', metric: 'aht' },
+    { label: 'Avg Actual AHT', val: avgAct.toFixed(2) + 'm', metric: 'aht' },
+    { label: 'Total Volume', val: vol.toLocaleString(), metric: 'vol' },
+    { label: 'Variance %', val: (avgStd ? ((avgAct-avgStd)/avgStd * 100).toFixed(1) : 0) + '%', metric: 'aht' }
+  ];
+
+  kpis.forEach(k => {
+    const d = document.createElement('div');
+    d.className = 'kpi-card' + (currentMetric === k.metric ? ' active' : '');
+    d.innerHTML = `<div class="kpi-title">${k.label}</div><div class="kpi-value">${k.val}</div>`;
+    list.appendChild(d);
+  });
+}
+
+function updateChart() {
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  if(chart) chart.destroy();
+
+  const getMonthAvg = (prefix) => {
+      return MONTHS.map(m => {
+          let s = 0, c = 0;
+          const hIdx = parseInt(m.key.substring(1));
+          let targetKey;
+          if(prefix === 'std') targetKey = window.HEADERS['h'+hIdx];
+          if(prefix === 'act') targetKey = window.HEADERS['h'+(hIdx+14)];
+          
+          filtered.forEach(r => {
+              const v = parseFloat(r[targetKey]);
+              if(!isNaN(v) && v > 0) { s += v; c++; }
+          });
+          return c ? (s/c) : 0;
+      });
+  };
+
+  const stdData = getMonthAvg('std');
+  const actData = getMonthAvg('act');
+
+  const dataLabelsBox = {
+    id: 'dataLabelsBox',
+    afterDatasetsDraw(c) {
+      const {ctx} = c;
+      c.data.datasets.forEach((ds, dsI) => {
+        const meta = c.getDatasetMeta(dsI);
+        meta.data.forEach((p, i) => {
+          const val = ds.data[i];
+          if(!val) return;
+          ctx.save();
+          ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+          const txt = val.toFixed(1);
+          const w = ctx.measureText(txt).width + 10, h = 18;
+          ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.strokeStyle = ds.borderColor;
+          ctx.beginPath(); ctx.roundRect(p.x - w/2, p.y - h - 6, w, h, 4); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#1e293b'; ctx.fillText(txt, p.x, p.y - h/2 - 7);
+          ctx.restore();
+        });
+      });
+    }
+  };
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: MONTHS.map(m => m.label),
+      datasets: [
+        { label: 'Standard AHT', data: stdData, borderColor: '#3b82f6', tension: 0.3, pointBackgroundColor: '#fff', borderWidth: 2 },
+        { label: 'Actual AHT', data: actData, borderColor: '#f87171', tension: 0.3, pointBackgroundColor: '#fff', borderWidth: 2 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: { grid: { display: false }, ticks: { display: false } }
+      }
+    },
+    plugins: [dataLabelsBox]
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initFilt();
+    run();
+});
+</script>
+</body>
+</html>

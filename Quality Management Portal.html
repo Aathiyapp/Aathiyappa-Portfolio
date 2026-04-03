@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>India Quality And Operational Compliance Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <style>
+    :root{
+      /* Professional Navy Theme */
+      --primary:#0f2744; --primary-light:#1e3a5f;
+      --accent:#3b82f6; --accent-hover:#2563eb;
+      --bg:#f1f5f9; --card-bg:#ffffff; --header-bg:#ffffff;
+      --header-gradient:linear-gradient(135deg,#ffffff 0%,#f8fafc 100%);
+      --border:#cbd5e1; --text:#1e293b; --text-light:#64748b;
+      --text-header:#0f2744; --success:#22c55e; --warning:#f59e0b;
+      --disabled-bg:#f8fafc; --disabled-text:#94a3b8;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+    body{background:var(--bg);color:var(--text);line-height:1.5}
+    header{
+      background:var(--header-gradient);color:var(--text-header);padding:16px 40px;
+      display:flex;justify-content:space-between;align-items:center;
+      box-shadow:0 2px 12px rgba(15,39,68,.08);border-bottom:2px solid #e2e8f0;
+      position:sticky;top:0;z-index:100;
+    }
+    header h1{font-size:22px;font-weight:600;display:flex;align-items:center;gap:12px;margin:0;letter-spacing:-.025em;color:var(--text-header)}
+    header h1 i{color:var(--accent);font-size:24px}
+    .brand-logo{height:56px;width:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.08));max-width:280px}
+    .container{max-width:1400px;margin:32px auto;padding:0 24px}
+    .nav-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+    .nav-card{
+      background:var(--card-bg);border-radius:16px;padding:32px 28px;
+      box-shadow:0 2px 8px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.08);
+      transition:all .25s cubic-bezier(.4,0,.2,1);cursor:pointer;border:1px solid var(--border);
+      display:flex;flex-direction:column;align-items:center;text-align:center;text-decoration:none;color:var(--text);
+      position:relative;overflow:hidden;
+      animation:fadeInUp .4s ease-out forwards;animation-delay:calc(var(--i,0) * .1s);
+    }
+    .nav-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--primary-light));opacity:0;transition:opacity .25s}
+    .nav-card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,.12),0 4px 8px rgba(0,0,0,.08);border-color:var(--accent)}
+    .nav-card:hover::before{opacity:1}
+    .nav-icon{
+      font-size:36px;color:var(--accent);margin-bottom:20px;background:linear-gradient(135deg,#eff6ff,#dbeafe);
+      width:72px;height:72px;display:flex;align-items:center;justify-content:center;border-radius:16px;
+      box-shadow:0 2px 6px rgba(59,130,246,.15);transition:transform .2s;
+    }
+    .nav-card:hover .nav-icon{transform:scale(1.05);background:linear-gradient(135deg,#dbeafe,#bfdbfe)}
+    .nav-title{font-size:19px;font-weight:700;margin-bottom:12px;color:var(--primary)}
+    .nav-desc{font-size:14px;color:var(--text-light);line-height:1.5}
+    .nav-card.disabled{opacity:.85;cursor:not-allowed;background:var(--disabled-bg);border-style:dashed}
+    .nav-card.disabled:hover{transform:none;box-shadow:0 2px 8px rgba(0,0,0,.06);border-color:var(--border)}
+    .nav-card.disabled .nav-icon{background:#f1f5f9;color:var(--disabled-text);box-shadow:none}
+    .nav-card.disabled .nav-title,.nav-card.disabled .nav-desc{color:var(--disabled-text)}
+    .badge{
+      background:#e2e8f0;color:var(--text-light);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;
+      margin-top:18px;text-transform:uppercase;letter-spacing:.05em;display:inline-flex;align-items:center;gap:4px;
+    }
+    .badge.active{background:linear-gradient(135deg,#dcfce7,#bbf7d0);color:#166534;box-shadow:0 1px 3px rgba(34,197,94,.15)}
+    .badge.coming-soon{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e}
+    @media (max-width:768px){
+      header{padding:14px 20px;flex-direction:column;gap:16px;text-align:center}
+      header h1{font-size:20px}
+      .brand-logo{height:48px;max-width:240px}
+      .container{margin:24px auto;padding:0 16px}
+      .nav-grid{grid-template-columns:1fr}
+      .nav-card{padding:28px 24px}
+    }
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+
+<body>
+<header>
+  <h1>
+    <i class="fas fa-chart-pie"></i>
+    India Quality And Operational Compliance Dashboard
+  </h1>
+
+  <!-- Brand Logo -->
+  <img
+    src="https://via.placeholder.com/160x56?text=Quality+Portal"
+    alt="ReSourcePro"
+    class="brand-logo"
+    onerror="this.style.display='none';"
+  />
+</header>
+
+<div class="container">
+  <div class="nav-grid">
+
+    <!-- TQS Dashboard (Active) -->
+    <a href="TQS Dashboard.html"
+       class="nav-card" style="--i:0">
+      <div class="nav-icon"><i class="fas fa-clipboard-check"></i></div>
+      <div class="nav-title">Total Quality System</div>
+      <div class="nav-desc">Client found error and Audit system metrics performance</div>
+      <div class="badge active">
+        <i class="fas fa-circle" style="font-size:6px;"></i> Active
+      </div>
+    </a>
+
+    <!-- Auditor Performance (Active) -->
+    <a href="Auditor_Performance_Dashboard.html"
+       class="nav-card" style="--i:1">
+      <div class="nav-icon"><i class="fas fa-user-shield"></i></div>
+      <div class="nav-title">Auditor Performance</div>
+      <div class="nav-desc">Auditor error per hour performance</div>
+      <div class="badge active">
+        <i class="fas fa-circle" style="font-size:6px;"></i> Active
+      </div>
+    </a>
+
+    <!-- Operational Compliance (Active - CARE) -->
+    <a href="CARE.html" class="nav-card" style="--i:2">
+      <div class="nav-icon"><i class="fas fa-balance-scale"></i></div>
+      <div class="nav-title">Operational Compliance</div>
+      <div class="nav-desc">FTE, Output and Certs Compliance Performance</div>
+      <div class="badge active">
+        <i class="fas fa-circle" style="font-size:6px;"></i> Active
+      </div>
+    </a>
+
+    <!-- Audit System – Weekly Compliance (Active - ASM) -->
+    <a href="ASM weekly.html" class="nav-card" style="--i:3">
+      <div class="nav-icon"><i class="fas fa-calendar-check"></i></div>
+      <div class="nav-title">Audit System – Weekly Compliance</div>
+      <div class="nav-desc">Compliance against weekly percentage FTE audited target</div>
+      <div class="badge active">
+        <i class="fas fa-circle" style="font-size:6px;"></i> Active
+      </div>
+    </a>
+
+    <!-- AHT / Efficiency Performance (Active) -->
+    <a href="AHT.html" class="nav-card" style="--i:4">
+      <div class="nav-icon"><i class="fas fa-gauge-high"></i></div>
+      <div class="nav-title">AHT / Efficiency Performance</div>
+      <div class="nav-desc">Average handling time performance trend</div>
+      <div class="badge active">
+        <i class="fas fa-circle" style="font-size:6px;"></i> Active
+      </div>
+    </a>
+
+    <!-- PMP Compliance (Coming Soon) -->
+    <div class="nav-card disabled" onclick="showComingSoon('PMP Compliance')" style="--i:5">
+      <div class="nav-icon"><i class="fas fa-id-card-clip"></i></div>
+      <div class="nav-title">PMP Compliance</div>
+      <div class="nav-desc">Adherence to PMP guidelines</div>
+      <div class="badge coming-soon">
+        <i class="fas fa-hourglass-half" style="font-size:10px;"></i> Coming Soon
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Toast for "Coming Soon" items
+  function showComingSoon(moduleName){
+    const toast=document.createElement('div');
+    toast.innerHTML=`
+      <div style="
+        position:fixed;bottom:24px;right:24px;background:white;color:#1e293b;
+        padding:14px 20px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.15);
+        border-left:4px solid #f59e0b;z-index:1000;display:flex;align-items:center;gap:10px;
+        animation:slideIn 0.3s ease-out;max-width:320px;font-size:14px;
+      ">
+        <i class="fas fa-info-circle" style="color:#f59e0b;"></i>
+        <div>
+          <strong>${moduleName}</strong><br>
+          <span style="color:#64748b;font-size:13px;">This module is under development and will be available soon.</span>
+        </div>
+      </div>`;
+    document.body.appendChild(toast);
+    setTimeout(()=>{toast.style.animation='slideOut 0.3s ease-in forwards';setTimeout(()=>toast.remove(),300);},4000);
+  }
+  // Animations for toast
+  const style=document.createElement('style');
+  style.textContent=`
+    @keyframes slideIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(100px);opacity:0}}
+  `;
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>

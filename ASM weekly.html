@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Weekly ASM Performance</title>
+
+<!-- External Libraries -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root {
+  --primary:#0f2744; --primary-light:#1e3a5f; --accent:#3b82f6; --accent-hover:#2563eb;
+  --bg-primary: #f1f5f9; --bg-secondary: #ffffff; --bg-tertiary: #f8fafc;
+  --text-primary: #1e293b; --text-secondary: #475569; --text-muted: #64748b; --text-header: #0f2744;
+  --border-color: #cbd5e1;
+  --chart-blue: #60a5fa; --chart-green: #22c55e; --chart-red: #f87171;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --radius-sm: 8px; --radius-md: 12px;
+  --active-card-bg: #eff6ff; --active-card-border: #3b82f6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; }
+
+/* HEADER */
+header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: var(--text-header); padding: 12px 24px; box-shadow: 0 2px 12px rgba(15, 39, 68, 0.08);
+  border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+}
+header h1 { font-size: 19px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+header h1 i { color: var(--accent); font-size: 20px; }
+.home-btn { 
+    text-decoration: none; color: var(--text-header); background: var(--bg-tertiary); 
+    padding: 6px 12px; border-radius: var(--radius-sm); border:1px solid var(--border-color);
+    font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;
+}
+.home-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.container { padding: 16px 24px 40px; max-width: 1600px; margin: 0 auto; }
+
+/* Filters */
+.filters {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;
+  padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+}
+.filter-group { display: flex; flex-direction: column; min-width: 140px; flex: 1; }
+.filter-group label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px; }
+.filter-group select {
+  padding: 7px 28px 7px 10px; font-size: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  background: var(--bg-tertiary); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center; background-size: 14px; cursor: pointer;
+}
+.clear-btn { background: #ef4444; color: white; border: none; padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; font-weight: 600; align-self: flex-end; }
+
+/* Layout */
+.main-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+.kpi-sidebar { display: flex; flex-direction: column; gap: 10px; }
+.kpi-card { 
+    background: var(--bg-secondary); border-radius: var(--radius-md); padding: 12px 14px; border: 1px solid var(--border-color); 
+    cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); position: relative;
+}
+.kpi-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.kpi-card.active { border-color: var(--active-card-border); background: var(--active-card-bg); }
+.kpi-card.active::after { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--active-card-border); border-radius: 4px 0 0 4px; }
+.kpi-title { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+.kpi-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+
+/* Chart Area */
+.content-area { display: flex; flex-direction: column; gap: 24px; }
+.chart-container { 
+    background: var(--bg-secondary); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border-color); 
+    height: 480px; box-shadow: var(--shadow-sm);
+}
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.chart-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+#dataTable_wrapper { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
+table.dataTable thead th { font-size: 11px; font-weight: 700; text-transform: uppercase; background: var(--bg-tertiary); color: var(--text-muted); padding: 10px; }
+table.dataTable tbody td { font-size: 12px; padding: 10px; border-bottom: 1px solid var(--border-color); }
+</style>
+</head>
+<body>
+
+<header>
+  <div><h1><i class="fas fa-calendar-week"></i> Weekly ASM Performance</h1></div>
+  <a href="Quality Management Portal.html" class="home-btn"><i class="fas fa-home"></i> Back to Portal</a>
+</header>
+
+<div class="container">
+  <div class="filters">
+    <div class="filter-group"><label>Location</label><select id="locF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Account Manager</label><select id="mgrF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Team Leader</label><select id="tlF"><option value="">All</option></select></div>
+    <div class="filter-group"><label>Production Week</label><select id="weekF"><option value="">All</option></select></div>
+    <button class="clear-btn" onclick="clearFilt()">Clear</button>
+  </div>
+
+  <div class="main-layout">
+    <div class="kpi-sidebar" id="kpiSection"></div>
+    <div class="content-area">
+      <div class="chart-container">
+        <div class="chart-header">
+          <div class="chart-title"><i class="fas fa-chart-line"></i> <span id="chartLabel">WoW Trend: Compliance %</span></div>
+        </div>
+        <canvas id="mainChart"></canvas>
+      </div>
+      <div id="dataTable_wrapper">
+        <table id="dataTable" class="display" style="width:100%">
+          <thead><tr><th>Week</th><th>Location</th><th>Manager</th><th>Team Leader</th><th>Account</th><th>% Audited</th><th>% Compliance</th><th>Avg Audit Time</th><th>Vol Meet TQL</th><th>Err/Hr</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="./weekly asm.js"></script>
+
+<script>
+let filteredData = [];
+let chartInst = null;
+let dtInst = null;
+let currentMetric = '% FTE Meet Compliance';
+const KEYS = {
+  audited: '% FTE Audited -\r\nweekly 2.5%', 
+  comp: '% FTE Meet Compliance', 
+  time: 'Audit Time/FTE/Day (minutes)',
+  tql: '% FTE Vol Meet TQL',
+  err: 'Errors/Hour'
+};
+
+function tryGetNum(r, key) {
+    let k = Object.keys(r).find(x => x.replace(/\s+/g,'').includes(key.replace(/\s+/g,'')));
+    let val = parseFloat(r[k || key]);
+    return isNaN(val) ? null : val;
+}
+
+function popSel(id, field) {
+  const sel = document.getElementById(id); const val = sel.value;
+  sel.innerHTML = '<option value="">All</option>';
+  [...new Set(myData.map(r=>r[field]).filter(x=>x))].sort().forEach(v=>sel.appendChild(new Option(v,v)));
+  if(val) sel.value = val;
+}
+
+function initFilt() {
+  popSel('locF', 'Location'); popSel('mgrF', 'Account Manager'); popSel('tlF', 'Team Leader');
+  const selW = document.getElementById('weekF');
+  const dts = [...new Set(myData.map(r=>r['Production Week']).filter(x=>x))].sort((a,b)=>new Date(a)-new Date(b));
+  selW.innerHTML = '<option value="">All</option>';
+  dts.forEach(d => selW.appendChild(new Option(d,d)));
+  ['locF','mgrF','tlF','weekF'].forEach(i=>document.getElementById(i).onchange = runStack);
+}
+
+function clearFilt() { ['locF','mgrF','tlF','weekF'].forEach(i=>document.getElementById(i).value=''); runStack(); }
+
+function runStack() {
+  const [l,m,t,w] = ['locF','mgrF','tlF','weekF'].map(i=>document.getElementById(i).value);
+  filteredData = myData.filter(r => (!l||r['Location']===l) && (!m||r['Account Manager']===m) && (!t||r['Team Leader']===t) && (!w||r['Production Week']===w));
+  updateKPI(); updateChart(); updateTable();
+}
+
+function getAvg(metric) {
+  let s=0, c=0;
+  filteredData.forEach(r => { let v = tryGetNum(r, metric); if(v !== null) { s+=v; c++; }});
+  return c ? (s/c) : 0;
+}
+
+function updateKPI() {
+  const sect = document.getElementById('kpiSection'); sect.innerHTML = '';
+  if(!filteredData.length) return;
+  const kpis = [
+    { label: '% Meet Compliance', val: (getAvg(KEYS.comp)*100).toFixed(1)+'%', mKey: KEYS.comp, ico: 'fa-check-circle' },
+    { label: '% Vol Meet TQL', val: (getAvg(KEYS.tql)*100).toFixed(1)+'%', mKey: KEYS.tql, ico: 'fa-star' },
+    { label: '% Audited', val: (getAvg(KEYS.audited)*100).toFixed(1)+'%', mKey: KEYS.audited, ico: 'fa-search' },
+    { label: 'Avg Audit Time/Day', val: getAvg(KEYS.time).toFixed(0)+' m', mKey: KEYS.time, ico: 'fa-clock' },
+    { label: 'Errors/Hour', val: getAvg(KEYS.err).toFixed(2), mKey: KEYS.err, ico: 'fa-exclamation-circle' }
+  ];
+  kpis.forEach(k => {
+    let d = document.createElement('div');
+    d.className = `kpi-card ${currentMetric === k.mKey ? 'active' : ''}`;
+    d.innerHTML = `<div class="kpi-title"><i class="fas ${k.ico}"></i> ${k.label}</div><div class="kpi-value">${k.val}</div>`;
+    d.onclick = () => { currentMetric = k.mKey; document.getElementById('chartLabel').innerText = `WoW Trend: ${k.label}`; runStack(); };
+    sect.appendChild(d);
+  });
+}
+
+const dataLabelsBox = {
+    id: 'dataLabelsBox',
+    afterDatasetsDraw(c) {
+      const {ctx} = c;
+      c.data.datasets.forEach((ds, dsI) => {
+        const meta = c.getDatasetMeta(dsI);
+        meta.data.forEach((p, i) => {
+          const val = ds.data[i]; if(val === null || val === undefined) return;
+          ctx.save(); ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+          const txt = val + (currentMetric.includes('%') ? '%' : '');
+          const w = ctx.measureText(txt).width + 10, h = 18;
+          ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.strokeStyle = ds.borderColor;
+          ctx.beginPath(); ctx.roundRect(p.x - w/2, p.y - h - 6, w, h, 4); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#1e293b'; ctx.fillText(txt, p.x, p.y - h/2 - 7);
+          ctx.restore();
+        });
+      });
+    }
+};
+
+function updateChart() {
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  if(chartInst) chartInst.destroy();
+
+  const weeks = [...new Set(filteredData.map(r=>r['Production Week']))].sort((a,b)=>new Date(a)-new Date(b));
+  const data = weeks.map(d => {
+    let s=0, c=0;
+    filteredData.filter(r=>r['Production Week']===d).forEach(r => {
+      let v = tryGetNum(r, currentMetric); if(v!==null){s+=v; c++;}
+    });
+    let val = c ? (s/c) : null;
+    return (val !== null && currentMetric.includes('%')) ? parseFloat((val*100).toFixed(1)) : (val!==null?parseFloat(val.toFixed(2)):null);
+  });
+
+  chartInst = new Chart(ctx, {
+    type: 'line',
+    data: { labels: weeks, datasets: [{ label: currentMetric, data: data, borderColor: '#3b82f6', tension: 0.3, fill: true, backgroundColor:'rgba(59,130,246,0.1)', pointBackgroundColor: '#fff' }] },
+    options: { reactive: true, maintainAspectRatio: false, plugins: { legend: { display:false } }, scales: { x: { grid: { display: false } }, y: { grid: { display: false }, ticks: { display: false } } } },
+    plugins: [dataLabelsBox]
+  });
+}
+
+function updateTable() {
+  let tb = document.querySelector("#dataTable tbody"); tb.innerHTML = '';
+  if(dtInst) { dtInst.clear(); dtInst.destroy(); dtInst=null; }
+  filteredData.forEach(r => {
+    let tr = document.createElement('tr');
+    let vAud = tryGetNum(r, KEYS.audited), vComp = tryGetNum(r, KEYS.comp), vTvl = tryGetNum(r, KEYS.tql), vTime = tryGetNum(r, KEYS.time), vErr = tryGetNum(r, KEYS.err);
+    [r['Production Week'], r['Location'], r['Account Manager'], r['Team Leader'], r['Account Abbreviation'],
+     vAud===null ? '-' : (vAud*100).toFixed(1)+'%', vComp===null ? '-' : (vComp*100).toFixed(1)+'%', vTime===null ? '-' : vTime.toFixed(0),
+     vTvl===null ? '-' : (vTvl*100).toFixed(1)+'%', vErr===null ? '-' : vErr.toFixed(2)
+    ].forEach(v => { let td=document.createElement('td'); td.textContent=v; tr.appendChild(td); });
+    tb.appendChild(tr);
+  });
+  dtInst = $("#dataTable").DataTable({ pageLength: 10, ordering: true });
+}
+
+document.addEventListener("DOMContentLoaded", () => { initFilt(); runStack(); });
+</script>
+</body>
+</html>
